@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget android-versionCode="53000" id="com.moodle.moodlemobile" ios-CFBundleVersion="5.3.0.0" version="5.3.0" versionCode="53000" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Moodle</name>
-    <description>Moodle official app</description>
-    <author email="mobile@moodle.com" href="http://moodle.com">Moodle Mobile team</author>
+<widget android-versionCode="53000" id="com.oksigenia.aty" ios-CFBundleVersion="5.3.0.0" version="5.3.0" versionCode="53000" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Oksigenia Aty</name>
+    <description>Oksigenia Aty</description>
+    <author email="dev@oksigenia.cc" href="https://oksigenia.com">Oksigenia SL</author>
     <content src="index.html" />
     <access origin="*" />
     <access launch-external="yes" origin="tel:*" />
