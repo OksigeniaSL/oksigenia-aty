@@ -212,7 +212,7 @@
             "cordova-plugin-badge": {},
             "cordova-plugin-chooser": {},
             "cordova-plugin-customurlscheme": {
-                "URL_SCHEME": "moodlemobile",
+                "URL_SCHEME": "oksigeniaaty",
                 "ANDROID_SCHEME": " ",
                 "ANDROID_HOST": " ",
                 "ANDROID_PATHPREFIX": "/"

@@ -1,0 +1,109 @@
+# Builds the Oksigenia Aty Android app bundle (AAB), signed with the upload key.
+#
+# Runs on demand and on an Oksigenia tag (oksigenia-v*). It is never triggered by pull requests, so the signing
+# secrets are never exposed to a fork. Uploading to Google Play's internal track is a later step (it needs the Play
+# service account); for now the signed AAB is kept as an artifact.
+name: Oksigenia Aty Android
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [oksigenia-v52]
+    tags: ['oksigenia-v*']
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      # ubuntu-latest ships the Android SDK with licences accepted (ANDROID_HOME set); gradle fetches what it needs.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Cordova
+        run: npm install -g cordova@13
+
+      - name: Place the Firebase config
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: echo "$GOOGLE_SERVICES_JSON" | base64 -d > google-services.json
+
+      - name: Build the app plugin and the web assets
+        run: |
+          npm run prod --prefix cordova-plugin-moodleapp
+          npm run build:prod
+
+      # The web build does not reference cordova.js (the app also ships as a PWA), so the native plugins would be
+      # unavailable and the app would hang on the splash. Add the reference; cordova prepare provides the file itself.
+      - name: Make cordova available to the web app
+        run: |
+          grep -q 'src="cordova.js"' www/index.html || \
+            sed -i 's#</head>#  <script src="cordova.js"></script>\n</head>#' www/index.html
+          grep -n 'cordova.js' www/index.html
+
+      - name: Prepare the Android platform
+        run: cordova prepare android --no-telemetry
+
+      - name: Write the signing config
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > release.keystore
+          cat > build.json <<EOF
+          {
+            "android": {
+              "release": {
+                "keystore": "release.keystore",
+                "storePassword": "$KEYSTORE_PASSWORD",
+                "alias": "oksigenia-aty",
+                "password": "$KEYSTORE_PASSWORD",
+                "keystoreType": "jks"
+              }
+            }
+          }
+          EOF
+
+      - name: Build the signed AAB (for Google Play)
+        run: cordova build android --release --buildConfig=build.json --no-telemetry -- --packageType=bundle
+
+      - name: Build the signed APK (for sideloading on a device)
+        run: cordova build android --release --buildConfig=build.json --no-telemetry -- --packageType=apk
+
+      - name: Build the debug APK (debuggable, for troubleshooting)
+        run: cordova build android --debug --no-telemetry -- --packageType=apk
+
+      - name: Collect the artifacts
+        run: |
+          mkdir -p dist
+          cp "$(find platforms/android -name 'app-debug.apk' | head -1)" dist/oksigenia-aty-debug.apk
+          cp "$(find platforms/android -name 'app-release.aab' | head -1)" dist/oksigenia-aty.aab
+          cp "$(find platforms/android -name '*-release.apk' ! -name '*unsigned*' | head -1)" dist/oksigenia-aty.apk
+          ls -la dist
+
+      - name: Upload the artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: oksigenia-aty-android
+          path: dist/*
+          if-no-files-found: error
+
+      - name: Clean up secrets on the runner
+        if: always()
+        run: rm -f release.keystore build.json google-services.json
