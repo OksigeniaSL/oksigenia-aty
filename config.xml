@@ -60,7 +60,7 @@
         <param name="ios-package" onload="true" value="CDVStatusBar" />
     </feature>
     <platform name="android">
-        <icon src="resources/android/refugio-icon.png" background="resources/android/refugio-background.png" foreground="resources/android/refugio-foreground.png" />
+        <icon background="resources/android/refugio-background.png" foreground="resources/android/refugio-foreground.png" />
         <preference name="AndroidWindowSplashScreenAnimatedIcon" value="resources/android/android-splash.xml" />
         <preference name="AndroidWindowSplashScreenBackground" value="#0a2e50" />
         <preference name="AndroidWindowSplashScreenIconBackgroundColor" value="#0a2e50" />
