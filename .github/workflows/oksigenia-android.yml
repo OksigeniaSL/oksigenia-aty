@@ -44,13 +44,8 @@ jobs:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: echo "$GOOGLE_SERVICES_JSON" | base64 -d > google-services.json
 
-      - name: Build the web assets and the app plugin
-        run: |
-          npm run prod --prefix cordova-plugin-moodleapp
-          npm run build:prod
-
-      - name: Prepare the Android platform
-        run: cordova prepare android --no-telemetry
+      - name: Build the app plugin
+        run: npm run prod --prefix cordova-plugin-moodleapp
 
       - name: Write the signing config
         env:
@@ -72,14 +67,15 @@ jobs:
           }
           EOF
 
+      # ionic cordova build (not a bare cordova build) is what injects cordova.js, so the native plugins work at runtime.
       - name: Build the signed AAB (for Google Play)
-        run: cordova build android --release --buildConfig=build.json --no-telemetry -- --packageType=bundle
+        run: NODE_ENV=production npx ionic cordova build android --prod --release --no-interactive -- --buildConfig=build.json --packageType=bundle
 
       - name: Build the signed APK (for sideloading on a device)
-        run: cordova build android --release --buildConfig=build.json --no-telemetry -- --packageType=apk
+        run: NODE_ENV=production npx ionic cordova build android --prod --release --no-interactive -- --buildConfig=build.json --packageType=apk
 
       - name: Build the debug APK (debuggable, for troubleshooting)
-        run: cordova build android --debug --no-telemetry -- --packageType=apk
+        run: NODE_ENV=production npx ionic cordova build android --prod --debug --no-interactive -- --packageType=apk
 
       - name: Collect the artifacts
         run: |
