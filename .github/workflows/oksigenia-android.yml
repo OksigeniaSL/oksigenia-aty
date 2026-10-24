@@ -78,9 +78,13 @@ jobs:
       - name: Build the signed APK (for sideloading on a device)
         run: cordova build android --release --buildConfig=build.json --no-telemetry -- --packageType=apk
 
+      - name: Build the debug APK (debuggable, for troubleshooting)
+        run: cordova build android --debug --no-telemetry -- --packageType=apk
+
       - name: Collect the artifacts
         run: |
           mkdir -p dist
+          cp "$(find platforms/android -name 'app-debug.apk' | head -1)" dist/oksigenia-aty-debug.apk
           cp "$(find platforms/android -name 'app-release.aab' | head -1)" dist/oksigenia-aty.aab
           cp "$(find platforms/android -name '*-release.apk' ! -name '*unsigned*' | head -1)" dist/oksigenia-aty.apk
           ls -la dist
