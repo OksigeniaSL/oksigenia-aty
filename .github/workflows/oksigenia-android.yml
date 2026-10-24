@@ -72,20 +72,24 @@ jobs:
           }
           EOF
 
-      - name: Build the signed AAB
+      - name: Build the signed AAB (for Google Play)
         run: cordova build android --release --buildConfig=build.json --no-telemetry -- --packageType=bundle
 
-      - name: Collect the AAB
+      - name: Build the signed APK (for sideloading on a device)
+        run: cordova build android --release --buildConfig=build.json --no-telemetry -- --packageType=apk
+
+      - name: Collect the artifacts
         run: |
           mkdir -p dist
-          find platforms/android -name '*.aab' -path '*release*' -exec cp {} dist/ \;
+          cp "$(find platforms/android -name 'app-release.aab' | head -1)" dist/oksigenia-aty.aab
+          cp "$(find platforms/android -name '*-release.apk' ! -name '*unsigned*' | head -1)" dist/oksigenia-aty.apk
           ls -la dist
 
-      - name: Upload the AAB
+      - name: Upload the artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: oksigenia-aty-aab
-          path: dist/*.aab
+          name: oksigenia-aty-android
+          path: dist/*
           if-no-files-found: error
 
       - name: Clean up secrets on the runner
