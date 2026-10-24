@@ -90,7 +90,7 @@
     "sites": [],
     "multisitesdisplay": "sitefinder",
     "sitefindersettings": {},
-    "onlyallowlistedsites": true,
+    "onlyallowlistedsites": false,
     "forcedefaultlanguage": false,
     "privacypolicy": "https://oksigenia.com/",
     "notificoncolor": "#00d4ff",
