@@ -32,9 +32,7 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
+      # ubuntu-latest ships the Android SDK with licences accepted (ANDROID_HOME set); gradle fetches what it needs.
       - name: Install dependencies
         run: npm ci
 
