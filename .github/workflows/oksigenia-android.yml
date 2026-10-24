@@ -1,0 +1,94 @@
+# Builds the Oksigenia Aty Android app bundle (AAB), signed with the upload key.
+#
+# Runs on demand and on an Oksigenia tag (oksigenia-v*). It is never triggered by pull requests, so the signing
+# secrets are never exposed to a fork. Uploading to Google Play's internal track is a later step (it needs the Play
+# service account); for now the signed AAB is kept as an artifact.
+name: Oksigenia Aty Android
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['oksigenia-v*']
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Cordova
+        run: npm install -g cordova@13
+
+      - name: Place the Firebase config
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: echo "$GOOGLE_SERVICES_JSON" | base64 -d > google-services.json
+
+      - name: Build the web assets and the app plugin
+        run: |
+          npm run prod --prefix cordova-plugin-moodleapp
+          npm run build:prod
+
+      - name: Prepare the Android platform
+        run: cordova prepare android --no-telemetry
+
+      - name: Write the signing config
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > release.keystore
+          cat > build.json <<EOF
+          {
+            "android": {
+              "release": {
+                "keystore": "release.keystore",
+                "storePassword": "$KEYSTORE_PASSWORD",
+                "alias": "oksigenia-aty",
+                "password": "$KEYSTORE_PASSWORD",
+                "keystoreType": "jks"
+              }
+            }
+          }
+          EOF
+
+      - name: Build the signed AAB
+        run: cordova build android --release --buildConfig=build.json --no-telemetry -- --packageType=bundle
+
+      - name: Collect the AAB
+        run: |
+          mkdir -p dist
+          find platforms/android -name '*.aab' -path '*release*' -exec cp {} dist/ \;
+          ls -la dist
+
+      - name: Upload the AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: oksigenia-aty-aab
+          path: dist/*.aab
+          if-no-files-found: error
+
+      - name: Clean up secrets on the runner
+        if: always()
+        run: rm -f release.keystore build.json google-services.json
