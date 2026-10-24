@@ -8,6 +8,7 @@ name: Oksigenia Aty Android
 on:
   workflow_dispatch:
   push:
+    branches: [oksigenia]
     tags: ['oksigenia-v*']
 
 permissions:
