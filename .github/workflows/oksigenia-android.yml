@@ -44,8 +44,21 @@ jobs:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: echo "$GOOGLE_SERVICES_JSON" | base64 -d > google-services.json
 
-      - name: Build the app plugin
-        run: npm run prod --prefix cordova-plugin-moodleapp
+      - name: Build the app plugin and the web assets
+        run: |
+          npm run prod --prefix cordova-plugin-moodleapp
+          npm run build:prod
+
+      # The web build does not reference cordova.js (the app also ships as a PWA), so the native plugins would be
+      # unavailable and the app would hang on the splash. Add the reference; cordova prepare provides the file itself.
+      - name: Make cordova available to the web app
+        run: |
+          grep -q 'src="cordova.js"' www/index.html || \
+            sed -i 's#</head>#  <script src="cordova.js"></script>\n</head>#' www/index.html
+          grep -n 'cordova.js' www/index.html
+
+      - name: Prepare the Android platform
+        run: cordova prepare android --no-telemetry
 
       - name: Write the signing config
         env:
@@ -67,15 +80,14 @@ jobs:
           }
           EOF
 
-      # ionic cordova build (not a bare cordova build) is what injects cordova.js, so the native plugins work at runtime.
       - name: Build the signed AAB (for Google Play)
-        run: NODE_ENV=production npx ionic cordova build android --prod --release --no-interactive -- --buildConfig=build.json --packageType=bundle
+        run: cordova build android --release --buildConfig=build.json --no-telemetry -- --packageType=bundle
 
       - name: Build the signed APK (for sideloading on a device)
-        run: NODE_ENV=production npx ionic cordova build android --prod --release --no-interactive -- --buildConfig=build.json --packageType=apk
+        run: cordova build android --release --buildConfig=build.json --no-telemetry -- --packageType=apk
 
       - name: Build the debug APK (debuggable, for troubleshooting)
-        run: NODE_ENV=production npx ionic cordova build android --prod --debug --no-interactive -- --packageType=apk
+        run: cordova build android --debug --no-telemetry -- --packageType=apk
 
       - name: Collect the artifacts
         run: |
