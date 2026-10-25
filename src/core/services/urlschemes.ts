@@ -19,13 +19,11 @@ import { CoreWSError } from '@classes/errors/wserror';
 import { CoreContentLinksDelegate } from '@features/contentlinks/services/contentlinks-delegate';
 import { CoreContentLinksHelper } from '@features/contentlinks/services/contentlinks-helper';
 import { CoreLoginHelper, CoreLoginSSOData } from '@features/login/services/login-helper';
-import { ApplicationInit, Http, makeSingleton, Translate } from '@singletons';
+import { ApplicationInit, makeSingleton, Translate } from '@singletons';
 import { CoreLogger } from '@static/logger';
 import { CorePath } from '@static/path';
 import { CoreConstants } from '../constants';
-import { CoreWS } from '@services/ws';
-import { firstValueFrom } from 'rxjs';
-import { timeout } from 'rxjs/operators';
+import { CoreWS, HttpRequestOptions } from '@services/ws';
 import { CoreSSO } from '@static/sso';
 import { CoreNavigator, CoreRedirectPayload } from './navigator';
 import { CoreSiteCheckResponse, CoreSites } from './sites';
@@ -566,17 +564,24 @@ export class CoreCustomURLSchemesProvider {
             throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidsite')));
         }
 
-        const tokenUrl = `${siteUrl}/local/oksigeniaaty/token.php?key=${encodeURIComponent(key)}`;
+        // Use the native HTTP (bypasses CORS) and POST the key, so it stays out of logs and the URL. The key goes in
+        // the form body; serializer defaults to urlencoded, so PHP receives it in $_POST.
+        const tokenUrl = `${siteUrl}/local/oksigeniaaty/token.php`;
+        const options: HttpRequestOptions = {
+            method: 'post',
+            data: { key },
+        };
 
-        let response: { token?: string; siteurl?: string; error?: string };
+        let response: { token?: string; siteurl?: string; error?: string } | undefined;
         try {
-            response = await firstValueFrom(
-                Http.get<{ token?: string; siteurl?: string; error?: string }>(tokenUrl)
-                    .pipe(timeout(CoreWS.getRequestTimeout())),
+            const result = await CoreWS.sendHTTPRequest<{ token?: string; siteurl?: string; error?: string }>(
+                tokenUrl,
+                options,
             );
+            response = result.body;
         } catch (error) {
             throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidsite'), {
-                debug: { code: 'atylogintokenerror', details: error.message },
+                debug: { code: 'atylogintokenerror', details: CoreErrorHelper.getErrorMessageFromError(error) ?? '' },
             }));
         }
 
