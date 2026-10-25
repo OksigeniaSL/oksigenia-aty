@@ -48,7 +48,9 @@ type AtyTokenResponse = {
     needspin?: boolean; // The user has a PIN set and it was missing or wrong; the key was not consumed.
     needspinsetup?: boolean; // Signed in, but no PIN yet: offer to set one (trust on first use).
     locked?: boolean; // Too many wrong PINs; verification is temporarily locked.
-    error?: string;
+    pinprompt?: string; // Localised "enter your PIN" message (the server knows the user's language).
+    pinsetupprompt?: string; // Localised "create a PIN" message.
+    error?: string; // Localised error (wrong PIN, locked, or a generic failure).
 };
 
 /*
@@ -593,26 +595,20 @@ export class CoreCustomURLSchemesProvider {
             const tokenUrl = `${siteUrl}/local/oksigeniaaty/token.php`;
 
             // Exchange the key for a token. If the user has set a PIN, the server asks for it without consuming the
-            // key, so we can prompt and retry until it is right (or the user cancels).
+            // key, so we can prompt and retry until it is right (or the user cancels). All prompt text is localised
+            // by the server (it knows the user's language), so the app ships no PIN strings of its own.
             let response = await this.postAtyKey(tokenUrl, { key });
-            let pinError = '';
             while (response?.needspin) {
                 let pin: string;
                 try {
-                    const message = response.locked
-                        ? Translate.instant('local_oksigeniaaty.pinlocked')
-                        : (pinError || Translate.instant('local_oksigeniaaty.pinenter'));
-                    pin = <string> await CorePrompts.show(message, 'tel', {
-                        header: Translate.instant('local_oksigeniaaty.pintitle'),
-                        placeholderOrLabel: Translate.instant('local_oksigeniaaty.pintitle'),
-                    });
+                    const message = response.error || response.pinprompt || '';
+                    pin = <string> await CorePrompts.show(message, 'tel', { placeholderOrLabel: 'PIN' });
                 } catch {
                     // The user dismissed the PIN prompt.
                     throw new CoreCustomURLSchemesHandleError(new CoreCanceledError());
                 }
 
                 response = await this.postAtyKey(tokenUrl, { key, pin });
-                pinError = response?.error ?? Translate.instant('local_oksigeniaaty.pinwrong');
             }
 
             if (!response || !response.token) {
@@ -620,8 +616,8 @@ export class CoreCustomURLSchemesProvider {
             }
 
             // Trust on first use: no PIN yet, so offer to set one for next time (the user may skip it).
-            if (response.needspinsetup) {
-                await this.offerAtyPinSetup(siteUrl, response.token);
+            if (response.needspinsetup && response.pinsetupprompt) {
+                await this.offerAtyPinSetup(siteUrl, response.token, response.pinsetupprompt);
             }
 
             // Dress the app in the user's own language: open a link, land in your language.
@@ -679,18 +675,12 @@ export class CoreCustomURLSchemesProvider {
      *
      * @param siteUrl The site URL.
      * @param token The freshly minted app token.
+     * @param message The localised invitation to set a PIN (from the server).
      */
-    protected async offerAtyPinSetup(siteUrl: string, token: string): Promise<void> {
+    protected async offerAtyPinSetup(siteUrl: string, token: string, message: string): Promise<void> {
         let pin: string;
         try {
-            pin = <string> await CorePrompts.show(Translate.instant('local_oksigeniaaty.pinsetupmsg'), 'tel', {
-                header: Translate.instant('local_oksigeniaaty.pinsetuptitle'),
-                placeholderOrLabel: Translate.instant('local_oksigeniaaty.pintitle'),
-                buttons: {
-                    okText: Translate.instant('local_oksigeniaaty.pinset'),
-                    cancelText: Translate.instant('local_oksigeniaaty.pinskip'),
-                },
-            });
+            pin = <string> await CorePrompts.show(message, 'tel', { placeholderOrLabel: 'PIN' });
         } catch {
             return; // Skipped; nothing to do.
         }
