@@ -19,10 +19,13 @@ import { CoreWSError } from '@classes/errors/wserror';
 import { CoreContentLinksDelegate } from '@features/contentlinks/services/contentlinks-delegate';
 import { CoreContentLinksHelper } from '@features/contentlinks/services/contentlinks-helper';
 import { CoreLoginHelper, CoreLoginSSOData } from '@features/login/services/login-helper';
-import { ApplicationInit, makeSingleton, Translate } from '@singletons';
+import { ApplicationInit, Http, makeSingleton, Translate } from '@singletons';
 import { CoreLogger } from '@static/logger';
 import { CorePath } from '@static/path';
 import { CoreConstants } from '../constants';
+import { CoreWS } from '@services/ws';
+import { firstValueFrom } from 'rxjs';
+import { timeout } from 'rxjs/operators';
 import { CoreSSO } from '@static/sso';
 import { CoreNavigator, CoreRedirectPayload } from './navigator';
 import { CoreSiteCheckResponse, CoreSites } from './sites';
@@ -140,7 +143,9 @@ export class CoreCustomURLSchemesProvider {
 
         // Get the data from the URL.
         try {
-            if (this.isCustomURLToken(url)) {
+            if (this.isCustomURLAtyLogin(url)) {
+                data = await this.getCustomURLAtyLoginData(url);
+            } else if (this.isCustomURLToken(url)) {
                 data = await this.getCustomURLTokenData(url);
             } else if (this.isCustomURLLink(url)) {
                 // In iOS, the protocol after the scheme doesn't have ":". Add it.
@@ -507,6 +512,84 @@ export class CoreCustomURLSchemesProvider {
         }
 
         return url.includes(`${CoreConstants.CONFIG.customurlscheme}://token=`);
+    }
+
+    /**
+     * Check whether a URL is an Oksigenia Aty sign-in URL (scheme://atylogin=...).
+     *
+     * @param url URL to check.
+     * @returns Whether it's an Aty sign-in URL.
+     */
+    isCustomURLAtyLogin(url: string): boolean {
+        if (!url) {
+            return false;
+        }
+
+        return url.includes(`${CoreConstants.CONFIG.customurlscheme}://atylogin=`);
+    }
+
+    /**
+     * Get the data needed to sign in from an Oksigenia Aty sign-in URL.
+     *
+     * The URL carries base64("siteurl:::key"); the one-time key is exchanged for an app token at the site's
+     * local/oksigeniaaty/token.php, so no password is needed. Returns SSO-style data for the normal site creation flow.
+     *
+     * @param url The sign-in URL.
+     * @returns The sign-in data.
+     */
+    protected async getCustomURLAtyLoginData(url: string): Promise<CoreCustomURLSchemesParams> {
+        if (!this.isCustomURLAtyLogin(url)) {
+            throw this.createInvalidSchemeError(url);
+        }
+
+        if (CoreSSO.isSSOAuthenticationOngoing()) {
+            throw new CoreCustomURLSchemesHandleError('Duplicated');
+        }
+
+        CoreSSO.startSSOAuthentication();
+        this.logger.debug('App launched by an Aty sign-in URL');
+
+        let payload = url.replace(`${CoreConstants.CONFIG.customurlscheme}://atylogin=`, '');
+        payload = payload.replace(/\/?#?\/?$/, '');
+
+        let decoded: string;
+        try {
+            decoded = atob(payload);
+        } catch {
+            throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidsite')));
+        }
+
+        const parts = decoded.split(':::');
+        const siteUrl = parts[0];
+        const key = parts[1];
+        if (!siteUrl || !key) {
+            throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidsite')));
+        }
+
+        const tokenUrl = `${siteUrl}/local/oksigeniaaty/token.php?key=${encodeURIComponent(key)}`;
+
+        let response: { token?: string; siteurl?: string; error?: string };
+        try {
+            response = await firstValueFrom(
+                Http.get<{ token?: string; siteurl?: string; error?: string }>(tokenUrl)
+                    .pipe(timeout(CoreWS.getRequestTimeout())),
+            );
+        } catch (error) {
+            throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidsite'), {
+                debug: { code: 'atylogintokenerror', details: error.message },
+            }));
+        }
+
+        if (!response || !response.token) {
+            throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidaccount')));
+        }
+
+        return {
+            siteUrl: response.siteurl || siteUrl,
+            token: response.token,
+            isSSOToken: true,
+            isAuthenticationURL: true,
+        };
     }
 
     /**
