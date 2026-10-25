@@ -44,6 +44,16 @@ jobs:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: echo "$GOOGLE_SERVICES_JSON" | base64 -d > google-services.json
 
+      # The default build only generates English (src/assets/lang/en.json). Pull Moodle's translated
+      # langpacks for every language in moodle.config.json, then overlay Oksigenia's own strings, so the
+      # app ships multilingual and picks the device language automatically.
+      - name: Bundle all languages (Moodle langpacks + Oksigenia strings)
+        run: |
+          mkdir -p src/assets/lang
+          LANGVERSION=5.2 bash scripts/update_langpacks.sh
+          node scripts/oksigenia-merge-lang.mjs
+          echo "Built language files:"; ls src/assets/lang | sort | tr '\n' ' '; echo
+
       - name: Build the app plugin and the web assets
         run: |
           npm run prod --prefix cordova-plugin-moodleapp
