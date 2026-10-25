@@ -578,9 +578,9 @@ export class CoreCustomURLSchemesProvider {
             data: { key },
         };
 
-        let response: { token?: string; siteurl?: string; error?: string } | null = null;
+        let response: { token?: string; privatetoken?: string; siteurl?: string; error?: string } | null = null;
         try {
-            const result = await CoreWS.sendHTTPRequest<{ token?: string; siteurl?: string; error?: string }>(
+            const result = await CoreWS.sendHTTPRequest<{ token?: string; privatetoken?: string; siteurl?: string; error?: string }>(
                 tokenUrl,
                 options,
             );
