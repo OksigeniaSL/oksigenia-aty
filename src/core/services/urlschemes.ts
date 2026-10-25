@@ -552,7 +552,12 @@ export class CoreCustomURLSchemesProvider {
 
         let decoded: string;
         try {
-            decoded = atob(payload);
+            // Accept standard base64 and base64url, padded or not.
+            let base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+            while (base64.length % 4) {
+                base64 += '=';
+            }
+            decoded = atob(base64);
         } catch {
             throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidsite')));
         }
@@ -560,7 +565,8 @@ export class CoreCustomURLSchemesProvider {
         const parts = decoded.split(':::');
         const siteUrl = parts[0];
         const key = parts[1];
-        if (!siteUrl || !key) {
+        // Only ever sign in to an https site from a sign-in link; never cleartext.
+        if (!siteUrl || !key || !/^https:\/\//i.test(siteUrl)) {
             throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidsite')));
         }
 
@@ -590,8 +596,10 @@ export class CoreCustomURLSchemesProvider {
         }
 
         return {
-            siteUrl: response.siteurl || siteUrl,
+            // The site from the link, never one the server claims.
+            siteUrl,
             token: response.token,
+            privateToken: response.privatetoken,
             isSSOToken: true,
             isAuthenticationURL: true,
         };
