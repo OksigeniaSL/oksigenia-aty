@@ -87,10 +87,7 @@
         "high": 120
     },
     "customurlscheme": "oksigeniaaty",
-    "sites": [
-        { "name": "Campus Oksigenia", "url": "https://campus.oksigenia.com" },
-        { "name": "Aula Nuryana", "url": "https://aula.nuryana.com" }
-    ],
+    "sites": [],
     "multisitesdisplay": "url",
     "sitefindersettings": {},
     "onlyallowlistedsites": true,
