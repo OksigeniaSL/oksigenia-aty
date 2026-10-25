@@ -31,8 +31,25 @@ import { CoreErrorHelper, CoreErrorObject } from './error-helper';
 import { CoreUrl } from '@static/url';
 import { CoreLoadings } from './overlays/loadings';
 import { CoreAlerts } from './overlays/alerts';
+import { CorePrompts } from './overlays/prompts';
 import { CorePlatform } from './platform';
+import { CoreLang } from '@services/lang';
+import { CoreCanceledError } from '@classes/errors/cancelederror';
 import { NO_SITE_ID } from '@features/login/constants';
+
+/**
+ * What local/oksigeniaaty/token.php answers when the app exchanges a one-time key.
+ */
+type AtyTokenResponse = {
+    token?: string;
+    privatetoken?: string;
+    siteurl?: string;
+    lang?: string;
+    needspin?: boolean; // The user has a PIN set and it was missing or wrong; the key was not consumed.
+    needspinsetup?: boolean; // Signed in, but no PIN yet: offer to set one (trust on first use).
+    locked?: boolean; // Too many wrong PINs; verification is temporarily locked.
+    error?: string;
+};
 
 /*
  * Provider to handle custom URL schemes.
@@ -547,62 +564,146 @@ export class CoreCustomURLSchemesProvider {
         CoreSSO.startSSOAuthentication();
         this.logger.debug('App launched by an Aty sign-in URL');
 
-        let payload = url.replace(`${CoreConstants.CONFIG.customurlscheme}://atylogin=`, '');
-        payload = payload.replace(/\/?#?\/?$/, '');
-
-        let decoded: string;
+        // Once SSO is started, finish it on any failure so a cancelled or failed sign-in does not leave it stuck
+        // "ongoing" (on success, handleCustomURL finishes it for us because isSSOToken is set).
         try {
-            // Accept standard base64 and base64url, padded or not.
-            let base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
-            while (base64.length % 4) {
-                base64 += '=';
+            let payload = url.replace(`${CoreConstants.CONFIG.customurlscheme}://atylogin=`, '');
+            payload = payload.replace(/\/?#?\/?$/, '');
+
+            let decoded: string;
+            try {
+                // Accept standard base64 and base64url, padded or not.
+                let base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+                while (base64.length % 4) {
+                    base64 += '=';
+                }
+                decoded = atob(base64);
+            } catch {
+                throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidsite')));
             }
-            decoded = atob(base64);
-        } catch {
-            throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidsite')));
-        }
 
-        const parts = decoded.split(':::');
-        const siteUrl = parts[0];
-        const key = parts[1];
-        // Only ever sign in to an https site from a sign-in link; never cleartext.
-        if (!siteUrl || !key || !/^https:\/\//i.test(siteUrl)) {
-            throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidsite')));
-        }
+            const parts = decoded.split(':::');
+            const siteUrl = parts[0];
+            const key = parts[1];
+            // Only ever sign in to an https site from a sign-in link; never cleartext.
+            if (!siteUrl || !key || !/^https:\/\//i.test(siteUrl)) {
+                throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidsite')));
+            }
 
-        // Use the native HTTP (bypasses CORS) and POST the key, so it stays out of logs and the URL. The key goes in
-        // the form body; serializer defaults to urlencoded, so PHP receives it in $_POST.
-        const tokenUrl = `${siteUrl}/local/oksigeniaaty/token.php`;
+            const tokenUrl = `${siteUrl}/local/oksigeniaaty/token.php`;
+
+            // Exchange the key for a token. If the user has set a PIN, the server asks for it without consuming the
+            // key, so we can prompt and retry until it is right (or the user cancels).
+            let response = await this.postAtyKey(tokenUrl, { key });
+            let pinError = '';
+            while (response?.needspin) {
+                let pin: string;
+                try {
+                    const message = response.locked
+                        ? Translate.instant('local_oksigeniaaty.pinlocked')
+                        : (pinError || Translate.instant('local_oksigeniaaty.pinenter'));
+                    pin = <string> await CorePrompts.show(message, 'tel', {
+                        header: Translate.instant('local_oksigeniaaty.pintitle'),
+                        placeholderOrLabel: Translate.instant('local_oksigeniaaty.pintitle'),
+                    });
+                } catch {
+                    // The user dismissed the PIN prompt.
+                    throw new CoreCustomURLSchemesHandleError(new CoreCanceledError());
+                }
+
+                response = await this.postAtyKey(tokenUrl, { key, pin });
+                pinError = response?.error ?? Translate.instant('local_oksigeniaaty.pinwrong');
+            }
+
+            if (!response || !response.token) {
+                throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidaccount')));
+            }
+
+            // Trust on first use: no PIN yet, so offer to set one for next time (the user may skip it).
+            if (response.needspinsetup) {
+                await this.offerAtyPinSetup(siteUrl, response.token);
+            }
+
+            // Dress the app in the user's own language: open a link, land in your language.
+            if (response.lang) {
+                try {
+                    await CoreLang.changeCurrentLanguage(response.lang);
+                } catch {
+                    // Keep the current language when the user's one is not available in the app.
+                }
+            }
+
+            return {
+                // The site from the link, never one the server claims.
+                siteUrl,
+                token: response.token,
+                privateToken: response.privatetoken,
+                isSSOToken: true,
+                isAuthenticationURL: true,
+            };
+        } catch (error) {
+            CoreSSO.finishSSOAuthentication();
+
+            throw error;
+        }
+    }
+
+    /**
+     * POST a one-time key (and an optional PIN) to the site's token.php and return its parsed answer.
+     *
+     * Uses the native HTTP so it bypasses CORS; the key travels in the POST body, out of logs and the URL.
+     *
+     * @param tokenUrl The site's token.php URL.
+     * @param data The key, and the PIN when the user is supplying one.
+     * @returns The server's answer.
+     */
+    protected async postAtyKey(tokenUrl: string, data: { key: string; pin?: string }): Promise<AtyTokenResponse | null> {
         const options: HttpRequestOptions = {
             method: 'post',
-            data: { key },
+            data,
         };
 
-        let response: { token?: string; privatetoken?: string; siteurl?: string; error?: string } | null = null;
         try {
-            const result = await CoreWS.sendHTTPRequest<{ token?: string; privatetoken?: string; siteurl?: string; error?: string }>(
-                tokenUrl,
-                options,
-            );
-            response = result.body;
+            const result = await CoreWS.sendHTTPRequest<AtyTokenResponse>(tokenUrl, options);
+
+            return result.body;
         } catch (error) {
             throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidsite'), {
                 debug: { code: 'atylogintokenerror', details: CoreErrorHelper.getErrorMessageFromError(error) ?? '' },
             }));
         }
+    }
 
-        if (!response || !response.token) {
-            throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidaccount')));
+    /**
+     * After the first passwordless sign-in, offer to set a PIN for next time. Skipping is fine; it can be set later.
+     *
+     * @param siteUrl The site URL.
+     * @param token The freshly minted app token.
+     */
+    protected async offerAtyPinSetup(siteUrl: string, token: string): Promise<void> {
+        let pin: string;
+        try {
+            pin = <string> await CorePrompts.show(Translate.instant('local_oksigeniaaty.pinsetupmsg'), 'tel', {
+                header: Translate.instant('local_oksigeniaaty.pinsetuptitle'),
+                placeholderOrLabel: Translate.instant('local_oksigeniaaty.pintitle'),
+                buttons: {
+                    okText: Translate.instant('local_oksigeniaaty.pinset'),
+                    cancelText: Translate.instant('local_oksigeniaaty.pinskip'),
+                },
+            });
+        } catch {
+            return; // Skipped; nothing to do.
         }
 
-        return {
-            // The site from the link, never one the server claims.
-            siteUrl,
-            token: response.token,
-            privateToken: response.privatetoken,
-            isSSOToken: true,
-            isAuthenticationURL: true,
-        };
+        if (!pin || !/^\d{4,8}$/.test(pin)) {
+            return; // Not a usable PIN; let them set it later from their profile.
+        }
+
+        try {
+            await CoreWS.call('local_oksigeniaaty_set_pin', { pin }, { wsToken: token, siteUrl });
+        } catch {
+            // Not critical: they stay signed in and can set a PIN another time.
+        }
     }
 
     /**

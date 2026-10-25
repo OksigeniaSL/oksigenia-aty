@@ -3,5 +3,13 @@
     "core.login.connectingtosite": "Conectando con tu plataforma",
     "core.login.siteaddresshelp": "La misma dirección que usas en el navegador, con o sin https://.",
     "core.login.siteintro": "Escanea el código QR de tu centro u organización, o escribe la dirección de su plataforma.",
-    "core.settings.oksigeniacredit": "Oksigenia Aty, de Oksigenia SL. Basada en la app de Moodle™ (Apache 2.0), modificada por Oksigenia SL."
+    "core.settings.oksigeniacredit": "Oksigenia Aty, de Oksigenia SL. Basada en la app de Moodle™ (Apache 2.0), modificada por Oksigenia SL.",
+    "local_oksigeniaaty.pinenter": "Escribe tu PIN",
+    "local_oksigeniaaty.pinlocked": "Demasiados PIN incorrectos. Espera unos minutos y vuelve a intentarlo, o pide un enlace de acceso nuevo.",
+    "local_oksigeniaaty.pinset": "Poner PIN",
+    "local_oksigeniaaty.pinsetupmsg": "Pon un PIN de 4 a 8 cifras para entrar más rápido la próxima vez. Puedes omitirlo y ponerlo más tarde.",
+    "local_oksigeniaaty.pinsetuptitle": "Crea un PIN",
+    "local_oksigeniaaty.pinskip": "Ahora no",
+    "local_oksigeniaaty.pintitle": "Tu PIN",
+    "local_oksigeniaaty.pinwrong": "Ese PIN no es correcto. Inténtalo de nuevo."
 }
