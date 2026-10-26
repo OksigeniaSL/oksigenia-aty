@@ -140,7 +140,12 @@ export class CoreCustomURLSchemesProvider {
 
         // Get the data from the URL.
         try {
-            if (this.isCustomURLToken(url)) {
+            if (url.includes(`${CoreConstants.CONFIG.customurlscheme}://atylogin=`)) {
+                // Oksigenia Aty passwordless sign-in, kept in its own service; load it lazily so the core file does
+                // not statically depend on it (and the only Aty change here stays this short dispatch).
+                const { AtyLogin } = await import('@services/aty-login');
+                data = await AtyLogin.getLoginData(url);
+            } else if (this.isCustomURLToken(url)) {
                 data = await this.getCustomURLTokenData(url);
             } else if (this.isCustomURLLink(url)) {
                 // In iOS, the protocol after the scheme doesn't have ":". Add it.
