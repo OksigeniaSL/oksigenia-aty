@@ -1,0 +1,7 @@
+{
+    "core.login.connecttomoodle": "Connectez-vous à votre plateforme",
+    "core.login.connectingtosite": "Connexion à votre plateforme…",
+    "core.login.siteaddresshelp": "La même adresse que dans votre navigateur, avec ou sans https://.",
+    "core.login.siteintro": "Scannez le code QR de votre établissement ou organisation, ou saisissez l'adresse de sa plateforme.",
+    "core.settings.oksigeniacredit": "Oksigenia Aty, par Oksigenia SL. Basée sur l'app Moodle™ (Apache 2.0), modifiée par Oksigenia SL."
+}
