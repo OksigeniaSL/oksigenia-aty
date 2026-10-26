@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Component, OnInit, ElementRef, inject, viewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, inject, viewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 
 import { CoreNetwork } from '@services/network';
@@ -29,6 +29,7 @@ import { Translate } from '@singletons';
 import { CoreUrl, CoreUrlPartNames } from '@static/url';
 import { CoreNavigator } from '@services/navigator';
 import { CoreCustomURLSchemes, CoreCustomURLSchemesHandleError } from '@services/urlschemes';
+import { AtyLogin } from '@services/aty-login';
 import { CoreErrorHelper } from '@services/error-helper';
 import { CoreForms } from '@static/form';
 import { AlertButton } from '@ionic/core';
@@ -61,11 +62,13 @@ import { CoreSharedModule } from '@/core/shared.module';
         CoreSharedModule,
     ],
 })
-export default class CoreLoginSitePage implements OnInit {
+export default class CoreLoginSitePage implements OnInit, OnDestroy {
 
     readonly formElement = viewChild<ElementRef>('siteFormEl');
 
     siteForm!: FormGroup;
+    connecting = false;
+    connectingUrl = '';
     fixedSites?: CoreLoginSiteInfoExtended[];
     filteredSites?: CoreLoginSiteInfoExtended[];
     siteSelector = CoreLoginSiteSelectorListMethod.SITE_FINDER;
@@ -81,6 +84,7 @@ export default class CoreLoginSitePage implements OnInit {
     appName = CoreConstants.CONFIG.appname;
 
     protected formBuilder = inject(FormBuilder);
+    protected connectAttempt = 0; // Incremented on every connection attempt and cancellation to ignore stale results.
 
     /**
      * @inheritdoc
@@ -293,14 +297,18 @@ export default class CoreLoginSitePage implements OnInit {
             await this.loginDemoSite(siteData);
 
         } else {
-            // Not a demo site.
-            const modal = await CoreLoadings.show();
+            // Not a demo site. The connecting state is shown in the page (not in a blocking modal) so it can be cancelled.
+            const attempt = this.startConnecting(url);
 
             let checkResult: CoreSiteCheckResponse;
 
             try {
                 checkResult = await CoreSites.checkSite(url, undefined, 'Site URL page');
             } catch (error) {
+                if (this.isConnectCancelled(attempt)) {
+                    return;
+                }
+
                 // Attempt guessing the domain if the initial check failed
                 const domain = CoreUrl.guessMoodleDomain(url);
 
@@ -308,22 +316,82 @@ export default class CoreLoginSitePage implements OnInit {
                     try {
                         checkResult = await CoreSites.checkSite(domain, undefined, 'Site URL page');
                     } catch (secondError) {
+                        if (this.isConnectCancelled(attempt)) {
+                            return;
+                        }
+
                         // Try to use the first error.
-                        modal.dismiss();
+                        this.cancelConnect();
 
                         return this.showLoginIssue(url, error || secondError);
                     }
                 } else {
-                    modal.dismiss();
+                    this.cancelConnect();
 
                     return this.showLoginIssue(url, error);
                 }
             }
 
-            await this.login(checkResult);
+            if (this.isConnectCancelled(attempt)) {
+                return;
+            }
 
-            modal.dismiss();
+            const navigated = await this.login(checkResult);
+
+            if (!navigated) {
+                // Still in this page, show the form again. If we left, ionViewDidLeave resets the state.
+                this.cancelConnect();
+            }
         }
+    }
+
+    /**
+     * Show the connecting state for a URL and start a new connection attempt.
+     *
+     * @param url URL being checked.
+     * @returns Attempt identifier, to detect later whether the attempt was cancelled.
+     */
+    protected startConnecting(url: string): number {
+        this.connectAttempt++;
+        this.connecting = true;
+        this.connectingUrl = CoreUrl.removeUrlParts(url, CoreUrlPartNames.Protocol);
+
+        return this.connectAttempt;
+    }
+
+    /**
+     * Check whether a connection attempt was cancelled or superseded by a newer one.
+     *
+     * @param attempt Attempt identifier returned by startConnecting.
+     * @returns Whether the attempt is no longer the active one.
+     */
+    protected isConnectCancelled(attempt: number): boolean {
+        return attempt !== this.connectAttempt;
+    }
+
+    /**
+     * Cancel the connection attempt in progress (if any) and show the form again.
+     *
+     * The pending request itself keeps running until it finishes or times out, but its result is ignored.
+     */
+    cancelConnect(): void {
+        this.connectAttempt++;
+        this.connecting = false;
+        this.connectingUrl = '';
+    }
+
+    /**
+     * Page left (e.g. the user was sent to the credentials page or went back): drop any pending attempt.
+     */
+    ionViewDidLeave(): void {
+        this.cancelConnect();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    ngOnDestroy(): void {
+        this.cancelConnect();
     }
 
     /**
@@ -361,19 +429,20 @@ export default class CoreLoginSitePage implements OnInit {
      *
      * @param siteCheck Response obtained from the site check request.
      *
-     * @returns Promise resolved after logging in.
+     * @returns Promise resolved with whether the user was sent to the credentials page.
      */
-    protected async login(siteCheck: CoreSiteCheckResponse): Promise<void> {
+    protected async login(siteCheck: CoreSiteCheckResponse): Promise<boolean> {
         try {
             await CoreSites.checkApplication(siteCheck.config);
 
             CoreForms.triggerFormSubmittedEvent(this.formElement(), true);
 
-            CoreNavigator.navigate('/login/credentials', {
+            return await CoreNavigator.navigate('/login/credentials', {
                 params: { siteCheck },
             });
         } catch {
             // Ignore errors.
+            return false;
         }
     }
 
@@ -500,9 +569,8 @@ export default class CoreLoginSitePage implements OnInit {
      * @returns Promise resolved when done.
      */
     async showInstructionsAndScanQR(): Promise<void> {
+        // Skip the Moodle-centric QR instructions screen (a web screenshot that does not match Aty) and scan straight.
         try {
-            await CoreLoginHelper.showScanQRInstructions();
-
             await this.scanQR();
         } catch {
             // Ignore errors.
@@ -519,6 +587,19 @@ export default class CoreLoginSitePage implements OnInit {
         const text = await CoreQRScan.scanQR();
 
         if (!text) {
+            return;
+        }
+
+        // An Aty sign-in QR carries the https magic link (so any camera can open it); scan it with the app itself and
+        // we turn it into the sign-in scheme so the normal handler signs the user in.
+        const atyScheme = AtyLogin.getSchemeFromMagicLink(text);
+        if (atyScheme) {
+            try {
+                await CoreCustomURLSchemes.handleCustomURL(atyScheme);
+            } catch (error) {
+                CoreCustomURLSchemes.treatHandleCustomURLError(error, atyScheme, 'CoreLoginSitePage');
+            }
+
             return;
         }
 

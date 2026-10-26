@@ -8,6 +8,138 @@
     margin-top: 1.4rem;
 }
 
+// Short explanation above the QR button.
+.core-login-site-intro {
+    font: var(--mdl-typography-body-font-lg);
+    color: var(--core-login-text-color);
+    margin: 0 0 16px;
+}
+
+// Primary action: scan the QR code of the site.
+ion-button.core-login-site-qrcode {
+    --background: var(--core-login-brand);
+    --background-hover: var(--core-login-brand);
+    --background-activated: var(--core-login-brand);
+    --background-focused: var(--core-login-brand);
+    --color: var(--core-login-brand-contrast);
+    --border-radius: var(--core-login-radius);
+    --padding-top: 0;
+    --padding-bottom: 0;
+    min-height: 56px;
+    margin: 0;
+    font: var(--mdl-typography-label-font-lg);
+
+    ion-icon {
+        font-size: #{dynamic-font(22px)};
+    }
+}
+
+// "Or" separator between the QR button and the address field.
+.core-login-site-qrcode-separator {
+    position: relative;
+    margin: 20px 0;
+    font: var(--mdl-typography-body-font-sm);
+    color: var(--medium);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+
+    span {
+        position: relative;
+        background: var(--core-login-background);
+        padding: 0 12px;
+    }
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        border-top: 1px solid var(--gray-300);
+    }
+}
+
+// Big, boxed address field. The box draws its own focus ring, so the input highlight is hidden.
+.core-login-site-field {
+    border: 2px solid var(--core-input-stroke);
+    border-radius: var(--core-login-radius);
+    background: var(--core-login-input-background);
+    padding: 6px 16px;
+    transition: border-color 0.2s ease-in-out;
+
+    &:focus-within {
+        border-color: var(--core-login-brand);
+    }
+
+    ion-input {
+        --background: transparent;
+        --color: var(--core-login-input-color);
+        --padding-start: 0;
+        --padding-end: 0;
+        --highlight-height: 0px;
+        font-size: #{dynamic-font(18px)};
+        min-height: 52px;
+    }
+}
+
+.core-login-site-field-help,
+.core-login-site-field-error {
+    font: var(--mdl-typography-body-font-sm);
+    margin: 8px 4px 0;
+}
+
+.core-login-site-field-help {
+    color: var(--medium);
+}
+
+.core-login-site-field-error {
+    color: var(--danger);
+}
+
+ion-button.core-login-site-connect {
+    --background: var(--core-login-brand);
+    --background-hover: var(--core-login-brand);
+    --background-activated: var(--core-login-brand);
+    --background-focused: var(--core-login-brand);
+    --color: var(--core-login-brand-contrast);
+    --border-radius: var(--core-login-radius);
+    min-height: 52px;
+    margin: 16px 0 0;
+    font: var(--mdl-typography-label-font-lg);
+}
+
+// Connecting state, shown instead of the form while the site is being checked.
+.core-login-site-connecting {
+    padding: 32px 16px;
+
+    ion-spinner {
+        width: 44px;
+        height: 44px;
+        color: var(--core-login-brand);
+    }
+
+    .core-login-site-connecting-title {
+        font: var(--mdl-typography-heading6-font);
+        color: var(--core-login-text-color);
+        margin: 16px 0 4px;
+    }
+
+    .core-login-site-connecting-url {
+        font: var(--mdl-typography-body-font-md);
+        color: var(--medium);
+        margin: 0 0 24px;
+        word-break: break-all;
+    }
+
+    ion-button.core-login-site-cancel {
+        --border-color: var(--core-login-brand);
+        --border-radius: var(--core-login-radius);
+        --color: var(--core-login-brand);
+        min-width: 160px;
+        margin: 0;
+    }
+}
+
 .item ion-thumbnail {
     min-width: 50px;
     min-height: 50px;

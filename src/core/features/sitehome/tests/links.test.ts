@@ -20,6 +20,7 @@ import { CoreSiteHomeIndexLinkHandlerService } from '@features/sitehome/services
 import { CoreNavigator } from '@services/navigator';
 import { CoreSites } from '@services/sites';
 import { CoreCustomURLSchemes } from '@services/urlschemes';
+import { CoreConstants } from '@/core/constants';
 
 describe('Site Home link handlers', () => {
 
@@ -41,7 +42,7 @@ describe('Site Home link handlers', () => {
         CoreContentLinksDelegate.registerHandler(new CoreSiteHomeIndexLinkHandlerService());
 
         // Act.
-        await CoreCustomURLSchemes.handleCustomURL(`moodlemobile://link=${siteUrl}/?redirect=0`);
+        await CoreCustomURLSchemes.handleCustomURL(`${CoreConstants.CONFIG.customurlscheme}://link=${siteUrl}/?redirect=0`);
 
         // Assert.
         expect(CoreNavigator.navigateToSitePath).toHaveBeenCalledWith('/home/site', {

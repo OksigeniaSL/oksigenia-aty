@@ -1,6 +1,11 @@
 @use "theme/globals" as *;
 
 :host {
+    // Brand tokens for the login screens (Refugio), until the app theme adopts them as its primary colour.
+    --core-login-brand: #0a2e50;
+    --core-login-brand-contrast: #ffffff;
+    --core-login-radius: 14px;
+
     ion-content,
     ion-list {
         --background: var(--core-login-background);
@@ -140,6 +145,14 @@
 
     .core-login-login-button {
         margin-top: 32px;
+        --background: var(--core-login-brand);
+        --background-hover: var(--core-login-brand);
+        --background-activated: var(--core-login-brand);
+        --background-focused: var(--core-login-brand);
+        --color: var(--core-login-brand-contrast);
+        --border-radius: var(--core-login-radius);
+        min-height: 52px;
+        font: var(--mdl-typography-label-font-lg);
     }
 
     .core-login-login-inbrowser-button {
@@ -167,6 +180,10 @@
 }
 
 :host-context(:root.dark) {
+    // Light accent on the dark background; the brand navy becomes the text colour.
+    --core-login-brand: #5cd6ff;
+    --core-login-brand-contrast: #0a2e50;
+
     @if ($core-login-button-outline-dark) {
         form ion-button {
             --background: white;
