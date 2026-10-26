@@ -21,12 +21,21 @@
 }
 
 /*
- * Oksigenia Aty: condensed header titles, so the app's bars read tighter and a touch less like stock Moodle. Uses the
- * platform's own condensed family (Roboto Condensed on Android), so it costs nothing in the bundle and looks native.
+ * Oksigenia Aty: condensed header titles, so the app's bars read tighter and a touch less like stock Moodle. The
+ * Android web view does not expose a condensed system family, so the app bundles Roboto Condensed (Apache 2.0, latin
+ * subset, 700) for it; font-display: swap shows the title at once and swaps in the condensed face when it loads.
  * -------------------------------------------
  */
+@font-face {
+    font-family: 'Roboto Condensed';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("/assets/fonts/roboto-condensed/RobotoCondensed-Bold-latin.woff2") format('woff2');
+}
+
 ion-header ion-toolbar ion-title {
-    font-family: 'Roboto Condensed', 'sans-serif-condensed', 'Arial Narrow', var(--ion-font-family, sans-serif);
+    font-family: 'Roboto Condensed', var(--ion-font-family, sans-serif);
     font-weight: 700;
 }
 
