@@ -21,6 +21,16 @@
 }
 
 /*
+ * Oksigenia Aty: condensed header titles, so the app's bars read tighter and a touch less like stock Moodle. Uses the
+ * platform's own condensed family (Roboto Condensed on Android), so it costs nothing in the bundle and looks native.
+ * -------------------------------------------
+ */
+ion-header ion-toolbar ion-title {
+    font-family: 'Roboto Condensed', 'sans-serif-condensed', 'Arial Narrow', var(--ion-font-family, sans-serif);
+    font-weight: 700;
+}
+
+/*
  * Oksigenia Aty PIN pad: a compact, auto-height card centred on the screen.
  * -------------------------------------------
  */
