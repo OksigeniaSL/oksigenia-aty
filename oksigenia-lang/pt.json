@@ -3,5 +3,13 @@
     "core.login.connectingtosite": "A ligar à tua plataforma…",
     "core.login.siteaddresshelp": "O mesmo endereço que usas no navegador, com ou sem https://.",
     "core.login.siteintro": "Lê o código QR da tua escola ou organização, ou escreve o endereço da tua plataforma.",
-    "core.settings.oksigeniacredit": "Oksigenia Aty, da Oksigenia SL. Baseada na aplicação Moodle™ (Apache 2.0), modificada pela Oksigenia SL."
+    "core.settings.oksigeniacredit": "Oksigenia Aty, da Oksigenia SL. Baseada na aplicação Moodle™ (Apache 2.0), modificada pela Oksigenia SL.",
+    "core.aty.biometric": "Impressão digital ou rosto",
+    "core.aty.biometricaskdisable": "Podes entrar com a tua impressão digital ou o teu rosto. Queres deixar de os usar e entrar só com o teu PIN?",
+    "core.aty.biometricaskenable": "Entras com o teu PIN. Queres usar também a tua impressão digital ou o teu rosto? É opcional e podes desativar quando quiseres.",
+    "core.aty.biometricdisable": "Só PIN",
+    "core.aty.biometricdisabled": "Feito: vais entrar com o teu PIN.",
+    "core.aty.biometricenable": "Usar impressão digital ou rosto",
+    "core.aty.biometricenabled": "Feito: da próxima vez podes usar a tua impressão digital ou o teu rosto.",
+    "core.aty.biometricneedspin": "Para usar a impressão digital ou o rosto, primeiro precisas de um PIN. Crias o PIN quando entras com o link ou o código QR da tua escola ou organização."
 }

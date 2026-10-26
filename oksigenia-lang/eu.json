@@ -3,5 +3,13 @@
     "core.login.connectingtosite": "Zure plataformara konektatzen…",
     "core.login.siteaddresshelp": "Nabigatzailean erabiltzen duzun helbide bera, https://-rekin edo gabe.",
     "core.login.siteintro": "Eskaneatu zure ikastetxe edo erakundearen QR kodea, edo idatzi bere plataformaren helbidea.",
-    "core.settings.oksigeniacredit": "Oksigenia Aty, Oksigenia SL-rena. Moodle™ aplikazioan oinarritua (Apache 2.0), Oksigenia SL-k moldatua."
+    "core.settings.oksigeniacredit": "Oksigenia Aty, Oksigenia SL-rena. Moodle™ aplikazioan oinarritua (Apache 2.0), Oksigenia SL-k moldatua.",
+    "core.aty.biometric": "Hatz-marka edo aurpegia",
+    "core.aty.biometricaskdisable": "Hatz-markarekin edo aurpegiarekin sar zaitezke. Hori erabiltzeari utzi eta PINarekin bakarrik sartu nahi duzu?",
+    "core.aty.biometricaskenable": "Zure PINarekin sartzen zara. Hatz-marka edo aurpegia ere erabili nahi dituzu? Aukerakoa da, eta nahi duzunean ken dezakezu.",
+    "core.aty.biometricdisable": "PINa bakarrik",
+    "core.aty.biometricdisabled": "Eginda: PINarekin sartuko zara.",
+    "core.aty.biometricenable": "Erabili hatz-marka edo aurpegia",
+    "core.aty.biometricenabled": "Eginda: hurrengoan hatz-marka edo aurpegia erabil ditzakezu.",
+    "core.aty.biometricneedspin": "Hatz-marka edo aurpegia erabiltzeko, lehenik PIN bat behar duzu. Zure ikastetxe edo erakundearen estekarekin edo QR kodearekin sartzean sortzen duzu."
 }

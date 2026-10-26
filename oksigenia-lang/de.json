@@ -3,5 +3,13 @@
     "core.login.connectingtosite": "Verbindung zu deiner Plattform…",
     "core.login.siteaddresshelp": "Dieselbe Adresse wie im Browser, mit oder ohne https://.",
     "core.login.siteintro": "Scanne den QR-Code deiner Schule oder Organisation oder gib die Adresse ihrer Plattform ein.",
-    "core.settings.oksigeniacredit": "Oksigenia Aty, von Oksigenia SL. Basiert auf der Moodle™-App (Apache 2.0), angepasst von Oksigenia SL."
+    "core.settings.oksigeniacredit": "Oksigenia Aty, von Oksigenia SL. Basiert auf der Moodle™-App (Apache 2.0), angepasst von Oksigenia SL.",
+    "core.aty.biometric": "Fingerabdruck oder Gesicht",
+    "core.aty.biometricaskdisable": "Du kannst dich mit Fingerabdruck oder Gesicht anmelden. Möchtest du das beenden und dich nur mit deiner PIN anmelden?",
+    "core.aty.biometricaskenable": "Du meldest dich mit deiner PIN an. Möchtest du auch deinen Fingerabdruck oder dein Gesicht verwenden? Das ist freiwillig und du kannst es jederzeit wieder ausschalten.",
+    "core.aty.biometricdisable": "Nur PIN",
+    "core.aty.biometricdisabled": "Erledigt: Du meldest dich mit deiner PIN an.",
+    "core.aty.biometricenable": "Fingerabdruck oder Gesicht verwenden",
+    "core.aty.biometricenabled": "Erledigt: Beim nächsten Mal kannst du deinen Fingerabdruck oder dein Gesicht verwenden.",
+    "core.aty.biometricneedspin": "Für Fingerabdruck oder Gesicht brauchst du zuerst eine PIN. Du legst sie fest, wenn du dich mit dem Link oder QR-Code deiner Schule oder Organisation anmeldest."
 }

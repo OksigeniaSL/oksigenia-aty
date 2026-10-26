@@ -1,0 +1,10 @@
+{
+    "biometric": "Fingerprint or face",
+    "biometricaskdisable": "You can sign in with your fingerprint or face. Do you want to stop and sign in only with your PIN?",
+    "biometricaskenable": "You sign in with your PIN. Do you also want to use your fingerprint or face? It is optional and you can turn it off at any time.",
+    "biometricdisable": "Only PIN",
+    "biometricdisabled": "Done: you will sign in with your PIN.",
+    "biometricenable": "Use fingerprint or face",
+    "biometricenabled": "Done: next time you can use your fingerprint or face.",
+    "biometricneedspin": "To use your fingerprint or face you first need a PIN. You create it when you sign in with the link or QR code of your school or organisation."
+}

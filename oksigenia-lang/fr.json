@@ -3,5 +3,13 @@
     "core.login.connectingtosite": "Connexion à votre plateforme…",
     "core.login.siteaddresshelp": "La même adresse que dans votre navigateur, avec ou sans https://.",
     "core.login.siteintro": "Scannez le code QR de votre établissement ou organisation, ou saisissez l'adresse de sa plateforme.",
-    "core.settings.oksigeniacredit": "Oksigenia Aty, par Oksigenia SL. Basée sur l'app Moodle™ (Apache 2.0), modifiée par Oksigenia SL."
+    "core.settings.oksigeniacredit": "Oksigenia Aty, par Oksigenia SL. Basée sur l'app Moodle™ (Apache 2.0), modifiée par Oksigenia SL.",
+    "core.aty.biometric": "Empreinte ou visage",
+    "core.aty.biometricaskdisable": "Vous pouvez vous connecter avec votre empreinte ou votre visage. Voulez-vous arrêter et vous connecter seulement avec votre code PIN ?",
+    "core.aty.biometricaskenable": "Vous vous connectez avec votre code PIN. Voulez-vous aussi utiliser votre empreinte ou votre visage ? C'est facultatif et vous pouvez le désactiver quand vous voulez.",
+    "core.aty.biometricdisable": "PIN uniquement",
+    "core.aty.biometricdisabled": "C'est fait : vous vous connecterez avec votre code PIN.",
+    "core.aty.biometricenable": "Utiliser l'empreinte ou le visage",
+    "core.aty.biometricenabled": "C'est fait : la prochaine fois, vous pourrez utiliser votre empreinte ou votre visage.",
+    "core.aty.biometricneedspin": "Pour utiliser votre empreinte ou votre visage, il vous faut d'abord un code PIN. Vous le créez en vous connectant avec le lien ou le code QR de votre établissement ou organisation."
 }

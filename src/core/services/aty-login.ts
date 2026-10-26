@@ -18,7 +18,6 @@ import { CoreError } from '@classes/errors/error';
 import { CoreCanceledError } from '@classes/errors/cancelederror';
 import { CoreErrorHelper } from '@services/error-helper';
 import { CoreLang } from '@services/lang';
-import { CoreAlerts } from '@services/overlays/alerts';
 import { CoreLoadings } from '@services/overlays/loadings';
 import { CoreModals } from '@services/overlays/modals';
 import { CoreCustomURLSchemesHandleError, CoreCustomURLSchemesParams } from '@services/urlschemes';
@@ -316,18 +315,8 @@ export class AtyLoginService {
             return; // Not critical: they stay signed in and can set a PIN another time.
         }
 
-        // With the PIN set, offer to store it behind the device's fingerprint or face for a touch next time.
-        if (ui.biometricask && ui.biometric) {
-            const { AtyBiometric } = await import('@services/aty-biometric');
-            if (await AtyBiometric.isAvailable()) {
-                try {
-                    await CoreAlerts.confirm(ui.biometricask);
-                    await AtyBiometric.enable(siteUrl, pin, ui.biometric);
-                } catch {
-                    // Declined or failed; the PIN pad still works.
-                }
-            }
-        }
+        // The app never proposes the fingerprint or face (many people prefer not to use biometrics): whoever wants it
+        // turns it on from the account menu (AtyBiometricMenuHandler).
     }
 
 }
