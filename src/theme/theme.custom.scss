@@ -19,3 +19,22 @@
 :root.dark {
 
 }
+
+/*
+ * Oksigenia Aty PIN pad: a compact, auto-height card centred on the screen.
+ * -------------------------------------------
+ */
+.aty-pin-modal {
+    --width: min(92%, 360px);
+    --height: auto;
+    --max-height: 92%;
+    --border-radius: 22px;
+    --box-shadow: 0 16px 48px rgba(10, 46, 80, 0.28);
+
+    align-items: center;
+    justify-content: center;
+
+    &::part(content) {
+        border-radius: 22px;
+    }
+}
