@@ -1,0 +1,70 @@
+<div class="aty-pin" [class.shaking]="shaking()">
+    @if (title()) {
+        <h2 class="aty-pin-title">{{ title() }}</h2>
+    }
+    @if (error() || message()) {
+        <p class="aty-pin-message" [class.error]="error()">{{ error() || message() }}</p>
+    }
+
+    <div class="aty-pin-dots" role="status" aria-live="polite">
+        @for (filled of dots(); track $index) {
+            <span class="aty-pin-dot" [class.filled]="filled" [class.error]="error()"></span>
+        }
+    </div>
+
+    <div class="aty-pin-strength" [attr.data-level]="strength()" aria-hidden="true">
+        <span class="aty-pin-seg"></span>
+        <span class="aty-pin-seg"></span>
+        <span class="aty-pin-seg"></span>
+    </div>
+
+    <div class="aty-pin-keypad">
+        @for (key of topKeys(); track $index) {
+            <button type="button" class="aty-pin-key" [disabled]="busy()" (click)="press(key)">{{ key }}</button>
+        }
+
+        <button
+            type="button"
+            class="aty-pin-key aty-pin-aux"
+            [class.active]="shuffled()"
+            [disabled]="busy()"
+            (click)="toggleShuffle()"
+            aria-label="shuffle"
+        >
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M16 3h5v5" />
+                <path d="M4 20 21 3" />
+                <path d="M16 21h5v-5" />
+                <path d="M4 4l6 6" />
+                <path d="M14 14l7 7" />
+            </svg>
+        </button>
+
+        <button type="button" class="aty-pin-key" [disabled]="busy()" (click)="press(lastKey())">{{ lastKey() }}</button>
+
+        <button type="button" class="aty-pin-key aty-pin-aux" [disabled]="busy()" (click)="backspace()" aria-label="backspace">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 5H9L3 12l6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1Z" />
+                <path d="m17 9-6 6" />
+                <path d="m11 9 6 6" />
+            </svg>
+        </button>
+    </div>
+
+    <div class="aty-pin-actions">
+        <ion-button fill="clear" class="aty-pin-cancel" [disabled]="busy()" (click)="cancel()">{{ cancelText() }}</ion-button>
+        <ion-button class="aty-pin-ok" [disabled]="!canSubmit() || busy()" (click)="submit()">
+            @if (busy()) {
+                <ion-spinner name="crescent" aria-hidden="true" />
+            } @else {
+                {{ okText() }}
+            }
+        </ion-button>
+    </div>
+
+    @if (forgotText()) {
+        <button type="button" class="aty-pin-forgot" [disabled]="busy()" (click)="forgot()">{{ forgotText() }}</button>
+    }
+</div>

@@ -1,0 +1,162 @@
+.aty-pin {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 20px calc(18px + var(--ion-safe-area-bottom, 0px));
+    background: var(--ion-background-color, #fff);
+    color: var(--ion-text-color, #1c1a19);
+}
+
+.aty-pin-title {
+    margin: 0 0 6px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--ion-color-primary, #0a2e50);
+}
+
+.aty-pin-message {
+    margin: 0 0 14px;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    text-align: center;
+    color: var(--ion-text-color-step-300, #5b6b7b);
+}
+
+.aty-pin-dots {
+    display: flex;
+    gap: 12px;
+    margin: 4px 0 14px;
+    min-height: 16px;
+}
+
+.aty-pin-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--ion-color-primary, #0a2e50);
+    opacity: 0.3;
+    transition: opacity 0.15s ease, transform 0.15s ease, background-color 0.15s ease;
+}
+
+.aty-pin-dot.filled {
+    opacity: 1;
+    background: var(--ion-color-primary, #0a2e50);
+    transform: scale(1.1);
+}
+
+.aty-pin-strength {
+    display: flex;
+    gap: 6px;
+    width: 168px;
+    margin: 0 0 20px;
+}
+
+.aty-pin-seg {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--ion-color-step-150, #e3e7ec);
+    transition: background-color 0.2s ease;
+}
+
+.aty-pin-strength[data-level="1"] .aty-pin-seg:nth-child(1) {
+    background: var(--ion-color-danger, #d64550);
+}
+
+.aty-pin-strength[data-level="2"] .aty-pin-seg:nth-child(-n+2) {
+    background: var(--ion-color-warning, #e0a800);
+}
+
+.aty-pin-strength[data-level="3"] .aty-pin-seg {
+    background: var(--ion-color-success, #2aa45a);
+}
+
+.aty-pin-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: 300px;
+}
+
+.aty-pin-key {
+    height: 58px;
+    border: 0;
+    border-radius: 16px;
+    background: var(--ion-color-step-100, #f1f4f8);
+    color: var(--ion-text-color, #1c1a19);
+    font-size: 1.6rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.1s ease, transform 0.05s ease;
+}
+
+.aty-pin-key:active {
+    transform: scale(0.94);
+    background: var(--ion-color-step-200, #e3e7ec);
+}
+
+.aty-pin-aux {
+    color: var(--ion-color-primary, #0a2e50);
+}
+
+.aty-pin-aux.active {
+    background: var(--ion-color-primary, #0a2e50);
+    color: var(--ion-color-primary-contrast, #fff);
+}
+
+.aty-pin-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 300px;
+    margin-top: 18px;
+}
+
+.aty-pin-ok {
+    --border-radius: 12px;
+    font-weight: 600;
+}
+
+.aty-pin-cancel {
+    --color: var(--ion-text-color-step-300, #5b6b7b);
+}
+
+.aty-pin-forgot {
+    margin-top: 14px;
+    border: 0;
+    background: transparent;
+    color: var(--ion-color-primary, #0a2e50);
+    font-size: 0.92rem;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+// A wrong PIN shakes the pad and flashes the message and dots red.
+@keyframes aty-pin-shake {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-11px); }
+    30% { transform: translateX(10px); }
+    45% { transform: translateX(-8px); }
+    60% { transform: translateX(6px); }
+    75% { transform: translateX(-4px); }
+}
+
+.aty-pin.shaking {
+    animation: aty-pin-shake 0.45s ease;
+}
+
+.aty-pin-message.error {
+    color: var(--ion-color-danger, #d64550);
+    font-weight: 600;
+}
+
+.aty-pin-dot.error.filled {
+    border-color: var(--ion-color-danger, #d64550);
+    background: var(--ion-color-danger, #d64550);
+}
