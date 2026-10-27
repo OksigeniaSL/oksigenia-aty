@@ -37,7 +37,7 @@ export class AtySites {
      * Oksigenia's public key for the list (32 raw bytes, base64). While it is empty the check is off and every site is
      * allowed, as before the list existed.
      */
-    protected static readonly PUBLIC_KEY = '';
+    protected static readonly PUBLIC_KEY = '6lbAKw2nf5Y3wpNeANf0+wgsUgEgjYsY13Hopfz0oR4=';
 
     /** Where the last verified list is kept. */
     protected static readonly CACHE_KEY = 'aty_sites_list';
@@ -45,7 +45,7 @@ export class AtySites {
     /** Loopback hosts: the local demo during development, reached over adb. No real site lives there. */
     protected static readonly LOOPBACK = ['localhost', '127.0.0.1', '[::1]'];
 
-    protected static readonly logger = CoreLogger.getInstance('AtySites');
+    protected static readonly LOGGER = CoreLogger.getInstance('AtySites');
 
     /**
      * Throw the "not an Oksigenia site" error unless the site is on the list.
@@ -142,7 +142,7 @@ export class AtySites {
                     return list;
                 }
             } catch (error) {
-                AtySites.logger.error('Cannot download the list of Oksigenia sites', error);
+                AtySites.LOGGER.error('Cannot download the list of Oksigenia sites', error);
 
                 return null;
             }
