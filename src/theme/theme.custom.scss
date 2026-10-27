@@ -37,6 +37,11 @@
 ion-header ion-toolbar ion-title {
     font-family: 'Roboto Condensed', var(--ion-font-family, sans-serif);
     font-weight: 700;
+
+    // The title's h1 takes its whole font from this shorthand (components/ion-header.scss), which resets the family.
+    h1 {
+        --mdl-typography-heading4-font: normal normal 700 var(--mdl-typography-heading4-fontSize)/var(--mdl-typography-heading-lineHeight) 'Roboto Condensed', var(--ion-font-family, sans-serif);
+    }
 }
 
 /*
