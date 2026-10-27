@@ -217,7 +217,7 @@
     "core.errorsomedatanotdownloaded": "Si has descargado esta actividad, ten en cuenta que parte de la información no se ha descargado por problemas de rendimiento y uso de datos.",
     "core.errorsomethingwrong": "Algo salió mal. Inténtalo de nuevo.",
     "core.errorsync": "Ocurrió un error al sincronizar. Inténtalo de nuevo más tarde.",
-    "core.errorsyncblocked": "Este/a {{$a}} no puede sincronizarse ahora mismo porque hay un proceso trabajando. Inténtalo de nuevo más tarde. Si el problema persiste, prueba a reiniciar la aplicación.",
+    "core.errorsyncblocked": "Ahora no se puede sincronizar ({{$a}}) porque hay otro proceso en marcha. Inténtalo más tarde; si sigue pasando, reinicia la app.",
     "core.exactalarmsturnedoffmessage": "Para no perderte ninguna alerta importante, activa «Alarmas y recordatorios» en los ajustes de tu dispositivo.",
     "core.explanationdigitalminor": "Esta información es necesaria para determinar si tu edad está por encima de la edad digital de consentimiento. Esta es la edad a la que un individuo puede aceptar los términos y condiciones y que sus datos sean legalmente almacenados y procesados.",
     "core.filedeletedsuccessfully": "Has eliminado \"{{filename}}\" correctamente",
@@ -351,5 +351,6 @@
     "core.wanttochangesite": "¿Quieres cambiar de sitio o salir?",
     "core.whatisyourage": "¿Qué edad tienes?",
     "core.youreoffline": "Tu dispositivo está fuera de línea",
-    "core.youreonline": "Tu dispositivo vuelve a estar en línea"
+    "core.youreonline": "Tu dispositivo vuelve a estar en línea",
+    "core.hasdatatosync": "Hay datos de {{$a}} guardados sin conexión que faltan por sincronizar."
 }
