@@ -75,6 +75,21 @@ export class CoreQRScanService {
             return;
         }
 
+        // Oksigenia Aty: a personal sign-in QR carries the site's https link (so any camera can open it). Scanned from
+        // any screen of the app (the reconnect page too), sign in with it as with its scheme. Loaded lazily to keep the
+        // sign-in service out of this one's imports.
+        const { AtyLogin } = await import('@services/aty-login');
+        const atyScheme = AtyLogin.getSchemeFromMagicLink(text);
+        if (atyScheme) {
+            try {
+                await CoreCustomURLSchemes.handleCustomURL(atyScheme);
+            } catch (error) {
+                CoreCustomURLSchemes.treatHandleCustomURLError(error, atyScheme, 'CoreQRScanService');
+            }
+
+            return;
+        }
+
         if (CoreCustomURLSchemes.isCustomURL(text)) {
             // Is a custom URL scheme, handle it.
             try {
