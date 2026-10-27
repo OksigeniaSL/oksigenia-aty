@@ -1532,6 +1532,7 @@
   "core.aty.biometricenable": "local_moodlemobileapp",
   "core.aty.biometricenabled": "local_moodlemobileapp",
   "core.aty.biometricneedspin": "local_moodlemobileapp",
+  "core.aty.sitenotallowed": "local_moodlemobileapp",
   "core.back": "moodle",
   "core.block.blocks": "moodle",
   "core.block.noblocks": "error",

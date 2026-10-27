@@ -160,6 +160,14 @@ export class AtyLoginService {
                 throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidsite')));
             }
 
+            // Only the Moodle sites that Oksigenia hosts, as for a typed address or the site QR.
+            const { AtySites } = await import('@services/aty-sites');
+            try {
+                await AtySites.assertAllowed(siteUrl);
+            } catch (error) {
+                throw new CoreCustomURLSchemesHandleError(error);
+            }
+
             const tokenUrl = `${siteUrl}/local/oksigeniaaty/token.php`;
 
             // Exchange the key for a token. If the user has set a PIN, the server asks for it without consuming the

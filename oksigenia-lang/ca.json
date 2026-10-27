@@ -11,5 +11,6 @@
     "core.aty.biometricdisabled": "Fet: entraràs amb el teu PIN.",
     "core.aty.biometricenable": "Fer servir empremta o cara",
     "core.aty.biometricenabled": "Fet: la propera vegada pots fer servir la teva empremta o la teva cara.",
-    "core.aty.biometricneedspin": "Per fer servir l'empremta o la cara primer necessites un PIN. El crees quan entres amb l'enllaç o el QR del teu centre o organització."
+    "core.aty.biometricneedspin": "Per fer servir l'empremta o la cara primer necessites un PIN. El crees quan entres amb l'enllaç o el QR del teu centre o organització.",
+    "core.aty.sitenotallowed": "Aquesta app és per als centres i organitzacions que tenen la plataforma allotjada a Oksigenia, i aquest lloc no n'és cap. Entra-hi des del navegador."
 }

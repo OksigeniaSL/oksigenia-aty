@@ -11,5 +11,6 @@
     "core.aty.biometricdisabled": "Erledigt: Du meldest dich mit deiner PIN an.",
     "core.aty.biometricenable": "Fingerabdruck oder Gesicht verwenden",
     "core.aty.biometricenabled": "Erledigt: Beim nächsten Mal kannst du deinen Fingerabdruck oder dein Gesicht verwenden.",
-    "core.aty.biometricneedspin": "Für Fingerabdruck oder Gesicht brauchst du zuerst eine PIN. Du legst sie fest, wenn du dich mit dem Link oder QR-Code deiner Schule oder Organisation anmeldest."
+    "core.aty.biometricneedspin": "Für Fingerabdruck oder Gesicht brauchst du zuerst eine PIN. Du legst sie fest, wenn du dich mit dem Link oder QR-Code deiner Schule oder Organisation anmeldest.",
+    "core.aty.sitenotallowed": "Diese App ist für Schulen und Organisationen, deren Plattform Oksigenia betreibt, und diese Seite gehört nicht dazu. Öffne sie im Browser."
 }

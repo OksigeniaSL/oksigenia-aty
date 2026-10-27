@@ -6,5 +6,6 @@
     "biometricdisabled": "Done: you will sign in with your PIN.",
     "biometricenable": "Use fingerprint or face",
     "biometricenabled": "Done: next time you can use your fingerprint or face.",
-    "biometricneedspin": "To use your fingerprint or face you first need a PIN. You create it when you sign in with the link or QR code of your school or organisation."
+    "biometricneedspin": "To use your fingerprint or face you first need a PIN. You create it when you sign in with the link or QR code of your school or organisation.",
+    "sitenotallowed": "This app is for the schools and organisations whose platform Oksigenia hosts, and this site is not one of them. Open it in your browser."
 }

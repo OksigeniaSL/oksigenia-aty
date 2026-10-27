@@ -11,5 +11,6 @@
     "core.aty.biometricdisabled": "Feito: entrarás co teu PIN.",
     "core.aty.biometricenable": "Usar pegada ou cara",
     "core.aty.biometricenabled": "Feito: a próxima vez podes usar a túa pegada ou a túa cara.",
-    "core.aty.biometricneedspin": "Para usar a pegada ou a cara primeiro necesitas un PIN. Créalo ao entrar coa ligazón ou o QR do teu centro ou organización."
+    "core.aty.biometricneedspin": "Para usar a pegada ou a cara primeiro necesitas un PIN. Créalo ao entrar coa ligazón ou o QR do teu centro ou organización.",
+    "core.aty.sitenotallowed": "Esta app é para os centros e organizacións cuxa plataforma aloxa Oksigenia, e este sitio non é un deles. Entra desde o navegador."
 }

@@ -12,6 +12,7 @@
     "core.aty.biometricenable": "Usar huella o cara",
     "core.aty.biometricenabled": "Hecho: la próxima vez puedes usar tu huella o tu cara.",
     "core.aty.biometricneedspin": "Para usar la huella o la cara primero necesitas un PIN. Lo creas al entrar con el enlace o el QR de tu centro u organización.",
+    "core.aty.sitenotallowed": "Esta app es para los centros y organizaciones cuya plataforma aloja Oksigenia, y este sitio no es uno de ellos. Entra desde el navegador.",
     "addon.block_myoverview.nocoursesenrolled": "Ahora mismo no tienes matrícula en ningún curso.",
     "addon.block_myoverview.noresultdescription": "Prueba a ajustar los filtros o explora los cursos disponibles",
     "addon.blog.publishtonoone": "Solo tú (borrador)",

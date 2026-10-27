@@ -11,5 +11,6 @@
     "core.aty.biometricdisabled": "Feito: vais entrar com o teu PIN.",
     "core.aty.biometricenable": "Usar impressão digital ou rosto",
     "core.aty.biometricenabled": "Feito: da próxima vez podes usar a tua impressão digital ou o teu rosto.",
-    "core.aty.biometricneedspin": "Para usar a impressão digital ou o rosto, primeiro precisas de um PIN. Crias o PIN quando entras com o link ou o código QR da tua escola ou organização."
+    "core.aty.biometricneedspin": "Para usar a impressão digital ou o rosto, primeiro precisas de um PIN. Crias o PIN quando entras com o link ou o código QR da tua escola ou organização.",
+    "core.aty.sitenotallowed": "Esta app é para os centros e organizações cuja plataforma é alojada pela Oksigenia, e este site não é um deles. Entra pelo navegador."
 }

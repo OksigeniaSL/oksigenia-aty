@@ -528,6 +528,10 @@ export class CoreSitesProvider {
             throw new CoreNetworkError();
         }
 
+        // Oksigenia Aty: only the Moodle sites that Oksigenia hosts. Loaded lazily, to keep it out of this service's imports.
+        const { AtySites } = await import('@services/aty-sites');
+        await AtySites.assertAllowed(siteUrl);
+
         try {
             return await this.checkSiteWithProtocol(siteUrl, protocol);
         } catch (error) {
