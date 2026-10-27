@@ -78,6 +78,20 @@ ion-header ion-toolbar ion-title {
     text-transform: uppercase;
 }
 
+// The month would fill the screen (a swipe container takes the full height) and push the list out of view.
+page-addon-calendar-index addon-calendar-calendar .core-swipe-slides-container {
+    min-height: 0;
+}
+
+// Ionic's list and item styles load later and would win without :root.
+:root addon-calendar-upcoming-events ion-list {
+    background: transparent;
+}
+
+:root addon-calendar-event-card .item-heading {
+    font-weight: 700 !important;
+}
+
 .aty-calendar-next {
     margin: 20px 16px 4px;
     font-size: .78rem;
