@@ -1,4 +1,6 @@
-@if (isLocalUrl()) {
+@if (atyIcon()) {
+    <span class="aty-mod-glyph" [style.--aty-glyph]="atyGlyph()" aria-hidden="true"></span>
+} @else if (isLocalUrl()) {
     <img [src]="iconUrl()" (error)="loadFallbackIcon()" alt="" aria-hidden="true">
 } @else {
     <img [url]="iconUrl()" core-external-content alt="" aria-hidden="true" [component]="linkIconWithComponent() ? computedModName() : null"

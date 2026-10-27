@@ -33,6 +33,13 @@ import { ModFeature, ModPurpose } from '@addons/mod/constants';
 const assetsPath = 'assets/img/';
 const fallbackModName = 'external-tool';
 
+// Oksigenia Aty: the app's own icon set for these activities, used instead of the site's (assets/img/aty-mod/).
+const atyIconsPath = 'assets/img/aty-mod/';
+const atyIcons = new Set([
+    'assign', 'bigbluebuttonbn', 'book', 'choice', 'data', 'feedback', 'folder', 'forum', 'glossary', 'h5pactivity', 'imscp',
+    'label', 'lesson', 'lti', 'page', 'quiz', 'resource', 'scorm', 'subsection', 'url', 'wiki', 'workshop',
+]);
+
 const enum IconVersion {
     LEGACY_VERSION = 'version_legacy',
     VERSION_4_0 = 'version_40',
@@ -57,6 +64,7 @@ const enum IconVersion {
         '[class]': 'iconVersion() + " " + purposeClass()',
         '[class.branded]': 'addBrandedClass()',
         '[class.colorize]': 'addColorizeClass()',
+        '[class.aty-mod]': '!!atyIcon()',
     },
 })
 export class CoreModIconComponent {
@@ -80,6 +88,8 @@ export class CoreModIconComponent {
             this.getComponentNameFromIconUrl(this.iconUrl()) !== this.computedModName());
 
     readonly computedModName = computed(() => this.modname() || this.getComponentNameFromIconUrl(this.modicon() ?? ''));
+    readonly atyIcon = computed(() => atyIcons.has(this.computedModName()) ? `${atyIconsPath + this.computedModName()}.svg` : '');
+    readonly atyGlyph = computed(() => this.atyIcon() ? `url("/${this.atyIcon()}")` : '');
     readonly modNameTranslated = computed(() =>
         CoreCourseModuleHelper.translateModuleName(this.computedModName(), this.fallbackTranslation()));
 

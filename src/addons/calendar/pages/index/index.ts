@@ -171,8 +171,9 @@ export default class AddonCalendarIndexPage implements OnInit, OnDestroy {
      * @inheritdoc
      */
     ngOnInit(): void {
-        this.loadUpcoming = !!CoreNavigator.getRouteBooleanParam('upcoming');
-        this.showCalendar = !this.loadUpcoming;
+        // Oksigenia Aty: the monthly view also lists what comes next below the month, so the upcoming events always load.
+        this.loadUpcoming = true;
+        this.showCalendar = !CoreNavigator.getRouteBooleanParam('upcoming');
 
         this.routeSubscription = this.route.queryParams.subscribe(() => {
             this.filter.courseId = CoreNavigator.getRouteNumberParam('courseId');
@@ -317,9 +318,8 @@ export default class AddonCalendarIndexPage implements OnInit, OnDestroy {
     protected async refreshComponentData(afterChange = false): Promise<void> {
         if (this.showCalendar) {
             await this.calendarComponent()?.refreshData(afterChange);
-        } else {
-            await this.upcomingEventsComponent()?.refreshData();
         }
+        await this.upcomingEventsComponent()?.refreshData();
     }
 
     /**

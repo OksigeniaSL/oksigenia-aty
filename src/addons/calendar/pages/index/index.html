@@ -48,7 +48,11 @@
         [displayNavButtons]="showCalendar" (onEventClicked)="gotoEvent($event)" (onDayClicked)="gotoDay($event)" />
 
     @if (loadUpcoming) {
-        <addon-calendar-upcoming-events [hidden]="showCalendar" [filter]="filter" (onEventClicked)="gotoEvent($event)" />
+        <!-- Oksigenia Aty: below the month, what comes next. -->
+        @if (showCalendar) {
+            <h2 class="aty-calendar-next">{{ 'addon.calendar.upcomingevents' | translate }}</h2>
+        }
+        <addon-calendar-upcoming-events [filter]="filter" (onEventClicked)="gotoEvent($event)" />
     }
 
     <!-- Create a calendar event. -->

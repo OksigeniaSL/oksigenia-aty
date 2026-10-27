@@ -53,7 +53,7 @@ export class CoreCoursesMyCoursesMainMenuHandlerService implements CoreMainMenuH
             title: 'core.courses.mycourses',
             page: CORE_COURSES_MYCOURSES_PAGE_NAME,
             class: 'core-courses-my-courses-handler',
-            icon: 'fas-graduation-cap',
+            icon: 'fas-book-open', // Oksigenia Aty: an open book, as on the home shortcut, not a mortarboard.
             priority: displayMyCourses ? this.priority + 200 : this.priority,
         };
     }

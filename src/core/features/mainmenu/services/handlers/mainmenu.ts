@@ -50,7 +50,7 @@ export class CoreMainMenuHomeHandlerService implements CoreMainMenuHandler {
      */
     getDisplayData(): CoreMainMenuPageNavHandlerData {
         return {
-            icon: 'fas-gauge-high',
+            icon: 'fas-house', // Oksigenia Aty: a house, not Moodle's gauge.
             title: 'core.mainmenu.home',
             page: MAIN_MENU_HOME_PAGE_NAME,
             class: 'core-home-handler',

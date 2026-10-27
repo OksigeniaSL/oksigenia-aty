@@ -39,7 +39,13 @@
                         [fullname]="notification.userfromfullname" [userId]="notification.useridfrom">
                         @if (notification.iconurl) {
                             <div class="core-avatar-extra-img">
-                                <img [url]="notification.iconurl" alt="" role="presentation" core-external-content>
+                                <!-- Oksigenia Aty: an activity's notice wears the app's own icon for that activity. -->
+                                @if (notification.component?.startsWith('mod_')) {
+                                    <core-mod-icon class="aty-mod-badge" [modname]="notification.component?.substring(4)"
+                                        [showAlt]="false" />
+                                } @else {
+                                    <img [url]="notification.iconurl" alt="" role="presentation" core-external-content>
+                                }
                             </div>
                         }
                     </core-user-avatar>

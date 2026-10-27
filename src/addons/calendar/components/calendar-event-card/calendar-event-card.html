@@ -2,12 +2,11 @@
 <ion-card>
     <ion-item [attr.aria-label]="calEvent.name" (click)="onEventClicked.emit()" button [class.item-dimmed]="calEvent.ispast"
         [class]="['ion-text-wrap', 'addon-calendar-event', 'addon-calendar-eventtype-'+calEvent.eventtype]" [detail]="false">
-        @if (calEvent.moduleIcon) {
-            <core-mod-icon [modicon]="calEvent.moduleIcon" slot="start" [modname]="calEvent.modulename"
-                [componentId]="calEvent.instance" [showAlt]="false" [purpose]="calEvent.purpose" [isBranded]="calEvent.branded" />
-        } @else if (calEvent.eventIcon) {
-            <ion-icon [name]="calEvent.eventIcon" slot="start" aria-hidden="true" />
-        }
+        <!-- Oksigenia Aty: the date as a card chip, as on the app's home, instead of Moodle's event icon. -->
+        <span class="aty-calendar-date" slot="start" aria-hidden="true">
+            <span class="aty-calendar-day">{{ calEvent.timestart * 1000 | coreFormatDate: '%e' }}</span>
+            <span class="aty-calendar-month">{{ (calEvent.timestart * 1000 | coreFormatDate: '%b').replace('.', '') }}</span>
+        </span>
         <ion-label>
             <!-- Add the icon title so accessibility tools read it. -->
             <span class="sr-only">

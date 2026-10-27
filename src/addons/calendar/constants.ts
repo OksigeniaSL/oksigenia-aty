@@ -55,7 +55,7 @@ export const ADDONS_CALENDAR_MENU_FEATURE_NAME = `${MAIN_MENU_FEATURE_PREFIX}${A
 export enum AddonCalendarEventIcons {
     SITE = 'fas-globe',
     CATEGORY = 'fas-cubes',
-    COURSE = 'fas-graduation-cap',
+    COURSE = 'fas-book-open', // Oksigenia Aty: the course's book, not a mortarboard.
     GROUP = 'fas-users',
     USER = 'fas-user',
 }

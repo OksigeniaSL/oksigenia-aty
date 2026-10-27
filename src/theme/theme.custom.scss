@@ -45,6 +45,121 @@ ion-header ion-toolbar ion-title {
 }
 
 /*
+ * Oksigenia Aty calendar: an event card shows its date as a chip, as the app's home does, and the monthly view lists
+ * what comes next under a heading.
+ * -------------------------------------------
+ */
+.aty-calendar-date {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    margin-block: 12px;
+    margin-inline-end: 14px;
+    border-radius: 12px;
+    background: rgba(var(--ion-color-primary-rgb), .12);
+    color: var(--primary);
+    line-height: 1;
+}
+
+.aty-calendar-day {
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.aty-calendar-month {
+    margin-top: 2px;
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.aty-calendar-next {
+    margin: 20px 16px 4px;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ion-color-medium);
+}
+
+/*
+ * Oksigenia Aty activity icons: the app's own set, one ink in the brand colour over a soft brand tile.
+ * -------------------------------------------
+ */
+core-mod-icon.aty-mod {
+    background: rgba(var(--ion-color-primary-rgb), .12);
+    border-radius: 12px;
+}
+
+// The small badge on a notice's avatar.
+core-mod-icon.aty-mod-badge {
+    --module-icon-size: 12px;
+    --module-icon-padding: 3px;
+    display: block;
+    border-radius: 6px;
+}
+
+.aty-mod-glyph {
+    display: block;
+    width: var(--size);
+    height: var(--size);
+    background-color: var(--primary);
+    -webkit-mask: var(--aty-glyph) center / contain no-repeat;
+    mask: var(--aty-glyph) center / contain no-repeat;
+}
+
+/*
+ * Oksigenia Aty dialogs: rounder alerts and loading cards with a soft shadow, the spinner in the brand colour, and
+ * the confirming button of an alert as a filled brand pill. This sheet loads before the components', hence :root.
+ * -------------------------------------------
+ */
+:root ion-loading.md,
+:root ion-loading.ios {
+    --border-radius: 20px;
+    --spinner-color: var(--primary);
+
+    .loading-wrapper {
+        padding: 18px 22px;
+        box-shadow: 0 18px 40px -16px rgba(0, 0, 0, .45);
+        font-weight: 600;
+    }
+}
+
+:root ion-alert {
+    --border-radius: 24px;
+
+    .alert-wrapper {
+        box-shadow: 0 24px 48px -18px rgba(0, 0, 0, .5);
+    }
+
+    .alert-title {
+        font-weight: 800;
+    }
+
+    .alert-button-group {
+        gap: 8px;
+        padding: 8px 16px 16px;
+    }
+
+    button.alert-button {
+        border-radius: 999px;
+        padding-inline: 18px;
+        font-weight: 700;
+        text-transform: none;
+    }
+
+    button.alert-button:last-child:not(.alert-button-role-destructive, .alert-button-role-cancel) {
+        background: var(--primary);
+        color: var(--primary-contrast);
+    }
+}
+
+/*
  * Oksigenia Aty PIN pad: a compact, auto-height card centred on the screen.
  * -------------------------------------------
  */
