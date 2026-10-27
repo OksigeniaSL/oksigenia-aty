@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget android-versionCode="52100" id="com.oksigenia.aty" ios-CFBundleVersion="5.2.1.0" version="5.2.1" versionCode="52100" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget android-versionCode="52101" id="com.oksigenia.aty" ios-CFBundleVersion="5.2.1.0" version="5.2.1" versionCode="52101" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Oksigenia Aty</name>
     <description>Oksigenia Aty</description>
     <author email="dev@oksigenia.cc" href="https://oksigenia.com">Oksigenia SL</author>

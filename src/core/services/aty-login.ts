@@ -55,6 +55,10 @@ export type AtyPinUi = {
     forgot?: string;
     biometric?: string;
     biometricask?: string;
+    confirmtitle?: string; // Setting a PIN: the second pad, to type it again.
+    confirmmessage?: string;
+    confirmok?: string;
+    mismatch?: string;
 };
 
 /**
@@ -307,6 +311,18 @@ export class AtyLoginService {
         const { pin } = await this.promptPin(ui);
         if (!pin || !/^\d{4,8}$/.test(pin)) {
             return; // Skipped or not a usable PIN; let them set it later from their profile.
+        }
+
+        // A new PIN is typed twice. The second pad stays open and shakes until it matches; cancelling it skips the PIN.
+        // A site whose plugin predates the confirmation sends no wording for it, and then the PIN is set at once.
+        if (ui.confirmtitle) {
+            const confirmation = await this.promptPin(
+                { title: ui.confirmtitle, message: ui.confirmmessage, ok: ui.confirmok, cancel: ui.cancel },
+                async (candidate) => candidate === pin ? { ok: true } : { ok: false, message: ui.mismatch },
+            );
+            if (confirmation.pin !== pin) {
+                return;
+            }
         }
 
         try {
