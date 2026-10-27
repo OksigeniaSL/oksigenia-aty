@@ -871,6 +871,14 @@ export class CoreWSProvider {
                 throw this.createHttpError(error, error.status);
             }
 
+            // Oksigenia Aty: a site under maintenance answers with a 503 page that carries no CORS headers, so here it
+            // looks like a failed request. Ask the site directly and say it is under maintenance, not "unknown error".
+            if (await this.isUnderMaintenance(preSets.siteUrl)) {
+                throw new CoreError(Translate.instant('core.sitemaintenance'), {
+                    debug: { code: 'sitemaintenance', details: preSets.siteUrl },
+                });
+            }
+
             throw new CoreError(Translate.instant('core.serverconnection', {
                 details: CoreErrorHelper.getErrorMessageFromError(error) ?? 'Unknown error',
             }));
@@ -1137,6 +1145,27 @@ export class CoreWSProvider {
         this.logger.debug('Successfully uploaded file', filePath);
 
         return data[0];
+    }
+
+    /**
+     * Oksigenia Aty: whether a site is under maintenance (Moodle then answers every page with a 503). Asked with the
+     * native HTTP, which is not subject to CORS, so it works when the web service call itself could not be read.
+     *
+     * @param siteUrl The site's URL.
+     * @returns Whether the site says it is under maintenance.
+     */
+    protected async isUnderMaintenance(siteUrl?: string): Promise<boolean> {
+        if (!siteUrl || !CorePlatform.isMobile()) {
+            return false;
+        }
+
+        try {
+            const response = await this.sendHTTPRequest(`${siteUrl}/login/index.php`, { method: 'get', responseType: 'text' });
+
+            return response.status === 503;
+        } catch (error) {
+            return error?.status === 503;
+        }
     }
 
     /**
