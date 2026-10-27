@@ -17,6 +17,7 @@ import { makeSingleton } from '@singletons';
 import { CoreMainMenuHomeDelegate } from '../home-delegate';
 import { CoreMainMenuHandler, CoreMainMenuPageNavHandlerData } from '../mainmenu-delegate';
 import { CORE_HOME_COMPONENT_NAME, MAIN_MENU_HOME_PAGE_NAME } from '@features/mainmenu/constants';
+import { CorePromiseUtils } from '@static/promise-utils';
 
 /**
  * Handler to add Home into main menu.
@@ -32,6 +33,14 @@ export class CoreMainMenuHomeHandlerService implements CoreMainMenuHandler {
      */
     async isEnabled(): Promise<boolean> {
         await CoreMainMenuHomeDelegate.waitForReady();
+
+        if (!CoreMainMenuHomeDelegate.hasHandlers(true)) {
+            // Oksigenia Aty: a site plugin's home may be the only home tab, and site plugins load after this first check.
+            // Wait for them, or the menu opens on the next tab and the home tab only shows up later.
+            const { CoreSitePlugins } = await import('@features/siteplugins/services/siteplugins');
+            await CorePromiseUtils.ignoreErrors(CoreSitePlugins.waitFetchPlugins());
+            await CoreMainMenuHomeDelegate.waitForReady();
+        }
 
         return CoreMainMenuHomeDelegate.hasHandlers(true);
     }
