@@ -14,6 +14,7 @@
 
 import { CoreAutoLogout } from '@features/autologout/services/autologout';
 import { AtyRenewal } from '@services/aty-renewal';
+import { AtyUserStyle } from '@services/aty-user-style';
 import { CoreConfig } from '@services/config';
 import { CoreFilepool } from '@services/filepool';
 import { CoreLang } from '@services/lang';
@@ -40,5 +41,6 @@ export default async function(): Promise<void> {
         CoreKeyboard.initialize(),
         CoreAutoLogout.initialize(),
         AtyRenewal.initialize(),
+        AtyUserStyle.initialize(),
     ]);
 }
