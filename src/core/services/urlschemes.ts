@@ -197,8 +197,14 @@ export class CoreCustomURLSchemesProvider {
                     if (previousSiteId && previousSiteId !== siteId) {
                         // Oksigenia Aty: signed in to another site (an Aty link) from inside one. Go through the logout
                         // page, as switching accounts does, so the previous site's plugins (its home) are unloaded and the
-                        // new site starts clean, instead of showing the old home in the new site's colours.
-                        await CoreSites.logout({ ...redirect, siteId });
+                        // new site starts clean, instead of showing the old home in the new site's colours. With nothing
+                        // to open, 'main' (as CoreNavigator does), or the logout page stores no redirect and the app
+                        // ends up on the accounts list after reloading.
+                        await CoreSites.logout({
+                            ...redirect,
+                            redirectPath: !redirect.redirectPath && !redirect.urlToOpen ? 'main' : redirect.redirectPath,
+                            siteId,
+                        });
 
                         return;
                     }
