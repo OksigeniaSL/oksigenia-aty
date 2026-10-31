@@ -184,17 +184,27 @@ export class CoreCustomURLSchemesProvider {
             // Check if the site needs to be created and ask the user to confirm if needed.
             let siteIds: string[];
             if (data.token) {
+                const previousSiteId = CoreSites.isLoggedIn() ? CoreSites.getCurrentSiteId() : undefined;
                 const siteId = await this.createSiteIfNeeded(data.token, data);
 
                 if (data.isSSOToken || (data.isAuthenticationURL && siteId && CoreSites.getCurrentSiteId() === siteId)) {
+                    const redirect: CoreRedirectPayload = {
+                        redirectPath: data.redirectPath,
+                        redirectOptions: data.redirectOptions,
+                        urlToOpen: data.urlToOpen ?? data.redirect,
+                    };
+
+                    if (previousSiteId && previousSiteId !== siteId) {
+                        // Oksigenia Aty: signed in to another site (an Aty link) from inside one. Go through the logout
+                        // page, as switching accounts does, so the previous site's plugins (its home) are unloaded and the
+                        // new site starts clean, instead of showing the old home in the new site's colours.
+                        await CoreSites.logout({ ...redirect, siteId });
+
+                        return;
+                    }
+
                     // Site created and authenticated, open the page to go.
-                    void CoreNavigator.navigateToSiteHome({
-                        params: <CoreRedirectPayload> {
-                            redirectPath: data.redirectPath,
-                            redirectOptions: data.redirectOptions,
-                            urlToOpen: data.urlToOpen ?? data.redirect,
-                        },
-                    });
+                    void CoreNavigator.navigateToSiteHome({ params: redirect });
 
                     return;
                 }
