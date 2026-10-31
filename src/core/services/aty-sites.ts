@@ -48,6 +48,15 @@ export class AtySites {
     protected static readonly LOGGER = CoreLogger.getInstance('AtySites');
 
     /**
+     * Whether the app only opens the sites on the list (it does once the public key is set).
+     *
+     * @returns Whether the list is in force.
+     */
+    static isActive(): boolean {
+        return !!AtySites.PUBLIC_KEY;
+    }
+
+    /**
      * Throw the "not an Oksigenia site" error unless the site is on the list.
      *
      * @param siteUrl The site's URL, with or without protocol.
@@ -69,7 +78,7 @@ export class AtySites {
      * @returns Whether the app may open it.
      */
     static async isAllowed(siteUrl: string): Promise<boolean> {
-        if (!AtySites.PUBLIC_KEY) {
+        if (!AtySites.isActive()) {
             return true;
         }
 

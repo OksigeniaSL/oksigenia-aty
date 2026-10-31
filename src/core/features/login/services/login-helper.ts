@@ -407,6 +407,14 @@ export class CoreLoginHelperProvider {
             return true;
         }
 
+        // Oksigenia Aty only connects to the sites on Oksigenia's signed list, so all of them are trusted: signing in to
+        // one whose content allows external scripts must not log the user out of the others. Imported lazily, like in
+        // CoreSites.checkSite, to keep the login helper free of the list's dependencies.
+        const { AtySites } = await import('@services/aty-sites');
+        if (AtySites.isActive()) {
+            return true;
+        }
+
         const sites = await this.getAvailableSites();
 
         return sites.length > 0;
