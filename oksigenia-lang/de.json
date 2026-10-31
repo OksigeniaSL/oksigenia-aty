@@ -15,5 +15,8 @@
     "core.aty.sitenotallowed": "Diese App ist für Schulen und Organisationen, deren Plattform Oksigenia betreibt, und diese Seite gehört nicht dazu. Öffne sie im Browser.",
     "core.aty.reconnectcode": "Hast du dich mit einem Link oder QR-Code angemeldet? Bitte deine Schule oder Organisation um einen neuen oder hol ihn dir auf ihrer Website, in deinem Benutzermenü unter „Aty“.",
     "core.aty.reconnectscan": "Code scannen",
-    "core.aty.reconnectpassword": "Oder melde dich mit deinem Passwort an"
+    "core.aty.reconnectpassword": "Oder melde dich mit deinem Passwort an",
+    "core.contentlinks.confirmlinktositetitle": "Andere Website öffnen?",
+    "core.contentlinks.confirmlinktosite": "Dieser Link führt dich zu:<br><br><strong>{{url}}</strong><br><br>Fahre nur fort, wenn du dieser Website vertraust.",
+    "core.contentlinks.opensite": "Website öffnen"
 }

@@ -15,5 +15,8 @@
     "core.aty.sitenotallowed": "Este app é para as escolas e organizações cuja plataforma é hospedada pela Oksigenia, e este site não é uma delas. Acesse pelo navegador.",
     "core.aty.reconnectcode": "Você entrou com um link ou um QR code? Peça um novo à sua escola ou organização, ou gere-o no site dela, no seu menu de usuário, na opção Aty.",
     "core.aty.reconnectscan": "Escanear o código",
-    "core.aty.reconnectpassword": "Ou entre com a sua senha"
+    "core.aty.reconnectpassword": "Ou entre com a sua senha",
+    "core.contentlinks.confirmlinktositetitle": "Abrir outro site?",
+    "core.contentlinks.confirmlinktosite": "Este link vai levar você para:<br><br><strong>{{url}}</strong><br><br>Continue só se você confia neste site.",
+    "core.contentlinks.opensite": "Abrir o site"
 }

@@ -355,5 +355,8 @@
     "core.whatisyourage": "¿Qué edad tienes?",
     "core.youreoffline": "Tu dispositivo está fuera de línea",
     "core.youreonline": "Tu dispositivo vuelve a estar en línea",
-    "core.hasdatatosync": "Hay datos de {{$a}} guardados sin conexión que faltan por sincronizar."
+    "core.hasdatatosync": "Hay datos de {{$a}} guardados sin conexión que faltan por sincronizar.",
+    "core.contentlinks.confirmlinktositetitle": "¿Abrir otro sitio?",
+    "core.contentlinks.confirmlinktosite": "Este enlace te lleva a:<br><br><strong>{{url}}</strong><br><br>Sigue solo si confías en este sitio.",
+    "core.contentlinks.opensite": "Abrir el sitio"
 }

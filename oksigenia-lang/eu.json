@@ -15,5 +15,8 @@
     "core.aty.sitenotallowed": "Aplikazio hau Oksigeniak ostatatzen dituen ikastetxe eta erakundeentzat da, eta gune hau ez da horietako bat. Sartu nabigatzailetik.",
     "core.aty.reconnectcode": "Esteka edo QR kode batekin sartu zinen? Eskatu berri bat zure ikastetxeari, edo lortu bere webgunean, zure erabiltzaile-menuko Aty sarreran.",
     "core.aty.reconnectscan": "Eskaneatu kodea",
-    "core.aty.reconnectpassword": "Edo sartu zure pasahitzarekin"
+    "core.aty.reconnectpassword": "Edo sartu zure pasahitzarekin",
+    "core.contentlinks.confirmlinktositetitle": "Beste gune bat ireki?",
+    "core.contentlinks.confirmlinktosite": "Esteka honek hona eramango zaitu:<br><br><strong>{{url}}</strong><br><br>Jarraitu gune honetaz fidatzen bazara bakarrik.",
+    "core.contentlinks.opensite": "Ireki gunea"
 }

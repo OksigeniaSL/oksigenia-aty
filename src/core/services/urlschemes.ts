@@ -266,7 +266,11 @@ export class CoreCustomURLSchemesProvider {
                         confirmSiteChange: false,
                     });
 
-                    if (!treated) {
+                    if (!treated && !site.isLoggedOut() && site.containsUrl(data.redirect)) {
+                        // Oksigenia Aty: a page of the site with no screen of its own in the app (a plugin's web page,
+                        // say) opens inside the app with the session, rather than ending in an error.
+                        await site.openInAppWithAutoLogin(data.redirect);
+                    } else if (!treated) {
                         CoreAlerts.showError(Translate.instant('core.contentlinks.errornoactions'));
                     }
                 }

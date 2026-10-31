@@ -15,5 +15,8 @@
     "core.aty.sitenotallowed": "Esta app é para os centros e organizacións cuxa plataforma aloxa Oksigenia, e este sitio non é un deles. Entra desde o navegador.",
     "core.aty.reconnectcode": "Entraches cunha ligazón ou un código QR? Pídelle un novo ao teu centro ou conségueo na súa web, no teu menú de usuario, na entrada de Aty.",
     "core.aty.reconnectscan": "Escanea o código",
-    "core.aty.reconnectpassword": "Ou entra co teu contrasinal"
+    "core.aty.reconnectpassword": "Ou entra co teu contrasinal",
+    "core.contentlinks.confirmlinktositetitle": "Abrir outro sitio?",
+    "core.contentlinks.confirmlinktosite": "Esta ligazón lévate a:<br><br><strong>{{url}}</strong><br><br>Continúa só se confías neste sitio.",
+    "core.contentlinks.opensite": "Abrir o sitio"
 }

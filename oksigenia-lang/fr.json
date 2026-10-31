@@ -15,5 +15,8 @@
     "core.aty.sitenotallowed": "Cette application est destinée aux établissements et organisations dont la plateforme est hébergée par Oksigenia, et ce site n'en fait pas partie. Ouvrez-le dans votre navigateur.",
     "core.aty.reconnectcode": "Vous vous êtes connecté avec un lien ou un code QR ? Demandez-en un nouveau à votre établissement, ou obtenez-le sur son site, dans votre menu utilisateur, à l'entrée Aty.",
     "core.aty.reconnectscan": "Scanner le code",
-    "core.aty.reconnectpassword": "Ou connectez-vous avec votre mot de passe"
+    "core.aty.reconnectpassword": "Ou connectez-vous avec votre mot de passe",
+    "core.contentlinks.confirmlinktositetitle": "Ouvrir un autre site ?",
+    "core.contentlinks.confirmlinktosite": "Ce lien vous emmène vers :<br><br><strong>{{url}}</strong><br><br>Ne continuez que si vous faites confiance à ce site.",
+    "core.contentlinks.opensite": "Ouvrir le site"
 }

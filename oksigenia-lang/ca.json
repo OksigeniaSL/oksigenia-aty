@@ -15,5 +15,8 @@
     "core.aty.sitenotallowed": "Aquesta app és per als centres i organitzacions que tenen la plataforma allotjada a Oksigenia, i aquest lloc no n'és cap. Entra-hi des del navegador.",
     "core.aty.reconnectcode": "Vas entrar amb un enllaç o un codi QR? Demana'n un de nou al teu centre o aconsegueix-lo al seu web, al teu menú d'usuari, a l'entrada d'Aty.",
     "core.aty.reconnectscan": "Escaneja el codi",
-    "core.aty.reconnectpassword": "O entra amb la teva contrasenya"
+    "core.aty.reconnectpassword": "O entra amb la teva contrasenya",
+    "core.contentlinks.confirmlinktositetitle": "Vols obrir un altre lloc?",
+    "core.contentlinks.confirmlinktosite": "Aquest enllaç et porta a:<br><br><strong>{{url}}</strong><br><br>Continua només si confies en aquest lloc.",
+    "core.contentlinks.opensite": "Obre el lloc"
 }
