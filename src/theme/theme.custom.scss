@@ -200,3 +200,21 @@ core-mod-icon.aty-mod {
         border-radius: 22px;
     }
 }
+
+/* Reconnect on an Oksigenia site: the way back in with a new link or QR code, above the password. */
+.aty-reconnect-code {
+    margin: 8px 0 4px;
+    text-align: center;
+}
+
+.aty-reconnect-code-text {
+    margin: 0 16px;
+    line-height: 1.45;
+    color: var(--ion-text-color-step-300, #5b6b7b);
+}
+
+.aty-reconnect-or {
+    margin: 18px 16px 4px;
+    font-weight: 600;
+    color: var(--ion-text-color-step-300, #5b6b7b);
+}

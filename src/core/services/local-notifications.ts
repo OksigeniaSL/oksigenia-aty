@@ -160,6 +160,15 @@ export class CoreLocalNotificationsProvider {
                 return;
             }
 
+            // Oksigenia Aty: not on the very first sign-in, where it would land on top of the new home and the PIN offer;
+            // from the next time the app opens on a site.
+            const signIns = await CoreConfig.get('aty_signins_seen', 0);
+            if (signIns < 1) {
+                await CoreConfig.set('aty_signins_seen', signIns + 1);
+
+                return;
+            }
+
             CoreAlerts.show({
                 header: Translate.instant('core.turnonexactalarms'),
                 message: Translate.instant('core.exactalarmsturnedoffmessage'),

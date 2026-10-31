@@ -53,6 +53,18 @@
                     }
                 </div>
 
+                @if (atySite) {
+                    <!-- Oksigenia Aty: who signed in with a link or QR code may have no password; a new code is the way back. -->
+                    <div class="aty-reconnect-code">
+                        <p class="aty-reconnect-code-text">{{ 'core.aty.reconnectcode' | translate }}</p>
+                        <ion-button expand="block" class="ion-margin" (click)="scanAtyCode()">
+                            <ion-icon name="fas-qrcode" slot="start" aria-hidden="true" />
+                            {{ 'core.aty.reconnectscan' | translate }}
+                        </ion-button>
+                        <p class="aty-reconnect-or">{{ 'core.aty.reconnectpassword' | translate }}</p>
+                    </div>
+                }
+
                 <div class="core-login-methods">
                     @if (currentLogin && currentLogin.provider) {
                         <core-identity-provider [provider]="currentLogin.provider" [launchurl]="siteConfig?.launchurl"

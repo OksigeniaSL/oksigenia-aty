@@ -21,6 +21,7 @@ import { CorePlatform } from '@services/platform';
 import { CoreSites } from '@services/sites';
 import { makeSingleton } from '@singletons';
 import { CoreEvents } from '@static/events';
+import { CoreWait } from '@static/wait';
 
 /**
  * Keeps an Oksigenia Aty session from falling: before the app token expires, it renews it with the user's PIN (no
@@ -34,6 +35,9 @@ export class AtyRenewalService {
 
     /** Offer to renew once the token is within this many seconds of expiring (14 days). */
     protected static readonly RENEW_WINDOW = 14 * 24 * 60 * 60;
+
+    /** How long to wait after a resume for a link that opened the app, in milliseconds. */
+    protected static readonly LINK_GRACE = 1500;
 
     /** The stored expiry of a token that never expires (0 means not known yet). */
     protected static readonly NEVER = -1;
@@ -54,6 +58,14 @@ export class AtyRenewalService {
         });
 
         CorePlatform.resume.subscribe(async () => {
+            // A link that opens the app arrives just after the resume and may bring its own PIN pad: give it a moment, and
+            // leave the renewal for the next resume if one came in, so two pads never stack.
+            await CoreWait.wait(AtyRenewalService.LINK_GRACE);
+            const { CoreCustomURLSchemes } = await import('@services/urlschemes');
+            if (CoreCustomURLSchemes.receivedRecently(AtyRenewalService.LINK_GRACE * 4)) {
+                return;
+            }
+
             await this.checkCurrentSite();
         });
     }

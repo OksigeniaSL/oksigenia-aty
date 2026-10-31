@@ -77,6 +77,7 @@ export default class CoreLoginReconnectPage implements OnInit, OnDestroy {
     siteConfig?: CoreSitePublicConfigResponse;
     redirectData?: CoreRedirectPayload;
     showLoginForm = true;
+    atySite = false; // Oksigenia Aty: the site has local_oksigeniaaty, so a new link or QR code signs the user back in.
 
     protected viewLeft = false;
     protected eventThrown = false;
@@ -135,6 +136,8 @@ export default class CoreLoginReconnectPage implements OnInit, OnDestroy {
             if (!this.site.infos) {
                 throw new CoreError('Invalid site');
             }
+
+            this.atySite = this.site.wsAvailable('local_oksigeniaaty_renew');
 
             this.siteInfo = {
                 id: this.siteId,
@@ -329,6 +332,13 @@ export default class CoreLoginReconnectPage implements OnInit, OnDestroy {
         }
 
         this.forgottenPassword();
+    }
+
+    /**
+     * Oksigenia Aty: scan a new personal QR code (or a sign-in link as QR), which signs the user back in.
+     */
+    async scanAtyCode(): Promise<void> {
+        await CoreLoginHelper.scanQR();
     }
 
     /**

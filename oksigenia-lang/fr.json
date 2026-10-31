@@ -12,5 +12,8 @@
     "core.aty.biometricenable": "Utiliser l'empreinte ou le visage",
     "core.aty.biometricenabled": "C'est fait : la prochaine fois, vous pourrez utiliser votre empreinte ou votre visage.",
     "core.aty.biometricneedspin": "Pour utiliser votre empreinte ou votre visage, il vous faut d'abord un code PIN. Vous le créez en vous connectant avec le lien ou le code QR de votre établissement ou organisation.",
-    "core.aty.sitenotallowed": "Cette application est destinée aux établissements et organisations dont la plateforme est hébergée par Oksigenia, et ce site n'en fait pas partie. Ouvrez-le dans votre navigateur."
+    "core.aty.sitenotallowed": "Cette application est destinée aux établissements et organisations dont la plateforme est hébergée par Oksigenia, et ce site n'en fait pas partie. Ouvrez-le dans votre navigateur.",
+    "core.aty.reconnectcode": "Vous vous êtes connecté avec un lien ou un code QR ? Demandez-en un nouveau à votre établissement, ou obtenez-le sur son site, dans votre menu utilisateur, à l'entrée Aty.",
+    "core.aty.reconnectscan": "Scanner le code",
+    "core.aty.reconnectpassword": "Ou connectez-vous avec votre mot de passe"
 }

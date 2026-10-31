@@ -7,5 +7,8 @@
     "biometricenable": "Use fingerprint or face",
     "biometricenabled": "Done: next time you can use your fingerprint or face.",
     "biometricneedspin": "To use your fingerprint or face you first need a PIN. You create it when you sign in with the link or QR code of your school or organisation.",
+    "reconnectcode": "Did you sign in with a link or a QR code? Ask your school or organisation for a new one, or get it on its website, in your user menu: “Open in the Aty app”.",
+    "reconnectpassword": "Or sign in with your password",
+    "reconnectscan": "Scan the code",
     "sitenotallowed": "This app is for the schools and organisations whose platform Oksigenia hosts, and this site is not one of them. Open it in your browser."
 }

@@ -12,5 +12,8 @@
     "core.aty.biometricenable": "Erabili hatz-marka edo aurpegia",
     "core.aty.biometricenabled": "Eginda: hurrengoan hatz-marka edo aurpegia erabil ditzakezu.",
     "core.aty.biometricneedspin": "Hatz-marka edo aurpegia erabiltzeko, lehenik PIN bat behar duzu. Zure ikastetxe edo erakundearen estekarekin edo QR kodearekin sartzean sortzen duzu.",
-    "core.aty.sitenotallowed": "Aplikazio hau Oksigeniak ostatatzen dituen ikastetxe eta erakundeentzat da, eta gune hau ez da horietako bat. Sartu nabigatzailetik."
+    "core.aty.sitenotallowed": "Aplikazio hau Oksigeniak ostatatzen dituen ikastetxe eta erakundeentzat da, eta gune hau ez da horietako bat. Sartu nabigatzailetik.",
+    "core.aty.reconnectcode": "Esteka edo QR kode batekin sartu zinen? Eskatu berri bat zure ikastetxeari, edo lortu bere webgunean, zure erabiltzaile-menuko Aty sarreran.",
+    "core.aty.reconnectscan": "Eskaneatu kodea",
+    "core.aty.reconnectpassword": "Edo sartu zure pasahitzarekin"
 }

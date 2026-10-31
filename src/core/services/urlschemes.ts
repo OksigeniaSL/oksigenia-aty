@@ -102,6 +102,16 @@ export class CoreCustomURLSchemesProvider {
     }
 
     /**
+     * Oksigenia Aty: whether a URL came in within the last milliseconds (an app resume that brings a link).
+     *
+     * @param milliseconds How far back to look.
+     * @returns Whether one did.
+     */
+    receivedRecently(milliseconds: number): boolean {
+        return Object.values(this.lastUrls).some((time) => Date.now() - time < milliseconds);
+    }
+
+    /**
      * Handle an URL received by custom URL scheme.
      *
      * @param url URL to treat.
