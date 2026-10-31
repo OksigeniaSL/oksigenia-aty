@@ -218,3 +218,21 @@ core-mod-icon.aty-mod {
     font-weight: 600;
     color: var(--ion-text-color-step-300, #5b6b7b);
 }
+
+/* Reconnect belongs to a known site, whose stylesheet is loaded: its buttons take the site's brand, not the app's
+   (the login screens' own tokens are set on the page host, light and dark, hence !important). */
+page-core-login-reconnect {
+    --core-login-brand: var(--ion-color-primary) !important;
+    --core-login-brand-contrast: var(--ion-color-primary-contrast) !important;
+}
+
+/* With the Aty code button on top, Moodle's own "Scan QR code" below is a duplicate, and so is its "or" when nothing else
+   (other login methods or identity providers) follows it. */
+page-core-login-reconnect:has(.aty-reconnect-code) core-login-methods .core-login-site-qrcode {
+    display: none;
+}
+
+page-core-login-reconnect:has(.aty-reconnect-code)
+    core-login-methods:not(:has(.core-login-methods, .core-login-identity-providers)) .core-login-methods-separator {
+    display: none;
+}
