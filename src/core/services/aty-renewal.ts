@@ -35,6 +35,9 @@ export class AtyRenewalService {
     /** Offer to renew once the token is within this many seconds of expiring (14 days). */
     protected static readonly RENEW_WINDOW = 14 * 24 * 60 * 60;
 
+    /** The stored expiry of a token that never expires (0 means not known yet). */
+    protected static readonly NEVER = -1;
+
     /** The token expiry learned at sign-in, keyed by site URL, until the site exists and we can store it per site. */
     protected pending: Record<string, number> = {};
 
@@ -101,8 +104,16 @@ export class AtyRenewalService {
             const validuntil = await CoreConfig.get<number>(this.key(site), 0);
             const now = Math.floor(Date.now() / 1000);
 
-            // Only when we know it expires, it is close, and it has not already passed (an expired token cannot renew).
-            if (validuntil <= 0 || validuntil <= now || validuntil - now > AtyRenewalService.RENEW_WINDOW) {
+            // Signed in with a password, the app never learned when its token expires; or the stored date has passed, so
+            // it belongs to an older token (the user is signed in, so the current one is alive): ask the site.
+            if (validuntil === 0 || (validuntil !== AtyRenewalService.NEVER && validuntil <= now)) {
+                await this.learn(site);
+
+                return;
+            }
+
+            // Only when it expires and it is close.
+            if (validuntil === AtyRenewalService.NEVER || validuntil - now > AtyRenewalService.RENEW_WINDOW) {
                 return;
             }
 
@@ -193,14 +204,30 @@ export class AtyRenewalService {
     }
 
     /**
+     * Learn when the site's token expires. With a PIN, the site only says when, and the PIN is asked later, in the
+     * renewal window; without one, a valid token is enough and the site renews it there and then.
+     *
+     * @param site The site.
+     */
+    protected async learn(site: CoreSite): Promise<void> {
+        const result = await this.call(site, '');
+        if (!result || (result.needspin && !result.validuntil)) {
+            // An older plugin does not say when while it asks for the PIN: try again on the next resume.
+            return;
+        }
+
+        await this.store(site, result.validuntil);
+    }
+
+    /**
      * Store a token expiry for a site.
      *
      * @param site The site.
-     * @param validuntil The expiry (unix time).
+     * @param validuntil The expiry (unix time, 0 if it never expires).
      */
     protected async store(site: CoreSite, validuntil: number): Promise<void> {
         try {
-            await CoreConfig.set(this.key(site), validuntil);
+            await CoreConfig.set(this.key(site), validuntil > 0 ? validuntil : AtyRenewalService.NEVER);
         } catch {
             // Ignore storage errors.
         }
