@@ -69,9 +69,7 @@ export class CoreSitePluginsMainMenuHandler extends CoreSitePluginsBaseHandler i
                 initResult: this.initResult,
                 ptrEnabled: this.handlerSchema.ptrenabled,
             },
-            // Oksigenia Aty: a plugin may ask for a tab, for a site that is mostly that plugin (a library). It gets one if it
-            // fits by priority, among the tabs the site has not turned off; on any other site, it stays in "More".
-            onlyInMore: !this.handlerSchema.displaydata?.tab,
+            onlyInMore: true,
         };
     }
 
