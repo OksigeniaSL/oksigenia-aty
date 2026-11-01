@@ -14,6 +14,9 @@
 
 import { Injectable } from '@angular/core';
 
+import { Md5 } from 'ts-md5';
+
+import { CoreConfig } from '@services/config';
 import { CoreError } from '@classes/errors/error';
 import { CoreCanceledError } from '@classes/errors/cancelederror';
 import { CoreErrorHelper } from '@services/error-helper';
@@ -67,6 +70,9 @@ export type AtyPinUi = {
  */
 @Injectable({ providedIn: 'root' })
 export class AtyLoginService {
+
+    /** Where the sign-in links already used on this phone are remembered, as hashes. */
+    protected static readonly SPENT_LINKS = 'aty_spent_login_links';
 
     protected logger = CoreLogger.getInstance('AtyLogin');
 
@@ -127,7 +133,7 @@ export class AtyLoginService {
             throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidsite')));
         }
 
-        if (CoreSSO.isSSOAuthenticationOngoing()) {
+        if (CoreSSO.isSSOAuthenticationOngoing() || await this.isSpent(url)) {
             throw new CoreCustomURLSchemesHandleError('Duplicated');
         }
 
@@ -206,6 +212,8 @@ export class AtyLoginService {
                 throw new CoreCustomURLSchemesHandleError(new CoreError(message));
             }
 
+            await this.markSpent(url);
+
             // Trust on first use: no PIN yet, so offer to set one for next time (the user may skip it).
             if (response.needspinsetup && response.pinui) {
                 await this.offerPinSetup(siteUrl, response.token, response.pinui);
@@ -238,6 +246,30 @@ export class AtyLoginService {
 
             throw error;
         }
+    }
+
+    /**
+     * Whether this phone already signed in with a link. A link works once, and Android keeps the one that opened the app: it
+     * hands it over again when it brings the app back after closing it, which would show the error of a used link.
+     *
+     * @param url The sign-in URL.
+     * @returns Whether it was used.
+     */
+    protected async isSpent(url: string): Promise<boolean> {
+        const spent = await CoreConfig.getJSON<string[]>(AtyLoginService.SPENT_LINKS, []);
+
+        return spent.includes(Md5.hashAsciiStr(url));
+    }
+
+    /**
+     * Remember that this phone signed in with a link, among the last few.
+     *
+     * @param url The sign-in URL.
+     */
+    protected async markSpent(url: string): Promise<void> {
+        const spent = await CoreConfig.getJSON<string[]>(AtyLoginService.SPENT_LINKS, []);
+
+        await CoreConfig.setJSON(AtyLoginService.SPENT_LINKS, [...spent, Md5.hashAsciiStr(url)].slice(-10));
     }
 
     /**
