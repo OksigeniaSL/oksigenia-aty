@@ -19,7 +19,8 @@ import { CoreUtils } from '@static/utils';
 import { makeSingleton } from '@singletons';
 import { CorePushNotificationsClickHandler } from '@features/pushnotifications/services/push-delegate';
 import { CorePushNotificationsNotificationBasicData } from '@features/pushnotifications/services/pushnotifications';
-import { CoreContentLinksHelper } from '@features/contentlinks/services/contentlinks-helper';
+import { CoreContentLinksHelper, HandleLinkOptions } from '@features/contentlinks/services/contentlinks-helper';
+import { CoreSites } from '@services/sites';
 import { AddonNotifications } from '../notifications';
 import { AddonNotificationsHelper } from '../notifications-helper';
 import { CoreViewer } from '@features/viewer/services/viewer';
@@ -71,6 +72,19 @@ export class AddonNotificationsPushClickHandlerService implements CorePushNotifi
     }
 
     /**
+     * Oksigenia Aty: a notice's link opens in the account the notice is for. A link only says the site, so with two accounts
+     * of one site on the phone (a family's) it opened in whichever was open, where it means nothing.
+     *
+     * @param notification The notification clicked.
+     * @returns The account's options for the link.
+     */
+    protected async accountOptions(notification: AddonNotificationsPushNotification): Promise<HandleLinkOptions> {
+        const site = notification.site ? await CorePromiseUtils.ignoreErrors(CoreSites.getSite(notification.site)) : undefined;
+
+        return { username: site?.getInfo()?.username, confirmSiteChange: false };
+    }
+
+    /**
      * Handle the notification click.
      *
      * @param notification The notification to check.
@@ -105,6 +119,7 @@ export class AddonNotificationsPushClickHandlerService implements CorePushNotifi
 
                 default: {
                     const treated = await CoreContentLinksHelper.handleLink(url, {
+                        ...await this.accountOptions(notification),
                         checkRoot: true,
                         openBrowserRoot: true,
                     });
@@ -118,7 +133,10 @@ export class AddonNotificationsPushClickHandlerService implements CorePushNotifi
 
         // No appurl or cannot be handled by the app. Try to handle the contexturl now.
         if (notification.contexturl) {
-            const treated = await CoreContentLinksHelper.handleLink(notification.contexturl);
+            const treated = await CoreContentLinksHelper.handleLink(
+                notification.contexturl,
+                await this.accountOptions(notification),
+            );
             if (treated) {
                 // Link treated, stop.
                 return;

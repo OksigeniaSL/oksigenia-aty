@@ -236,3 +236,10 @@ page-core-login-reconnect:has(.aty-reconnect-code)
     core-login-methods:not(:has(.core-login-methods, .core-login-identity-providers)) .core-login-methods-separator {
     display: none;
 }
+
+/* The app's own sign-in logo has its name in navy: on the dark theme, the version for dark backgrounds. A site's own logo
+   stays as it is. */
+:root.dark img.login-logo,
+:root.dark img.core-logo-fallback {
+    content: url("/assets/img/login_logo_dark.png");
+}
