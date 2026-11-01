@@ -863,6 +863,7 @@ export type CoreSitePluginsMainMenuHandlerData = CoreSitePluginsHandlerCommonDat
         title?: string;
         icon?: string;
         class?: string;
+        tab?: boolean; // Oksigenia Aty: ask for a tab instead of an entry in "More".
     };
     priority?: number;
     ptrenabled?: boolean;
