@@ -316,7 +316,7 @@ export const CoreContentLinksHelper = makeSingleton(CoreContentLinksHelperProvid
 /**
  * Options for handleLink.
  */
-type HandleLinkOptions = {
+export type HandleLinkOptions = {
     /**
      * Username to use to filter sites.
      */
