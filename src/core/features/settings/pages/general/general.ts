@@ -90,7 +90,7 @@ export default class CoreSettingsGeneralPage {
             } else {
                 this.isAndroid = CorePlatform.isAndroid();
                 this.colorSchemes = CoreSettingsHelper.getAllowedColorSchemes();
-                this.selectedScheme = await CoreConfig.get(CoreConfigSettingKey.COLOR_SCHEME, CoreColorScheme.LIGHT);
+                this.selectedScheme = await CoreConfig.get(CoreConfigSettingKey.COLOR_SCHEME, CoreColorScheme.SYSTEM);
             }
         }
 
