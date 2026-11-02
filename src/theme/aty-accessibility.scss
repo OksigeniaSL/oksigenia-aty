@@ -64,6 +64,11 @@ html:root.aty-a11y-underline {
     a, core-format-text a, .core-text a, [core-link] {
         text-decoration: underline !important;
     }
+
+    /* The rows of the home are links, but they look like buttons: underlined, their dates would read as struck out. */
+    a.aty-event, a.aty-event *, a.aty-tile, a.aty-tile *, a.aty-hero, a.aty-hero * {
+        text-decoration: none !important;
+    }
 }
 
 html:root.aty-a11y-grayscale ion-app {
@@ -119,9 +124,25 @@ html:root.aty-a11y-contrast.dark {
         color: #fff !important;
     }
 
-    .aty-event {
+    .aty-event, .aty-hero, .aty-tile, .aty-course-card, .aty-event-date, .aty-tile-icon {
         background: #000 !important;
+        background-image: none !important;
         border: 1px solid #fff !important;
+        box-shadow: none !important;
+    }
+
+    .aty-hero *, .aty-course-card * {
+        color: #fff !important;
+    }
+
+    .aty-hero-logo {
+        filter: none !important;
+        opacity: 1 !important;
+    }
+
+    ion-tab-bar {
+        --background: #000;
+        background: #000;
     }
 
     img {

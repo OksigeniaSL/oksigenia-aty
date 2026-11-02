@@ -349,7 +349,8 @@ export class CoreSettingsHelperProvider {
         if (CoreConstants.CONFIG.forceColorScheme) {
             this.setColorScheme(CoreConstants.CONFIG.forceColorScheme);
         } else {
-            const scheme = await CoreConfig.get(CoreConfigSettingKey.COLOR_SCHEME, CoreColorScheme.LIGHT);
+            // A new install follows the phone: Moodle's default is light, which sits badly on a phone in dark mode.
+            const scheme = await CoreConfig.get(CoreConfigSettingKey.COLOR_SCHEME, CoreColorScheme.SYSTEM);
             this.setColorScheme(scheme);
         }
     }
