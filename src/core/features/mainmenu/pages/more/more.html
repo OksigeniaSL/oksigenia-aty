@@ -60,6 +60,13 @@
             </core-dynamic-component>
         }
 
+        <ion-item button (click)="openAccessibility()" [detail]="true">
+            <ion-icon name="fas-universal-access" slot="start" aria-hidden="true" />
+            <ion-label>
+                <p class="item-heading">{{ 'core.settings.accessibility' | translate }}</p>
+            </ion-label>
+        </ion-item>
+
         @if (showScanQR) {
             <ion-item button (click)="scanQR()" [detail]="true">
                 <ion-icon name="fas-qrcode" slot="start" aria-hidden="true" />

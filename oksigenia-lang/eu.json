@@ -1,4 +1,13 @@
 {
+    "core.settings.accessibility": "Irisgarritasuna",
+    "core.settings.accessibilityintro": "Aukeratu aplikazioa errazten dizuna. Mugikor honetan geratzen da. Zure plataformaren webgunean aukeratutakoak hemen ere balio du, aldatu arte.",
+    "core.settings.accessibilitycontrast": "Kontraste handia",
+    "core.settings.accessibilitydyslexia": "Dislexiarako letra",
+    "core.settings.accessibilitygrayscale": "Grisen eskala",
+    "core.settings.accessibilitylineheight": "Lerroen artean tarte handiagoa",
+    "core.settings.accessibilitymotion": "Animazio gutxiago",
+    "core.settings.accessibilityreadable": "Letra argia",
+    "core.settings.accessibilityunderline": "Estekak azpimarratu",
     "core.login.ssoreturnfailed": "Ezin izan da sarrera osatu. Saiatu berriro.",
     "core.login.connecttomoodle": "Konektatu zure plataformara",
     "core.login.connectingtosite": "Zure plataformara konektatzen…",

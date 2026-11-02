@@ -38,7 +38,7 @@ import { CorePromiseUtils } from '@static/promise-utils';
 import { CoreCustomMenu, CoreCustomMenuItem } from '@features/mainmenu/services/custommenu';
 import { CoreCustomMenuItemComponent } from '@features/mainmenu/components/custom-menu-item/custom-menu-item';
 import { CORE_QRREADER_MENU_FEATURE_NAME } from '@features/viewer/constants';
-import { CORE_SETTINGS_PAGE_NAME } from '@features/settings/constants';
+import { CORE_SETTINGS_ACCESSIBILITY_PAGE_NAME, CORE_SETTINGS_PAGE_NAME } from '@features/settings/constants';
 
 /**
  * Page that displays the more page of the app.
@@ -158,6 +158,13 @@ export default class CoreMainMenuMorePage implements OnInit, OnDestroy {
      */
     openSettings(): void {
         CoreNavigator.navigateToSitePath(CORE_SETTINGS_PAGE_NAME);
+    }
+
+    /**
+     * Open the accessibility page.
+     */
+    openAccessibility(): void {
+        CoreNavigator.navigateToSitePath(`${CORE_SETTINGS_PAGE_NAME}/${CORE_SETTINGS_ACCESSIBILITY_PAGE_NAME}`);
     }
 
     /**

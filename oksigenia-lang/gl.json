@@ -1,4 +1,13 @@
 {
+    "core.settings.accessibility": "Accesibilidade",
+    "core.settings.accessibilityintro": "Escolle o que che faga máis doada a aplicación. Queda neste móbil. O que escolliches na web da túa plataforma tamén vale aquí, ata que o cambies.",
+    "core.settings.accessibilitycontrast": "Alto contraste",
+    "core.settings.accessibilitydyslexia": "Letra para dislexia",
+    "core.settings.accessibilitygrayscale": "Escala de grises",
+    "core.settings.accessibilitylineheight": "Máis espazo entre liñas",
+    "core.settings.accessibilitymotion": "Menos animacións",
+    "core.settings.accessibilityreadable": "Letra clara",
+    "core.settings.accessibilityunderline": "Subliñar as ligazóns",
     "core.login.ssoreturnfailed": "Non se puido completar a entrada. Téntao de novo.",
     "core.login.connecttomoodle": "Conéctate á túa plataforma",
     "core.login.connectingtosite": "Conectando á túa plataforma…",

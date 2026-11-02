@@ -1,0 +1,130 @@
+/*
+ * The looks of the app's accessibility settings (core/features/settings/services/accessibility.ts): a class on the document for
+ * each switch. html:root so that they win over the site's own CSS, which arrives later and sets the same variables on :root.
+ */
+@font-face {
+    font-family: 'Atkinson Hyperlegible';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/assets/fonts/aty-a11y/atkinson-hyperlegible-latin-400-normal.woff2") format('woff2'),
+        url("/assets/fonts/aty-a11y/atkinson-hyperlegible-latin-ext-400-normal.woff2") format('woff2');
+}
+
+@font-face {
+    font-family: 'Atkinson Hyperlegible';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("/assets/fonts/aty-a11y/atkinson-hyperlegible-latin-700-normal.woff2") format('woff2'),
+        url("/assets/fonts/aty-a11y/atkinson-hyperlegible-latin-ext-700-normal.woff2") format('woff2');
+}
+
+@font-face {
+    font-family: 'OpenDyslexic';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/assets/fonts/aty-a11y/opendyslexic-latin-400-normal.woff2") format('woff2');
+}
+
+@font-face {
+    font-family: 'OpenDyslexic';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("/assets/fonts/aty-a11y/opendyslexic-latin-700-normal.woff2") format('woff2');
+}
+
+html:root.aty-a11y-readable {
+    --ion-font-family: 'Atkinson Hyperlegible', sans-serif;
+}
+
+html:root.aty-a11y-dyslexia {
+    --ion-font-family: 'OpenDyslexic', sans-serif;
+}
+
+html:root.aty-a11y-readable,
+html:root.aty-a11y-dyslexia {
+    body,
+    h1, h2, h3, h4, h5, h6, p, li, a, span, button, input, textarea, select, td, th, label,
+    ion-title, ion-label, ion-button, ion-item, .item-heading, .aty-event-name, .aty-event-context,
+    .core-text, core-format-text {
+        font-family: var(--ion-font-family) !important;
+    }
+}
+
+html:root.aty-a11y-lineheight {
+    p, li, td, th, label, ion-label, .item-heading, core-format-text, .aty-event-name, .aty-event-context {
+        line-height: 1.7 !important;
+    }
+}
+
+html:root.aty-a11y-underline {
+    a, core-format-text a, .core-text a, [core-link] {
+        text-decoration: underline !important;
+    }
+}
+
+html:root.aty-a11y-grayscale ion-app {
+    filter: grayscale(1);
+}
+
+html:root.aty-a11y-motion {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* White on black, whatever the site's colours or the phone's mode, with the links and what is active in yellow. */
+html:root.aty-a11y-contrast,
+html:root.aty-a11y-contrast.dark {
+    --ion-background-color: #000;
+    --ion-background-color-rgb: 0, 0, 0;
+    --ion-text-color: #fff;
+    --ion-text-color-rgb: 255, 255, 255;
+    --ion-item-background: #000;
+    --ion-card-background: #000;
+    --ion-toolbar-background: #000;
+    --ion-toolbar-color: #fff;
+    --ion-tab-bar-background: #000;
+    --ion-tab-bar-color: #fff;
+    --ion-border-color: #fff;
+    --ion-item-border-color: #fff;
+    --ion-color-primary: #ffe000;
+    --ion-color-primary-rgb: 255, 224, 0;
+    --ion-color-primary-contrast: #000;
+    --ion-color-primary-contrast-rgb: 0, 0, 0;
+    --primary: #ffe000;
+    --core-header-toolbar-background: #000;
+    --core-header-toolbar-color: #fff;
+    --core-link-color: #ffe000;
+    --subdued: #fff;
+    --text-secondary: #fff;
+    background: #000;
+
+    ion-app, body {
+        background: #000;
+        color: #fff;
+    }
+
+    a, core-format-text a, .core-text a {
+        color: #ffe000 !important;
+    }
+
+    p, h1, h2, h3, h4, h5, h6, li, span, label, ion-label, .item-heading, .aty-event-name, .aty-event-context {
+        color: #fff !important;
+    }
+
+    .aty-event {
+        background: #000 !important;
+        border: 1px solid #fff !important;
+    }
+
+    img {
+        filter: none;
+    }
+}

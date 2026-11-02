@@ -17,12 +17,14 @@ import { Routes } from '@angular/router';
 
 import { AppRoutingModule, conditionalRoutes } from '@/app/app-routing.module';
 import { CoreMainMenuTabRoutingModule } from '@features/mainmenu/mainmenu-tab-routing.module';
+import { CoreAccessibility } from './services/accessibility';
 import { CoreSettingsHelper } from './services/settings-helper';
 import { SHAREDFILES_PAGE_NAME } from '@features/sharedfiles/constants';
 import { getSharedFilesRoutes } from '@features/sharedfiles/sharedfiles.module';
 import { CoreScreen } from '@services/screen';
 import {
     CORE_SETTINGS_ABOUT_PAGE_NAME,
+    CORE_SETTINGS_ACCESSIBILITY_PAGE_NAME,
     CORE_SETTINGS_DEV_PAGE_NAME,
     CORE_SETTINGS_DEVICEINFO_PAGE_NAME,
     CORE_SETTINGS_ERROR_LOG_PAGE_NAME,
@@ -69,6 +71,10 @@ const sectionRoutes: Routes = [
     {
         path: CORE_SETTINGS_ABOUT_PAGE_NAME,
         loadComponent: () => import('@features/settings/pages/about/about'),
+    },
+    {
+        path: CORE_SETTINGS_ACCESSIBILITY_PAGE_NAME,
+        loadComponent: () => import('@features/settings/pages/accessibility/accessibility'),
     },
 ];
 
@@ -142,6 +148,7 @@ const mainMenuMoreRoutes: Routes = [
     ],
     providers: [
         provideAppInitializer(() => CoreSettingsHelper.initialize()),
+        provideAppInitializer(() => CoreAccessibility.initialize()),
     ],
 })
 export class CoreSettingsModule {}

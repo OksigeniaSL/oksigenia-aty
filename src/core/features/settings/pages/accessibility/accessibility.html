@@ -1,0 +1,31 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button [text]="'core.back' | translate" />
+        </ion-buttons>
+        <ion-title>
+            <h1>{{ 'core.settings.accessibility' | translate }}</h1>
+        </ion-title>
+    </ion-toolbar>
+</ion-header>
+<ion-content>
+    <ion-list>
+        <ion-item class="ion-text-wrap">
+            <ion-label>
+                <p>{{ 'core.settings.accessibilityintro' | translate }}</p>
+            </ion-label>
+        </ion-item>
+        <ion-item button (click)="openTextSize()" [detail]="true" class="ion-text-wrap">
+            <ion-label>
+                <p class="item-heading">{{ 'core.settings.fontsize' | translate }}</p>
+            </ion-label>
+        </ion-item>
+        @for (setting of settings; track setting.key) {
+            <ion-item class="ion-text-wrap">
+                <ion-toggle [checked]="setting.on" (ionChange)="changed(setting.key, $event)">
+                    <p class="item-heading">{{ 'core.settings.accessibility' + setting.key | translate }}</p>
+                </ion-toggle>
+            </ion-item>
+        }
+    </ion-list>
+</ion-content>

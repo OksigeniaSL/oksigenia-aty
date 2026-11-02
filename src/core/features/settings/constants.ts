@@ -18,6 +18,7 @@ export const CORE_SETTINGS_GENERAL_PAGE_NAME = 'general';
 export const CORE_SETTINGS_SPACE_USAGE_PAGE_NAME = 'spaceusage';
 export const CORE_SETTINGS_SYNC_PAGE_NAME = 'sync';
 export const CORE_SETTINGS_ABOUT_PAGE_NAME = 'about';
+export const CORE_SETTINGS_ACCESSIBILITY_PAGE_NAME = 'accessibility';
 export const CORE_SETTINGS_DEVICEINFO_PAGE_NAME = 'deviceinfo';
 export const CORE_SETTINGS_DEV_PAGE_NAME = 'dev';
 export const CORE_SETTINGS_ERROR_LOG_PAGE_NAME = 'error-log';
