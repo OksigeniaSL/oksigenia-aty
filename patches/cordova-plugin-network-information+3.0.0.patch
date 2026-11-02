@@ -1,0 +1,12 @@
+diff --git a/node_modules/cordova-plugin-network-information/src/ios/CDVReachability.m b/node_modules/cordova-plugin-network-information/src/ios/CDVReachability.m
+index b43a62d..a097115 100644
+--- a/node_modules/cordova-plugin-network-information/src/ios/CDVReachability.m
++++ b/node_modules/cordova-plugin-network-information/src/ios/CDVReachability.m
+@@ -46,7 +46,6 @@
+ 
+ #import <sys/socket.h>
+ #import <netinet/in.h>
+-#import <netinet6/in6.h>
+ #import <arpa/inet.h>
+ #import <ifaddrs.h>
+ #import <netdb.h>

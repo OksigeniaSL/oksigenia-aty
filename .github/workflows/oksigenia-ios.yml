@@ -1,0 +1,237 @@
+# Builds Oksigenia Aty for the iOS simulator, runs it there and keeps screenshots of its first screen.
+#
+# Nothing is signed and nothing goes to Apple: a simulator build needs no Apple account, no certificates and no secrets.
+# The web part is built on Linux, the same way as in oksigenia-android.yml, because the arm64 macOS runner has 7 GB of
+# memory and build:prod asks for 8.
+#
+# It takes much longer than Android, and kit/ci-verde.sh waits for every workflow of a commit, so it does not run on every
+# push: on demand, on an Oksigenia tag, and when something that changes the native build changes.
+name: Oksigenia Aty iOS simulator
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [oksigenia-v52]
+    tags: ['oksigenia-v*']
+    paths:
+      - '.github/workflows/oksigenia-ios.yml'
+      - 'config.xml'
+      - 'GoogleService-Info.plist'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'cordova-plugin-moodleapp/**'
+      - 'patches/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oksigenia-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Bundle all languages (Moodle langpacks + Oksigenia strings)
+        run: |
+          mkdir -p src/assets/lang
+          LANGVERSION=5.2 bash scripts/update_langpacks.sh
+          node scripts/oksigenia-merge-lang.mjs
+
+      - name: Build the app plugin and the web assets
+        run: |
+          npm run prod --prefix cordova-plugin-moodleapp
+          npm run build:prod
+
+      # The web build does not reference cordova.js (see oksigenia-android.yml); cordova prepare provides the file itself.
+      - name: Make cordova available to the web app
+        run: |
+          grep -q 'src="cordova.js"' www/index.html || \
+            sed -i 's#</head>#  <script src="cordova.js"></script>\n</head>#' www/index.html
+          grep -n 'cordova.js' www/index.html
+
+      - name: Pack the web assets
+        run: tar -czf www.tgz www
+
+      - name: Upload the web assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: www
+          path: www.tgz
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
+
+  simulator:
+    needs: web
+    runs-on: macos-26
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Show the tools
+        run: |
+          sw_vers
+          xcodebuild -version
+          pod --version
+          xcrun simctl list runtimes
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Cordova
+        run: npm install -g cordova@13
+
+      - name: Fetch the web assets
+        uses: actions/download-artifact@v4
+        with:
+          name: www
+
+      - name: Unpack the web assets
+        run: |
+          tar -xzf www.tgz
+          rm www.tgz
+
+      - name: Build the app plugin
+        run: npm run prod --prefix cordova-plugin-moodleapp
+
+      - name: Prepare the iOS platform
+        run: |
+          mkdir -p dist
+          cordova prepare ios --no-telemetry --verbose > dist/prepare.log 2>&1 || { tail -80 dist/prepare.log; exit 1; }
+          tail -5 dist/prepare.log
+
+      # By its id: cordova's own choice is a device name that may not exist on the newest iOS, and xcodebuild then gives up.
+      - name: Pick a simulator
+        run: |
+          UDID=$(xcrun simctl list devices available --json | jq -r '
+            .devices | to_entries
+            | map(select(.key | test("SimRuntime\\.iOS-")))
+            | sort_by(.key | capture("iOS-(?<a>[0-9]+)-(?<b>[0-9]+)") | [(.a | tonumber), (.b | tonumber)])
+            | last.value | map(select(.name | startswith("iPhone")))
+            | (map(select(.name == "iPhone 17")) + .) | first.udid')
+          echo "UDID=$UDID" >> "$GITHUB_ENV"
+          xcrun simctl list devices | grep "$UDID"
+
+      # GoogleService-Info.plist is moodleapp's empty one, as committed. With IS_GCM_ENABLED false the push plugin never
+      # calls [FIRApp configure], so the app starts without a Firebase project.
+      - name: Build for the simulator
+        run: |
+          cordova build ios --emulator --debug --no-telemetry --verbose \
+            "--buildFlag=-destination platform=iOS Simulator,id=$UDID" --buildFlag=-IDEBuildingContinueBuildingAfterErrors=YES > dist/build.log 2>&1 || {
+            grep -E ' error: |fatal error|BUILD FAILED' dist/build.log | sort -u | cut -c1-300 | head -60
+            tail -30 dist/build.log | cut -c1-300
+            exit 1
+          }
+          tail -5 dist/build.log
+
+      - name: Boot the simulator
+        timeout-minutes: 15
+        run: xcrun simctl bootstatus "$UDID" -b
+
+      # Optional: answers the notification prompt beforehand, for the shots without it. If it fails, the rest still runs.
+      - name: Install applesimutils
+        continue-on-error: true
+        timeout-minutes: 10
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+        run: |
+          brew tap wix/brew
+          brew trust wix/brew
+          brew install applesimutils
+
+      - name: Run the app and take screenshots
+        timeout-minutes: 20
+        run: |
+          APP=$(find platforms/ios/build -maxdepth 2 -type d -name '*.app' | head -1)
+          echo "App: $APP"; du -sh "$APP"
+          BUNDLE_ID=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")
+          EXECUTABLE=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP/Info.plist")
+          mkdir -p dist/screenshots dist/logs
+          cp "$APP/AppIcon60x60@2x.png" dist/screenshots/app-icon.png || true
+
+          install_clean() {
+            xcrun simctl uninstall "$UDID" "$BUNDLE_ID" || true
+            xcrun simctl install "$UDID" "$APP"
+          }
+
+          # Starts the app and shoots at the given seconds; fails if the process has died by then.
+          launch_and_shoot() {
+            local label=$1 start pid t
+            shift
+            xcrun simctl terminate "$UDID" "$BUNDLE_ID" 2> /dev/null || true
+            start=$SECONDS
+            pid=$(xcrun simctl launch "$UDID" "$BUNDLE_ID" | awk -F': ' '{print $2}')
+            echo "$label: pid $pid"
+            for t in "$@"; do
+              while (( SECONDS - start < t )); do sleep 1; done
+              xcrun simctl io "$UDID" screenshot "dist/screenshots/$label-${t}s.png"
+            done
+            ps -p "$pid" > /dev/null || { echo "$label: the app is not running any more"; return 1; }
+          }
+
+          STATUS=0
+          install_clean
+          launch_and_shoot en 5 15 30 60 || STATUS=1
+          xcrun simctl spawn "$UDID" log show --last 5m --style compact \
+            --predicate "process == \"$EXECUTABLE\"" > dist/logs/en.log || true
+
+          if [ "$STATUS" = 0 ]; then
+            # A phone set to Spanish, to see whether the app follows the device language as it does on Android.
+            xcrun simctl spawn "$UDID" defaults write 'Apple Global Domain' AppleLanguages -array es-ES en
+            xcrun simctl spawn "$UDID" defaults write 'Apple Global Domain' AppleLocale -string es_ES
+            xcrun simctl shutdown "$UDID"
+            xcrun simctl bootstatus "$UDID" -b
+            install_clean
+            launch_and_shoot es 30 60 || STATUS=1
+
+            # The app asks for notifications when it starts, as moodleapp does, and the prompt covers half of the screen.
+            if command -v applesimutils > /dev/null && perl -e 'alarm shift; exec @ARGV' 180 \
+              applesimutils --byId "$UDID" --bundle "$BUNDLE_ID" --setPermissions 'notifications=YES'; then
+              launch_and_shoot es-noprompt 30 || STATUS=1
+            else
+              echo "No shot without the prompt: applesimutils is missing or failed"
+            fi
+          fi
+
+          # Crash reports of the simulator's apps land on the host.
+          find "$HOME/Library/Logs/DiagnosticReports" -name "*$EXECUTABLE*" -exec cp {} dist/logs/ \; 2> /dev/null || true
+          ls -la dist/screenshots dist/logs
+          exit "$STATUS"
+
+      - name: Shut the simulator down
+        if: always()
+        run: xcrun simctl shutdown all || true
+
+      - name: Upload the screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oksigenia-aty-ios-simulator
+          path: dist/**
+          retention-days: 14
+          if-no-files-found: warn
