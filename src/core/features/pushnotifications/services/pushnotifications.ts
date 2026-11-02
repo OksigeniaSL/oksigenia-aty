@@ -60,6 +60,11 @@ import { CorePromiseUtils } from '@static/promise-utils';
 import { CoreWSError } from '@classes/errors/wserror';
 import { CoreNative } from '@features/native/services/native';
 
+/** Local site config with the last time a site was told about the device. */
+const DEVICE_CHECK_TIME = 'pushDeviceCheckTime';
+/** How often a site is told about the device again, in milliseconds. */
+const DEVICE_CHECK_INTERVAL = 24 * 60 * 60 * 1000;
+
 /**
  * Service to handle push notifications.
  */
@@ -664,6 +669,13 @@ export class CorePushNotificationsProvider {
 
             const neededActions = await this.getRegisterDeviceActions(data, site, forceUnregister);
 
+            if (!neededActions.register && await this.isDeviceCheckDue(site)) {
+                // The site may have lost the device, for example if it was restored from a copy, and nothing else would tell.
+                // If it still has it, it only answers with a warning.
+                neededActions.register = true;
+                neededActions.updatePublicKey = false;
+            }
+
             if (neededActions.unregister) {
                 // Unregister the device first.
                 await CorePromiseUtils.ignoreErrors(this.unregisterDeviceOnMoodle(site));
@@ -685,6 +697,7 @@ export class CorePushNotificationsProvider {
 
                 // Insert the device in the local DB.
                 await CorePromiseUtils.ignoreErrors(this.registeredDevicesTables[site.getId()].insert(data));
+                await CorePromiseUtils.ignoreErrors(site.setLocalSiteConfig(DEVICE_CHECK_TIME, Date.now()));
             } else if (neededActions.updatePublicKey) {
                 // Device already registered, make sure the public key is up to date.
                 const response = await this.updatePublicKeyOnMoodle(site, data);
@@ -706,6 +719,18 @@ export class CorePushNotificationsProvider {
             // Remove pending unregisters for this site.
             await CorePromiseUtils.ignoreErrors(this.removePendingUnregister(site.getId()));
         }
+    }
+
+    /**
+     * Check whether it is time to tell a site about the device again, even if the app has it as registered.
+     *
+     * @param site Site.
+     * @returns Whether it is time.
+     */
+    protected async isDeviceCheckDue(site: CoreSite): Promise<boolean> {
+        const lastCheck = await CorePromiseUtils.ignoreErrors(site.getLocalSiteConfig<number>(DEVICE_CHECK_TIME, 0));
+
+        return lastCheck !== undefined && Date.now() - lastCheck >= DEVICE_CHECK_INTERVAL;
     }
 
     /**
