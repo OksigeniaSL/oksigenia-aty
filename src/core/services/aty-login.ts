@@ -23,10 +23,12 @@ import { CoreErrorHelper } from '@services/error-helper';
 import { CoreLang } from '@services/lang';
 import { CoreLoadings } from '@services/overlays/loadings';
 import { CoreModals } from '@services/overlays/modals';
+import { CoreSites } from '@services/sites';
 import { CoreCustomURLSchemesHandleError, CoreCustomURLSchemesParams } from '@services/urlschemes';
 import { CoreWS, HttpRequestOptions } from '@services/ws';
 import { Translate, makeSingleton } from '@singletons';
 import { CoreLogger } from '@static/logger';
+import { CorePromiseUtils } from '@static/promise-utils';
 import { CoreSSO } from '@static/sso';
 
 import { CoreConstants } from '../constants';
@@ -249,10 +251,48 @@ export class AtyLoginService {
     }
 
     /**
-     * Whether this phone already signed in with a link. A link works once, and Android keeps the one that opened the app: it
+     * Read the mark on the link of an e-mail's button (local/oksigeniaaty/go.php): the account it is for and something new on
+     * each tap. Android keeps the link that opened the app and hands it over again when it brings the app back after closing
+     * it, which would open that page again: the same mark twice is that, and not someone tapping again.
+     *
+     * @param url The link.
+     * @returns The link without its mark, and the id the account has in the app, if it says.
+     */
+    async readLinkMark(url: string): Promise<{ link: string; siteId?: string }> {
+        const mark = url.match(/[?&]atylink=([0-9a-f]*)\.[a-zA-Z0-9]+/i);
+        if (!mark) {
+            return { link: url };
+        }
+
+        if (await this.isSpent(url)) {
+            throw new CoreCustomURLSchemesHandleError('Duplicated');
+        }
+        await this.markSpent(url);
+
+        return {
+            link: url.replace(/([?&])atylink=[^&#]*(&?)/, (_match, before, after) => after ? before : ''),
+            siteId: mark[1] || undefined,
+        };
+    }
+
+    /**
+     * The username of an account on this phone, if it is in the site of a link. Anything else, and the link opens as any other.
+     *
+     * @param siteId The id the account has in the app.
+     * @param siteUrl The site of the link.
+     * @returns The username.
+     */
+    async usernameInSite(siteId: string | undefined, siteUrl: string): Promise<string | undefined> {
+        const site = siteId ? await CorePromiseUtils.ignoreErrors(CoreSites.getSite(siteId)) : undefined;
+
+        return site?.getURL() === siteUrl ? site.getInfo()?.username : undefined;
+    }
+
+    /**
+     * Whether this phone already used a link. A sign-in link works once, and Android keeps the one that opened the app: it
      * hands it over again when it brings the app back after closing it, which would show the error of a used link.
      *
-     * @param url The sign-in URL.
+     * @param url The link.
      * @returns Whether it was used.
      */
     protected async isSpent(url: string): Promise<boolean> {
@@ -262,9 +302,9 @@ export class AtyLoginService {
     }
 
     /**
-     * Remember that this phone signed in with a link, among the last few.
+     * Remember that this phone used a link, among the last few.
      *
-     * @param url The sign-in URL.
+     * @param url The link.
      */
     protected async markSpent(url: string): Promise<void> {
         const spent = await CoreConfig.getJSON<string[]>(AtyLoginService.SPENT_LINKS, []);

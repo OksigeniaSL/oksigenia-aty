@@ -63,6 +63,12 @@ import { CoreSharedModule } from '@/core/shared.module';
 })
 export default class CoreLoginCredentialsPage implements OnInit, OnDestroy {
 
+    /**
+     * Oksigenia Aty: the last of these screens to dress the app in its site. A link to another site opens its screen before
+     * this one closes, and closing it must not take the new site's colours with it.
+     */
+    protected static lastChecked?: CoreLoginCredentialsPage;
+
     readonly formElement = viewChild<ElementRef<HTMLFormElement>>('credentialsForm');
 
     credForm!: FormGroup;
@@ -234,6 +240,7 @@ export default class CoreLoginCredentialsPage implements OnInit, OnDestroy {
 
         if (!this.eventThrown && !this.viewLeft) {
             this.eventThrown = true;
+            CoreLoginCredentialsPage.lastChecked = this;
             CoreEvents.trigger(CoreEvents.LOGIN_SITE_CHECKED, { config: this.siteConfig });
         }
     }
@@ -371,14 +378,17 @@ export default class CoreLoginCredentialsPage implements OnInit, OnDestroy {
      */
     ngOnDestroy(): void {
         this.viewLeft = true;
-        CoreEvents.trigger(
-            CoreEvents.LOGIN_SITE_UNCHECKED,
-            {
-                config: this.siteConfig,
-                loginSuccessful: !!this.siteId,
-            },
-            this.siteId,
-        );
+        if (!CoreLoginCredentialsPage.lastChecked || CoreLoginCredentialsPage.lastChecked === this) {
+            CoreLoginCredentialsPage.lastChecked = undefined;
+            CoreEvents.trigger(
+                CoreEvents.LOGIN_SITE_UNCHECKED,
+                {
+                    config: this.siteConfig,
+                    loginSuccessful: !!this.siteId,
+                },
+                this.siteId,
+            );
+        }
         this.valueChangeSubscription?.unsubscribe();
         this.alwaysShowLoginFormObserver?.off();
         this.loginObserver?.off();

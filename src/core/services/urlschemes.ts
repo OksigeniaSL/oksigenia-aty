@@ -147,6 +147,7 @@ export class CoreCustomURLSchemesProvider {
 
         const modal = await CoreLoadings.show();
         let data: CoreCustomURLSchemesParams;
+        let linkAccount: string | undefined;
 
         // Get the data from the URL.
         try {
@@ -161,7 +162,13 @@ export class CoreCustomURLSchemesProvider {
                 // In iOS, the protocol after the scheme doesn't have ":". Add it.
                 url = url.replace(/\/\/link=(https?)\/\//, '//link=$1://');
 
-                data = await this.getCustomURLLinkData(url);
+                // Oksigenia Aty: the button of an e-mail says whose account it is for; its reading stays in its own service.
+                const { AtyLogin } = await import('@services/aty-login');
+                const { link, siteId } = await AtyLogin.readLinkMark(url);
+
+                data = await this.getCustomURLLinkData(link);
+                linkAccount = await AtyLogin.usernameInSite(siteId, data.siteUrl);
+                data.username = linkAccount ?? data.username;
             } else {
                 // In iOS, the protocol after the scheme doesn't have ":". Add it.
                 url = url.replace(/\/\/(https?)\/\//, '//$1://');
@@ -233,7 +240,7 @@ export class CoreCustomURLSchemesProvider {
                     userId: data.userId,
                 });
 
-                if (siteIds.length !== 1 || siteIds[0] !== CoreSites.getCurrentSiteId()) {
+                if (!linkAccount && (siteIds.length !== 1 || siteIds[0] !== CoreSites.getCurrentSiteId())) {
                     // Not current site or more than one site, confirm before changing site.
                     await CoreContentLinksHelper.confirmLinkToSite({ url: data.siteUrl });
                 }
