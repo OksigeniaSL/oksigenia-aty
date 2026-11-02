@@ -1,4 +1,5 @@
 {
+    "core.login.ssoreturnfailed": "La connexion n'a pas pu aboutir. Réessayez.",
     "core.login.connecttomoodle": "Connectez-vous à votre plateforme",
     "core.login.connectingtosite": "Connexion à votre plateforme…",
     "core.login.siteaddresshelp": "La même adresse que dans votre navigateur, avec ou sans https://.",

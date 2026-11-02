@@ -474,7 +474,13 @@ export class CoreCustomURLSchemesProvider {
             } }));
         }
 
-        const data: CoreCustomURLSchemesParams = await CoreLoginHelper.validateBrowserSSOLogin(url);
+        let data: CoreCustomURLSchemesParams;
+        try {
+            data = await CoreLoginHelper.validateBrowserSSOLogin(url);
+        } catch {
+            // What failed is the return from the browser, not the site's address.
+            throw new CoreCustomURLSchemesHandleError(Translate.instant('core.login.ssoreturnfailed'));
+        }
 
         data.isSSOToken = true;
         data.isAuthenticationURL = true;

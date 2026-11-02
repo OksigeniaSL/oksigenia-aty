@@ -72,6 +72,11 @@ import {
 } from './signup';
 import { CoreSitesFactory } from '@services/sites-factory';
 
+/** How long a browser login may take to come back, in milliseconds. */
+const SSO_LAUNCH_VALIDITY = 30 * 60 * 1000;
+/** How many earlier browser logins may still come back. */
+const SSO_MAX_EARLIER_LAUNCHES = 4;
+
 /**
  * Helper provider that provides some common features regarding authentication.
  */
@@ -644,17 +649,37 @@ export class CoreLoginHelperProvider {
         });
 
         const loginUrl = CoreUrl.addParamsToUrl(launchUrl, additionalParams);
+        const earlierPassports = await this.getPendingSSOPassports(siteUrl);
 
         // Store the siteurl and passport in CoreConfig for persistence.
         // We are "configuring" the app to wait for an SSO. CoreConfig shouldn't be used as a temporary storage.
         await CoreConfig.set(LOGIN_SSO_LAUNCH_DATA, JSON.stringify(<StoredLoginLaunchData> {
             siteUrl,
             passport,
+            earlierPassports,
+            launchTime: Date.now(),
             ...redirectData,
             ssoUrlParams: urlParams || {},
         }));
 
         return loginUrl;
+    }
+
+    /**
+     * Get the passports of the browser logins to a site that may still come back. A second tap while one is under way must
+     * not invalidate it: with a second factor it can take minutes, and the browser goes on with the first one.
+     *
+     * @param siteUrl Site URL.
+     * @returns Passports, oldest first.
+     */
+    protected async getPendingSSOPassports(siteUrl: string): Promise<number[]> {
+        const serializedData = await CoreConfig.get<string>(LOGIN_SSO_LAUNCH_DATA, '');
+        const data = CoreText.parseJSON<StoredLoginLaunchData | null>(serializedData, null);
+        if (!data || data.siteUrl !== siteUrl || Date.now() - (data.launchTime ?? 0) > SSO_LAUNCH_VALIDITY) {
+            return [];
+        }
+
+        return [...(data.earlierPassports ?? []), data.passport].slice(-SSO_MAX_EARLIER_LAUNCHES);
     }
 
     /**
@@ -977,33 +1002,26 @@ export class CoreLoginHelperProvider {
         // Split signature:::token
         const params = url.split(':::');
 
-        const serializedData = await CoreConfig.get<string>(LOGIN_SSO_LAUNCH_DATA);
+        const serializedData = await CoreConfig.get<string>(LOGIN_SSO_LAUNCH_DATA, '');
 
         const data = <StoredLoginLaunchData | null> CoreText.parseJSON(serializedData, null);
         if (data === null) {
             throw new CoreError('No launch data stored.');
         }
 
-        const passport = data.passport;
-        let launchSiteURL = data.siteUrl;
+        // Validate the signature, against any login still under way for this site. We need to check both http and https.
+        const passports = [data.passport, ...(data.earlierPassports ?? [])];
+        const otherSiteURL = data.siteUrl.includes('https://') ?
+            data.siteUrl.replace('https://', 'http://') :
+            data.siteUrl.replace('http://', 'https://');
+        const launchSiteURL = [data.siteUrl, otherSiteURL].find(siteUrl =>
+            passports.some(passport => Md5.hashAsciiStr(siteUrl + passport) === params[0]));
 
-        // Reset temporary values.
-        CoreConfig.delete(LOGIN_SSO_LAUNCH_DATA);
-
-        // Validate the signature.
-        // We need to check both http and https.
-        let signature: string = Md5.hashAsciiStr(launchSiteURL + passport);
-        if (signature !== params[0]) {
-            if (launchSiteURL.includes('https://')) {
-                launchSiteURL = launchSiteURL.replace('https://', 'http://');
-            } else {
-                launchSiteURL = launchSiteURL.replace('http://', 'https://');
-            }
-            signature = Md5.hashAsciiStr(launchSiteURL + passport);
-        }
-
-        if (signature === params[0]) {
+        if (launchSiteURL !== undefined) {
             this.logger.debug('Signature validated');
+
+            // Reset temporary values only now: a return that does not match must not invalidate a login under way.
+            CoreConfig.delete(LOGIN_SSO_LAUNCH_DATA);
 
             return {
                 siteUrl: launchSiteURL,
@@ -1015,8 +1033,7 @@ export class CoreLoginHelperProvider {
                 ssoUrlParams: data.ssoUrlParams,
             };
         } else {
-            this.logger.debug(`Invalid signature in the URL request yours: ${params[0]} mine: ${
-                 signature } for passport ${passport}`);
+            this.logger.debug(`Invalid signature in the URL request: ${params[0]}`);
 
             throw new CoreError(Translate.instant('core.unexpectederror'));
         }
@@ -1394,6 +1411,8 @@ type ResendConfirmationEmailResult = {
 type StoredLoginLaunchData = CoreRedirectPayload & {
     siteUrl: string;
     passport: number;
+    earlierPassports?: number[]; // Earlier browser logins to the same site, which may still come back.
+    launchTime?: number; // When the last browser login started, in milliseconds.
     ssoUrlParams: CoreUrlParams;
 };
 

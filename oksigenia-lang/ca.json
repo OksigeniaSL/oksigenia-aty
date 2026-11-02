@@ -1,4 +1,5 @@
 {
+    "core.login.ssoreturnfailed": "No s'ha pogut completar l'entrada. Torna-ho a provar.",
     "core.login.connecttomoodle": "Connecta't a la teva plataforma",
     "core.login.connectingtosite": "S'està connectant a la teva plataforma…",
     "core.login.siteaddresshelp": "La mateixa adreça que fas servir al navegador, amb o sense https://.",

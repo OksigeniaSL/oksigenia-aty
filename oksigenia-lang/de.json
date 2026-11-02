@@ -1,4 +1,5 @@
 {
+    "core.login.ssoreturnfailed": "Die Anmeldung konnte nicht abgeschlossen werden. Bitte versuche es noch einmal.",
     "core.login.connecttomoodle": "Mit deiner Plattform verbinden",
     "core.login.connectingtosite": "Verbindung zu deiner Plattform…",
     "core.login.siteaddresshelp": "Dieselbe Adresse wie im Browser, mit oder ohne https://.",

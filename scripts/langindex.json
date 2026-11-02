@@ -2245,6 +2245,7 @@
   "core.login.siteurl": "local_moodlemobileapp",
   "core.login.siteurlrequired": "local_moodlemobileapp",
   "core.login.startsignup": "moodle",
+  "core.login.ssoreturnfailed": "local_moodlemobileapp",
   "core.login.stillcantconnect": "local_moodlemobileapp",
   "core.login.toggleremove": "local_moodlemobileapp",
   "core.login.unsupportedsite": "local_moodlemobileapp",
