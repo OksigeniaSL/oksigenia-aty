@@ -237,6 +237,13 @@ page-core-login-reconnect:has(.aty-reconnect-code)
     display: none;
 }
 
+/* The icon a site gives a notice is drawn dark, for a light page: on the dark theme it turns light and keeps its colours'
+   hue, instead of a black shape on the dark grey of the list. */
+:root.dark .core-notification-icon img,
+:root.dark .core-avatar-extra-img img {
+    filter: invert(1) hue-rotate(180deg);
+}
+
 /* The app's own sign-in logo has its name in navy: on the dark theme, the version for dark backgrounds. A site's own logo
    stays as it is. */
 :root.dark img.login-logo,

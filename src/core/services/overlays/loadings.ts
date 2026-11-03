@@ -25,6 +25,10 @@ export class CoreLoadingsService {
 
     protected activeLoadingModals: CoreIonLoadingElement[] = [];
 
+    // Oksigenia Aty: how many things are holding the loadings paused. They nest: an alert that opens and closes over Aty's PIN
+    // pad must not bring the "Loading" back on top of the pad, which still waits for a tap the loading would then block.
+    protected pauses = 0;
+
     /**
      * Displays a loading modal window.
      *
@@ -87,6 +91,8 @@ export class CoreLoadingsService {
      * Pauses the active loading modal.
      */
     async pauseActiveModals(): Promise<void> {
+        this.pauses++;
+
         await Promise.all(this.activeLoadingModals.slice(0).reverse().map(modal => modal.pause()));
     }
 
@@ -94,6 +100,12 @@ export class CoreLoadingsService {
      * Resumes the active loading modals.
      */
     async resumeActiveModals(): Promise<void> {
+        // Oksigenia Aty: only the last of the nested pauses brings them back.
+        this.pauses = Math.max(0, this.pauses - 1);
+        if (this.pauses > 0) {
+            return;
+        }
+
         await Promise.all(this.activeLoadingModals.map(modal => modal.resume()));
     }
 

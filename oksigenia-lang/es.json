@@ -368,5 +368,7 @@
     "core.hasdatatosync": "Hay datos de {{$a}} guardados sin conexión que faltan por sincronizar.",
     "core.contentlinks.confirmlinktositetitle": "¿Abrir otro sitio?",
     "core.contentlinks.confirmlinktosite": "Este enlace te lleva a:<br><br><strong>{{url}}</strong><br><br>Sigue solo si confías en este sitio.",
-    "core.contentlinks.opensite": "Abrir el sitio"
+    "core.contentlinks.opensite": "Abrir el sitio",
+    "core.view": "Ver",
+    "core.warnopeninbrowser": "<p>Vas a salir de la app para abrir esta dirección en el navegador del móvil. ¿Quieres seguir?</p>\n<p><b>{{url}}</b></p>"
 }
