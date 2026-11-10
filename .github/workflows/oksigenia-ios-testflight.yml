@@ -1,0 +1,229 @@
+# Builds Oksigenia Aty for iPhone, signs it for the App Store and sends it to TestFlight.
+#
+# Only on demand, by hand or with a tag oksigenia-ios-v* (GitHub only offers the button for workflows of the default
+# branch, and this one lives on the Oksigenia branch): each run is a new build in App Store Connect. The build number
+# is the Android version code and the run number (52105.3), so every run counts up and a new version code starts above
+# the last one.
+#
+# Secrets of the repository (none is ever printed):
+#   IOS_DIST_P12_BASE64, IOS_DIST_P12_PASSWORD  the Apple Distribution certificate of Oksigenia SL, with its key
+#   IOS_PROFILE_BASE64                          the App Store provisioning profile of com.oksigenia.aty
+#   ASC_KEY_P8_BASE64, ASC_KEY_ID, ASC_ISSUER_ID the App Store Connect API key that uploads the build
+#   GOOGLE_SERVICE_INFO_PLIST                   the Firebase config of the iOS app, for the notifications
+# A pull request from a fork gets none of them, and this workflow does not run on pull requests anyway.
+name: Oksigenia Aty iOS TestFlight
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['oksigenia-ios-v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oksigenia-ios-testflight
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  APPLE_TEAM_ID: 9Q48TP86T4
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Bundle all languages (Moodle langpacks + Oksigenia strings)
+        run: |
+          mkdir -p src/assets/lang
+          LANGVERSION=5.2 bash scripts/update_langpacks.sh
+          node scripts/oksigenia-merge-lang.mjs
+
+      - name: Build the app plugin and the web assets
+        run: |
+          npm run prod --prefix cordova-plugin-moodleapp
+          npm run build:prod
+
+      # The web build does not reference cordova.js (see oksigenia-android.yml); cordova prepare provides the file itself.
+      - name: Make cordova available to the web app
+        run: |
+          grep -q 'src="cordova.js"' www/index.html || \
+            sed -i 's#</head>#  <script src="cordova.js"></script>\n</head>#' www/index.html
+          grep -n 'cordova.js' www/index.html
+
+      - name: Pack the web assets
+        run: tar -czf www.tgz www
+
+      - name: Upload the web assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: www-testflight
+          path: www.tgz
+          retention-days: 1
+          compression-level: 0
+          if-no-files-found: error
+
+  testflight:
+    needs: web
+    runs-on: macos-26
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Show the tools
+        run: |
+          sw_vers
+          xcodebuild -version
+          pod --version
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Cordova
+        run: npm install -g cordova@13
+
+      - name: Fetch the web assets
+        uses: actions/download-artifact@v4
+        with:
+          name: www-testflight
+
+      - name: Unpack the web assets
+        run: |
+          tar -xzf www.tgz
+          rm www.tgz
+
+      - name: Build the app plugin
+        run: npm run prod --prefix cordova-plugin-moodleapp
+
+      - name: Place the Firebase config
+        env:
+          GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
+        run: |
+          echo "$GOOGLE_SERVICE_INFO_PLIST" | base64 -d > GoogleService-Info.plist
+          /usr/libexec/PlistBuddy -c 'Print :BUNDLE_ID' GoogleService-Info.plist
+          /usr/libexec/PlistBuddy -c 'Print :IS_GCM_ENABLED' GoogleService-Info.plist
+
+      - name: Number the build
+        run: |
+          CODE=$(sed -nE 's/.*android-versionCode="([0-9]+)".*/\1/p' config.xml | head -1)
+          BUILD="$CODE.${{ github.run_number }}"
+          sed -i '' -E "s/ios-CFBundleVersion=\"[^\"]*\"/ios-CFBundleVersion=\"$BUILD\"/" config.xml
+          grep -o 'ios-CFBundleVersion="[^"]*"' config.xml
+          echo "BUILD=$BUILD" >> "$GITHUB_ENV"
+
+      - name: Install the certificate and the profile
+        env:
+          P12_BASE64: ${{ secrets.IOS_DIST_P12_BASE64 }}
+          P12_PASSWORD: ${{ secrets.IOS_DIST_P12_PASSWORD }}
+          PROFILE_BASE64: ${{ secrets.IOS_PROFILE_BASE64 }}
+        run: |
+          KEYCHAIN="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD=$(openssl rand -hex 24)
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          echo "$P12_BASE64" | base64 -d > "$RUNNER_TEMP/dist.p12"
+          security import "$RUNNER_TEMP/dist.p12" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          rm -f "$RUNNER_TEMP/dist.p12"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" > /dev/null
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+          security find-identity -v -p codesigning "$KEYCHAIN"
+
+          echo "$PROFILE_BASE64" | base64 -d > "$RUNNER_TEMP/aty.mobileprovision"
+          security cms -D -i "$RUNNER_TEMP/aty.mobileprovision" > "$RUNNER_TEMP/aty-profile.plist"
+          UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$RUNNER_TEMP/aty-profile.plist")
+          echo "Profile: $(/usr/libexec/PlistBuddy -c 'Print :Name' "$RUNNER_TEMP/aty-profile.plist") $UUID"
+          # Xcode 16 and later read the second folder; older ones, the first.
+          for DIR in "$HOME/Library/MobileDevice/Provisioning Profiles" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"; do
+            mkdir -p "$DIR"
+            cp "$RUNNER_TEMP/aty.mobileprovision" "$DIR/$UUID.mobileprovision"
+          done
+          rm -f "$RUNNER_TEMP/aty.mobileprovision" "$RUNNER_TEMP/aty-profile.plist"
+          echo "PROFILE_UUID=$UUID" >> "$GITHUB_ENV"
+
+      # Manual signing with the profile: cordova writes the identity and the profile for the app target only, archives,
+      # and exports the .ipa for App Store Connect.
+      - name: Build, sign and export
+        run: |
+          mkdir -p dist
+          cat > build.json << EOF
+          {"ios": {"release": {
+            "codeSignIdentity": "Apple Distribution",
+            "developmentTeam": "$APPLE_TEAM_ID",
+            "provisioningProfile": "$PROFILE_UUID",
+            "packageType": "app-store-connect"
+          }}}
+          EOF
+          cordova build ios --device --release --buildConfig=build.json --no-telemetry --verbose > dist/build.log 2>&1 || {
+            grep -E ' error: |fatal error|BUILD FAILED|ARCHIVE FAILED|EXPORT FAILED|No profile|No signing certificate|doesn.t match' dist/build.log | sort -u | cut -c1-300 | head -60
+            tail -40 dist/build.log | cut -c1-300
+            exit 1
+          }
+          tail -5 dist/build.log
+          IPA=$(find platforms/ios/build -name '*.ipa' | head -1)
+          [ -n "$IPA" ] || { echo "No .ipa"; exit 1; }
+          echo "IPA=$IPA" >> "$GITHUB_ENV"
+          ls -la "$IPA"
+
+      - name: Check what goes to Apple
+        run: |
+          APP_DIR="$RUNNER_TEMP/ipa"
+          mkdir -p "$APP_DIR"
+          unzip -q "$IPA" -d "$APP_DIR"
+          APP=$(find "$APP_DIR/Payload" -maxdepth 1 -name '*.app' | head -1)
+          for KEY in CFBundleIdentifier CFBundleShortVersionString CFBundleVersion ITSAppUsesNonExemptEncryption; do
+            echo "$KEY: $(/usr/libexec/PlistBuddy -c "Print :$KEY" "$APP/Info.plist")"
+          done
+          codesign -d --entitlements :- "$APP" 2> /dev/null | grep -A1 -E 'aps-environment|application-identifier' || true
+          codesign -dv "$APP" 2>&1 | grep -E 'Authority=|TeamIdentifier' || true
+
+      - name: Upload to TestFlight
+        env:
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          echo "$ASC_KEY_P8_BASE64" | base64 -d > "$HOME/.appstoreconnect/private_keys/AuthKey_$ASC_KEY_ID.p8"
+          xcrun altool --upload-app --type ios --file "$IPA" --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" \
+            --output-format normal
+          echo "Build $BUILD sent. App Store Connect processes it before TestFlight offers it."
+
+      - name: Clean up the signing material
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" 2> /dev/null || true
+          rm -rf "$HOME/.appstoreconnect" build.json GoogleService-Info.plist "$RUNNER_TEMP/ipa"
+          rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/"*.mobileprovision \
+            "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/"*.mobileprovision
+
+      # Logs only: the .ipa stays out, since the repository is public.
+      - name: Upload the build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oksigenia-aty-ios-testflight-log
+          path: dist/build.log
+          retention-days: 14
+          if-no-files-found: warn
