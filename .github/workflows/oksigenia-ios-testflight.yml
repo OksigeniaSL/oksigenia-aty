@@ -116,6 +116,12 @@ jobs:
       - name: Build the app plugin
         run: npm run prod --prefix cordova-plugin-moodleapp
 
+      - name: Prepare the iOS platform
+        run: |
+          mkdir -p dist
+          cordova prepare ios --no-telemetry --verbose > dist/prepare.log 2>&1 || { tail -80 dist/prepare.log; exit 1; }
+          tail -5 dist/prepare.log
+
       - name: Place the Firebase config
         env:
           GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
@@ -176,8 +182,8 @@ jobs:
           }}}
           EOF
           cordova build ios --device --release --buildConfig=build.json --no-telemetry --verbose > dist/build.log 2>&1 || {
-            grep -E ' error: |fatal error|BUILD FAILED|ARCHIVE FAILED|EXPORT FAILED|No profile|No signing certificate|doesn.t match' dist/build.log | sort -u | cut -c1-300 | head -60
-            tail -40 dist/build.log | cut -c1-300
+            grep -E ' error: |fatal error|BUILD FAILED|ARCHIVE FAILED|EXPORT FAILED|No profile|No signing certificate|doesn.t match' dist/build.log | sort -u | cut -c1-300 | head -60 || true
+            tail -40 dist/build.log | cut -c1-300 || true
             exit 1
           }
           tail -5 dist/build.log
@@ -219,11 +225,11 @@ jobs:
             "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/"*.mobileprovision
 
       # Logs only: the .ipa stays out, since the repository is public.
-      - name: Upload the build log
+      - name: Upload the build logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: oksigenia-aty-ios-testflight-log
-          path: dist/build.log
+          path: dist/*.log
           retention-days: 14
           if-no-files-found: warn
