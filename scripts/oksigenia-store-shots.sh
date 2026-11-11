@@ -118,7 +118,7 @@ shot inicio "Hola" 120
 
 # 2. A course in the centre's colours.
 open_link "/course/view.php?id=$COURSE"
-shot marca "Módulo 1" 60
+shot marca "Participantes" 60
 
 # 4. The notifications.
 open_link "/message/output/popup/notifications.php"
