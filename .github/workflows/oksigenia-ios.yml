@@ -160,9 +160,11 @@ jobs:
           for k, v in sorted(json.load(sys.stdin).items()):
               if k.endswith("UsageDescription"):
                   print(f"{k}: {v}")'
-          LPROJ=$(find "$APP" -maxdepth 2 -name InfoPlist.strings | sort)
-          [ -n "$LPROJ" ] || { echo "No InfoPlist.strings in the bundle"; exit 1; }
-          for f in $LPROJ; do echo "== ${f#"$APP"/}"; plutil -p "$f"; done
+          # The bundle's name has a space ("Oksigenia Aty.app"): one path per line, never split on spaces.
+          [ -n "$(find "$APP" -maxdepth 2 -name InfoPlist.strings)" ] || { echo "No InfoPlist.strings in the bundle"; exit 1; }
+          find "$APP" -maxdepth 2 -name InfoPlist.strings | sort | while IFS= read -r f; do
+            echo "== ${f#"$APP"/}"; plutil -p "$f"
+          done
 
       - name: Boot the simulator
         timeout-minutes: 15
