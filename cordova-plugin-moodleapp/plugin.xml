@@ -70,7 +70,7 @@
         <framework src="AVFoundation.framework" />
 
         <config-file target="*-Info.plist" parent="NSMicrophoneUsageDescription">
-            <string>We need microphone access to record sounds so you can attach them as part of your submissions.</string>
+            <string>Aty uses the microphone to record the audio you choose to add to your work.</string>
         </config-file>
 
         <header-file src="src/ios/Diagnostic_Microphone.h" />

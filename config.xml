@@ -157,10 +157,10 @@
         <splash src="resources/ios/splash/Default@2x~universal~anyany.png" />
         <preference name="SplashScreenBackgroundColor" value="#0a2e50" />
         <edit-config file="*-Info.plist" mode="merge" target="NSCameraUsageDescription">
-            <string>We need camera access to take pictures so you can use them for changing your profile picture, attach them in your tasks submission and share them with the teachers.</string>
+            <string>Aty uses the camera to scan your organisation's QR code and to take the photos and videos you choose to add to your profile or your work.</string>
         </edit-config>
         <edit-config file="*-Info.plist" mode="merge" target="NSPhotoLibraryUsageDescription">
-            <string>We need photo library access to get pictures from there so you can use them for changing your profile picture, attach them in your tasks submission and share them with the teachers.</string>
+            <string>Aty opens your photos only to add the ones you choose to your profile or your work.</string>
         </edit-config>
         <edit-config file="*-Info.plist" mode="merge" target="UISupportsDocumentBrowser">
             <true />
@@ -168,11 +168,31 @@
         <edit-config file="*-Info.plist" mode="merge" target="CFBundleShortVersionString">
             <string>5.2.1</string>
         </edit-config>
+        <!-- The languages of the permission texts, each in resources/ios/lproj/<lang>.lproj/InfoPlist.strings; the
+             English ones are the Info.plist values above. -->
         <edit-config file="*-Info.plist" mode="overwrite" target="CFBundleLocalizations">
             <array>
                 <string>en</string>
+                <string>es</string>
+                <string>ca</string>
+                <string>gl</string>
+                <string>eu</string>
+                <string>pt-PT</string>
+                <string>pt-BR</string>
+                <string>fr</string>
+                <string>de</string>
+                <string>it</string>
             </array>
         </edit-config>
+        <resource-file src="resources/ios/lproj/es.lproj/InfoPlist.strings" target="es.lproj/InfoPlist.strings" />
+        <resource-file src="resources/ios/lproj/ca.lproj/InfoPlist.strings" target="ca.lproj/InfoPlist.strings" />
+        <resource-file src="resources/ios/lproj/gl.lproj/InfoPlist.strings" target="gl.lproj/InfoPlist.strings" />
+        <resource-file src="resources/ios/lproj/eu.lproj/InfoPlist.strings" target="eu.lproj/InfoPlist.strings" />
+        <resource-file src="resources/ios/lproj/pt-PT.lproj/InfoPlist.strings" target="pt-PT.lproj/InfoPlist.strings" />
+        <resource-file src="resources/ios/lproj/pt-BR.lproj/InfoPlist.strings" target="pt-BR.lproj/InfoPlist.strings" />
+        <resource-file src="resources/ios/lproj/fr.lproj/InfoPlist.strings" target="fr.lproj/InfoPlist.strings" />
+        <resource-file src="resources/ios/lproj/de.lproj/InfoPlist.strings" target="de.lproj/InfoPlist.strings" />
+        <resource-file src="resources/ios/lproj/it.lproj/InfoPlist.strings" target="it.lproj/InfoPlist.strings" />
         <config-file parent="FIREBASE_ANALYTICS_COLLECTION_DEACTIVATED" target="*-Info.plist">
             <string>YES</string>
         </config-file>
@@ -196,7 +216,7 @@
             <false />
         </config-file>
         <config-file parent="NSCrossWebsiteTrackingUsageDescription" target="*-Info.plist">
-            <string>This app needs third party cookies to correctly render embedded content from the Moodle site.</string>
+            <string>Lets content embedded from your site, such as H5P, open with your session.</string>
         </config-file>
         <config-file parent="ITSAppUsesNonExemptEncryption" target="*-Info.plist">
             <false />

@@ -16,6 +16,7 @@ on:
     paths:
       - '.github/workflows/oksigenia-ios.yml'
       - 'config.xml'
+      - 'resources/ios/lproj/**'
       - 'GoogleService-Info.plist'
       - 'package.json'
       - 'package-lock.json'
@@ -147,6 +148,21 @@ jobs:
             exit 1
           }
           tail -5 dist/build.log
+
+      # The texts iOS shows when the app asks for a permission, and each language they come in: every *UsageDescription
+      # of Info.plist, and every <lang>.lproj/InfoPlist.strings the build put in the bundle (none means iOS shows English).
+      - name: Show the permission texts and their languages
+        run: |
+          APP=$(find platforms/ios/build -maxdepth 2 -type d -name '*.app' | head -1)
+          plutil -extract CFBundleLocalizations json -o - "$APP/Info.plist"; echo
+          plutil -convert json -o - "$APP/Info.plist" | python3 -c '
+          import json, sys
+          for k, v in sorted(json.load(sys.stdin).items()):
+              if k.endswith("UsageDescription"):
+                  print(f"{k}: {v}")'
+          LPROJ=$(find "$APP" -maxdepth 2 -name InfoPlist.strings | sort)
+          [ -n "$LPROJ" ] || { echo "No InfoPlist.strings in the bundle"; exit 1; }
+          for f in $LPROJ; do echo "== ${f#"$APP"/}"; plutil -p "$f"; done
 
       - name: Boot the simulator
         timeout-minutes: 15

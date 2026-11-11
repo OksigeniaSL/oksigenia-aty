@@ -370,5 +370,17 @@
     "core.contentlinks.confirmlinktosite": "Este enlace te lleva a:<br><br><strong>{{url}}</strong><br><br>Sigue solo si confías en este sitio.",
     "core.contentlinks.opensite": "Abrir el sitio",
     "core.view": "Ver",
-    "core.warnopeninbrowser": "<p>Vas a salir de la app para abrir esta dirección en el navegador del móvil. ¿Quieres seguir?</p>\n<p><b>{{url}}</b></p>"
+    "core.warnopeninbrowser": "<p>Vas a salir de la app para abrir esta dirección en el navegador del móvil. ¿Quieres seguir?</p>\n<p><b>{{url}}</b></p>",
+    "addon.block_myoverview.nocoursesenrolleddescription": "Explora los cursos disponibles y empieza a aprender.",
+    "addon.mod_data.locationpermissiondenied": "No se ha podido obtener permiso para acceder a tu ubicación.",
+    "addon.storagemanager.deleteallsitedatainfo": "Esta acción borrará todos los datos de '{{name}}', incluidos los cursos descargados y los datos que te permiten trabajar sin conexión a Internet.",
+    "core.confirmcanceledit": "¿Seguro que quieres salir de esta página? Se perderán todos los cambios.",
+    "core.confirmleaveunknownchanges": "¿Seguro que quieres salir de esta página? Si tienes cambios sin guardar, se perderán.",
+    "core.course.activitynotyetviewableremoteaddon": "Tu centro u organización ha instalado un plugin que la app aún no admite.",
+    "core.errorsitesupport": "Si el problema continúa, ponte en contacto con el soporte del sitio.",
+    "core.networkerroriframemsg": "Este contenido no está disponible sin conexión. Conéctate a Internet e inténtalo de nuevo.",
+    "core.settings.syncdatasaver": "Ahorro de datos: sincronizar solo con Wi-Fi",
+    "core.turnonnotificationsmessage": "¿Quieres recibir notificaciones de tus actividades y tareas?",
+    "core.user.privateprofiledetails": "Los datos del perfil son privados por tu rol o por los ajustes del sitio.",
+    "core.whyisthishappening": "¿Por qué pasa esto?"
 }

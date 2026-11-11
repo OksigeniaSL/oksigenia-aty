@@ -1,0 +1,6 @@
+/* The permission texts iOS shows, in this language (the English ones are in config.xml). */
+"NSCameraUsageDescription" = "Aty-k kamera erabiltzen du zure ikastetxe edo erakundearen QR kodea eskaneatzeko eta zure profilera edo lanera gehitu nahi dituzun argazkiak eta bideoak ateratzeko.";
+"NSPhotoLibraryUsageDescription" = "Aty-k zure argazkiak irekitzen ditu, aukeratzen dituzunak zure profilera edo lanera gehitzeko soilik.";
+"NSMicrophoneUsageDescription" = "Aty-k mikrofonoa erabiltzen du zure lanera gehitu nahi duzun audioa grabatzeko.";
+"NSFaceIDUsageDescription" = "Aty-k Face ID erabiltzen du, PINa idatzi gabe ireki ahal izateko.";
+"NSCrossWebsiteTrackingUsageDescription" = "Zure guneko eduki txertatua, H5P-ak adibidez, zure saioarekin irekitzea ahalbidetzen du.";

@@ -221,7 +221,7 @@
             },
             "cordova-plugin-device": {},
             "cordova-plugin-fingerprint-aio": {
-                "FACEID_USAGE_DESCRIPTION": "Use Face ID to sign in to the app"
+                "FACEID_USAGE_DESCRIPTION": "Aty uses Face ID so you can open it without typing your PIN."
             },
             "cordova-plugin-local-notification": {
                 "ANDROID_SUPPORT_V4_VERSION": "26.+"

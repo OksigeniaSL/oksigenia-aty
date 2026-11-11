@@ -1,0 +1,6 @@
+/* The permission texts iOS shows, in this language (the English ones are in config.xml). */
+"NSCameraUsageDescription" = "Aty usa la cámara para escanear el código QR de tu centro u organización y para hacer las fotos y los vídeos que quieras añadir a tu perfil o a tu trabajo.";
+"NSPhotoLibraryUsageDescription" = "Aty abre tus fotos solo para añadir a tu perfil o a tu trabajo las que elijas.";
+"NSMicrophoneUsageDescription" = "Aty usa el micrófono para grabar el audio que quieras añadir a tu trabajo.";
+"NSFaceIDUsageDescription" = "Aty usa Face ID para que puedas abrirla sin escribir tu PIN.";
+"NSCrossWebsiteTrackingUsageDescription" = "Permite que el contenido incrustado de tu sitio, como los H5P, se abra con tu sesión.";
