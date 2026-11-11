@@ -6,10 +6,22 @@
 #
 # It takes much longer than Android, and kit/ci-verde.sh waits for every workflow of a commit, so it does not run on every
 # push: on demand, on an Oksigenia tag, and when something that changes the native build changes.
+#
+# Started by hand with a demo site, it also takes the App Store screenshots (scripts/oksigenia-store-shots.sh): a 6.9"
+# iPhone, signed in with the token in the repository secrets ATY_SHOTS_TOKEN and ATY_SHOTS_PRIVATETOKEN.
 name: Oksigenia Aty iOS simulator
 
 on:
   workflow_dispatch:
+    inputs:
+      shots_site:
+        description: 'For App Store screenshots: https address of the demo site (empty: no store screenshots)'
+        required: false
+        default: ''
+      shots_course:
+        description: 'For App Store screenshots: id of the course of the second scene'
+        required: false
+        default: ''
   push:
     branches: [oksigenia-v52]
     tags: ['oksigenia-v*']
@@ -240,6 +252,36 @@ jobs:
           find "$HOME/Library/Logs/DiagnosticReports" -name "*$EXECUTABLE*" -exec cp {} dist/logs/ \; 2> /dev/null || true
           ls -la dist/screenshots dist/logs
           exit "$STATUS"
+
+      # The App Store screenshots, only when started by hand with a demo site. idb taps the one confirmation by its label.
+      - name: Set up Python for idb
+        if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' && inputs.shots_site != '' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install idb
+        if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' && inputs.shots_site != '' }}
+        timeout-minutes: 20
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+        run: |
+          brew tap facebook/fb
+          brew install facebook/fb/idb-companion
+          python -m pip install fb-idb
+
+      - name: Take the App Store screenshots
+        if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' && inputs.shots_site != '' }}
+        timeout-minutes: 30
+        env:
+          SITE: ${{ inputs.shots_site }}
+          COURSE: ${{ inputs.shots_course }}
+          TOKEN: ${{ secrets.ATY_SHOTS_TOKEN }}
+          PRIVATETOKEN: ${{ secrets.ATY_SHOTS_PRIVATETOKEN }}
+        run: |
+          APP=$(find platforms/ios/build -maxdepth 2 -type d -name '*.app' | head -1)
+          APP="$APP" OUT=dist/store bash scripts/oksigenia-store-shots.sh
 
       - name: Shut the simulator down
         if: always()
