@@ -1,9 +1,9 @@
 <div class="aty-pin" [class.shaking]="shaking()">
-    @if (title()) {
-        <h2 class="aty-pin-title">{{ title() }}</h2>
+    @if (shownTitle()) {
+        <h2 class="aty-pin-title">{{ shownTitle() }}</h2>
     }
-    @if (error() || message()) {
-        <p class="aty-pin-message" [class.error]="error()">{{ error() || message() }}</p>
+    @if (error() || shownMessage()) {
+        <p class="aty-pin-message" [class.error]="error()">{{ error() || shownMessage() }}</p>
     }
 
     <div class="aty-pin-dots" role="status" aria-live="polite">
@@ -59,7 +59,7 @@
             @if (busy()) {
                 <ion-spinner name="crescent" aria-hidden="true" />
             } @else {
-                {{ okText() }}
+                {{ shownOkText() }}
             }
         </ion-button>
     </div>

@@ -23,6 +23,7 @@ import { CoreErrorHelper } from '@services/error-helper';
 import { CoreLang } from '@services/lang';
 import { CoreLoadings } from '@services/overlays/loadings';
 import { CoreModals } from '@services/overlays/modals';
+import { CoreToasts, ToastDuration } from '@services/overlays/toasts';
 import { CoreSites } from '@services/sites';
 import { CoreCustomURLSchemesHandleError, CoreCustomURLSchemesParams } from '@services/urlschemes';
 import { CoreWS, HttpRequestOptions } from '@services/ws';
@@ -60,10 +61,11 @@ export type AtyPinUi = {
     forgot?: string;
     biometric?: string;
     biometricask?: string;
-    confirmtitle?: string; // Setting a PIN: the second pad, to type it again.
+    confirmtitle?: string; // Setting a PIN: the same pad asks for it again, to confirm it.
     confirmmessage?: string;
     confirmok?: string;
     mismatch?: string;
+    notsaved?: string; // Said when the new PIN could not be saved; sites whose plugin predates it send none.
 };
 
 /**
@@ -343,11 +345,13 @@ export class AtyLoginService {
      *
      * @param ui The localised wording for the pad (from the server); a non-empty forgot shows the recovery link.
      * @param validator Optional check that keeps the pad open and shakes it on a wrong PIN.
+     * @param confirm Setting a new PIN: the pad asks for it twice with the confirmation wording of the ui.
      * @returns { pin } (undefined when cancelled) or { forgot: true }.
      */
     protected async promptPin(
         ui: AtyPinUi,
         validator?: (pin: string) => Promise<{ ok: boolean; message?: string }>,
+        confirm = false,
     ): Promise<{ pin?: string; forgot?: boolean }> {
         const { AtyPinPadComponent, ATY_PIN_FORGOT } = await import('@/core/components/aty-pin-pad/aty-pin-pad');
 
@@ -365,6 +369,10 @@ export class AtyLoginService {
                     cancelText: ui.cancel ?? '',
                     forgotText: ui.forgot ?? '',
                     validator,
+                    confirmTitle: confirm ? ui.confirmtitle ?? '' : '',
+                    confirmMessage: confirm ? ui.confirmmessage ?? '' : '',
+                    confirmOkText: confirm ? ui.confirmok ?? '' : '',
+                    mismatchText: confirm ? ui.mismatch ?? '' : '',
                 },
                 cssClass: 'aty-pin-modal',
                 backdropDismiss: true,
@@ -388,27 +396,23 @@ export class AtyLoginService {
      * @param ui The localised wording for the pad (from the server).
      */
     protected async offerPinSetup(siteUrl: string, token: string, ui: AtyPinUi): Promise<void> {
-        const { pin } = await this.promptPin(ui);
+        // A new PIN is typed twice, in the same pad, which shakes until both match; cancelling skips the PIN. A site whose
+        // plugin predates the confirmation sends no wording for it, and then the PIN is set at once.
+        const { pin } = await this.promptPin(ui, undefined, true);
         if (!pin || !/^\d{4,8}$/.test(pin)) {
             return; // Skipped or not a usable PIN; let them set it later from their profile.
-        }
-
-        // A new PIN is typed twice. The second pad stays open and shakes until it matches; cancelling it skips the PIN.
-        // A site whose plugin predates the confirmation sends no wording for it, and then the PIN is set at once.
-        if (ui.confirmtitle) {
-            const confirmation = await this.promptPin(
-                { title: ui.confirmtitle, message: ui.confirmmessage, ok: ui.confirmok, cancel: ui.cancel },
-                async (candidate) => candidate === pin ? { ok: true } : { ok: false, message: ui.mismatch },
-            );
-            if (confirmation.pin !== pin) {
-                return;
-            }
         }
 
         try {
             await CoreWS.call('local_oksigeniaaty_set_pin', { pin }, { wsToken: token, siteUrl });
         } catch {
-            return; // Not critical: they stay signed in and can set a PIN another time.
+            // Not critical: they stay signed in and can set a PIN another time. But say so, or they would trust a PIN
+            // that does not exist.
+            if (ui.notsaved) {
+                CoreToasts.show({ message: ui.notsaved, duration: ToastDuration.LONG });
+            }
+
+            return;
         }
 
         // The app never proposes the fingerprint or face (many people prefer not to use biometrics): whoever wants it

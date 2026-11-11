@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, ElementRef, computed, inject, input, signal } from '@angular/core';
 
 import { CoreBaseModule } from '@/core/base.module';
 import { ModalController } from '@singletons';
@@ -22,7 +22,8 @@ import { ModalController } from '@singletons';
  * an on-screen number pad whose keys can be shuffled so a shoulder-surfer cannot read the PIN from finger positions.
  *
  * All its wording (title, message, buttons) is passed in, already localised by the server, so the app ships no PIN
- * strings of its own. It closes with the entered PIN, or with undefined when the user cancels.
+ * strings of its own. It closes with the entered PIN, or with undefined when the user cancels. A new PIN is typed twice in
+ * the same pad, which only closes once both match: two pads one after the other lost the second one on the iPhone.
  */
 /** The pad closes with this value when the user taps "forgot your PIN?". */
 export const ATY_PIN_FORGOT = '__aty_pin_forgot__';
@@ -45,6 +46,12 @@ export class AtyPinPadComponent {
     // When given, the entered PIN is checked against the server without closing the pad: a wrong PIN shakes the pad
     // in place instead of signing in. Without it (setting a new PIN), the pad just returns what was typed.
     readonly validator = input<((pin: string) => Promise<AtyPinValidation>) | undefined>(undefined);
+    // Setting a new PIN: with a confirmation title, the pad asks for the PIN again before closing, and shakes with the
+    // mismatch message until both match.
+    readonly confirmTitle = input('');
+    readonly confirmMessage = input('');
+    readonly confirmOkText = input('');
+    readonly mismatchText = input('');
 
     readonly pin = signal('');
     readonly shuffled = signal(false);
@@ -52,6 +59,15 @@ export class AtyPinPadComponent {
     readonly error = signal('');
     readonly shaking = signal(false);
     readonly busy = signal(false);
+    // The PIN typed the first time, while the pad asks for it again.
+    readonly firstPin = signal<string | undefined>(undefined);
+
+    readonly confirming = computed(() => this.firstPin() !== undefined);
+    readonly shownTitle = computed(() => this.confirming() ? this.confirmTitle() : this.title());
+    readonly shownMessage = computed(() => this.confirming() ? this.confirmMessage() : this.message());
+    readonly shownOkText = computed(() => this.confirming() && this.confirmOkText() ? this.confirmOkText() : this.okText());
+
+    protected readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
     /** One boolean per dot: filled up to the entered length, empty after. */
     readonly dots = computed(() => {
@@ -158,7 +174,22 @@ export class AtyPinPadComponent {
 
         const validator = this.validator();
         if (!validator) {
-            ModalController.dismiss(this.pin());
+            if (this.confirmTitle() && !this.confirming()) {
+                // First time: keep it and ask for it again in the same pad.
+                this.firstPin.set(this.pin());
+                this.error.set('');
+                this.pin.set('');
+
+                return;
+            }
+
+            if (this.confirming() && this.pin() !== this.firstPin()) {
+                this.reject(this.mismatchText());
+
+                return;
+            }
+
+            this.close(this.pin());
 
             return;
         }
@@ -170,7 +201,7 @@ export class AtyPinPadComponent {
         try {
             const result = await validator(this.pin());
             if (result.ok) {
-                ModalController.dismiss(this.pin());
+                this.close(this.pin());
 
                 return;
             }
@@ -182,7 +213,15 @@ export class AtyPinPadComponent {
             this.busy.set(false);
         }
 
-        // Wrong PIN: shake, show the reason, and clear the digits once the shake is done.
+        this.reject(message);
+    }
+
+    /**
+     * Wrong PIN: shake, show the reason, and clear the digits once the shake is done.
+     *
+     * @param message Why it was rejected (may be empty).
+     */
+    protected reject(message: string): void {
         this.error.set(message);
         this.shaking.set(true);
         setTimeout(() => {
@@ -192,11 +231,27 @@ export class AtyPinPadComponent {
     }
 
     /**
+     * Close this pad's own modal. ModalController.dismiss() closes whichever modal is on top, which is not always this one.
+     *
+     * @param value What the pad closes with.
+     */
+    protected close(value?: string): void {
+        const modal = this.host.nativeElement.closest('ion-modal');
+        if (modal) {
+            modal.dismiss(value);
+
+            return;
+        }
+
+        ModalController.dismiss(value);
+    }
+
+    /**
      * Close without a PIN.
      */
     cancel(): void {
         if (!this.busy()) {
-            ModalController.dismiss(undefined);
+            this.close(undefined);
         }
     }
 
@@ -205,7 +260,7 @@ export class AtyPinPadComponent {
      */
     forgot(): void {
         if (!this.busy()) {
-            ModalController.dismiss(ATY_PIN_FORGOT);
+            this.close(ATY_PIN_FORGOT);
         }
     }
 
