@@ -109,11 +109,17 @@ scene qr "" "Escanear código QR"
 # 1. Signed in with the token: the app asks before adding the site, then lands on the site's home.
 scene inicio "oksigeniaaty://$SITE?token=$TOKEN&privatetoken=$PRIVATETOKEN" "Hola"
 
-# 2. A course in the centre's colours; 4. the notifications; 5. the month; 6. my courses.
+# 6. The same home, down to its own «Mis cursos» cards: a site may hide Moodle's courses tab, and then /my/courses.php
+# opens as a web page.
+for _ in 1 2; do idb ui swipe 220 760 220 260 --duration 0.4; sleep 2; done
+sleep 6
+xcrun simctl io "$DEV" screenshot "$OUT/cursos.png" > /dev/null
+log "cursos: the end of the home"
+
+# 2. A course in the centre's colours; 4. the notifications; 5. the month.
 scene marca "$(link "/course/view.php?id=$COURSE")" "Participantes"
 scene avisos "$(link /message/output/popup/notifications.php)" "Notificaciones"
 scene agenda "$(link "/calendar/view.php?view=month")" "Calendario"
-scene cursos "$(link /my/courses.php)" "Mis cursos"
 
 for f in "$OUT"/*.png; do log "$(basename "$f"): $(sips -g pixelWidth -g pixelHeight "$f" | awk '/pixel/{printf "%s ", $2}')"; done
 xcrun simctl shutdown "$DEV" || true
