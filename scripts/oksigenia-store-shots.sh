@@ -111,9 +111,13 @@ for e in json.load(sys.stdin):
   return 1
 }
 
+# simctl openurl waits until iOS's prompt is answered, so it runs in the background while «Abrir» is tapped.
 open_url() {
-  xcrun simctl openurl "$DEV" "$1"
+  local pid
+  xcrun simctl openurl "$DEV" "$1" &
+  pid=$!
   allow_open || echo "No «Abrir» from iOS for this link"
+  wait "$pid" || echo "The link did not open"
 }
 
 # shot NAME TEXT SECONDS: once TEXT is on the screen, lets images and fonts settle and takes the screenshot.
