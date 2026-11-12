@@ -11,8 +11,8 @@
 #
 # The app signs in through its URL scheme with the token, then each scene is opened with an app link
 # (oksigeniaaty://link=...), so nothing is typed. The only tap is the app's own confirmation before adding the site,
-# done with idb by the button's label. A scene that does not appear leaves the screen as it was and an accessibility dump
-# in the logs, and the script fails at the end.
+# done with idb, found on the screen with macOS's text recognition, and iOS's own «Abrir» each time a link opens the app.
+# A scene that does not appear is still shot as the screen stands, and the script fails at the end.
 set -uo pipefail
 OUT=${OUT:-dist/store}
 LOGS=$(dirname "$OUT")/logs
@@ -49,35 +49,27 @@ idb_companion --udid "$DEV" > "$LOGS/idb-companion.log" 2>&1 &
 sleep 8
 idb connect localhost 10882 > /dev/null
 
-# The accessibility tree of the screen, as JSON.
-describe() { idb ui describe-all --json 2> /dev/null; }
+# The app's screens are web content, which the accessibility tree does not show: they are read with macOS's text
+# recognition (scripts/oksigenia-ocr.swift). iOS's own alerts, such as «¿Abrir en Oksigenia Aty?», are native and do show.
+OCR=$(mktemp -d)/ocr
+swiftc -O "$(dirname "$0")/oksigenia-ocr.swift" -o "$OCR"
+SCREEN=$(mktemp -d)/screen.png
 
-# Prints the centre "x y" of the first element whose label or value contains the text, or nothing.
+# Prints the centre "x y" of the text on the screen, in points (the screenshot is at 3x), or fails.
 find_text() {
-  describe | python3 -c '
-import json, sys
-want = sys.argv[1].lower()
-raw = sys.stdin.read().strip()
-try:
-    items = json.loads(raw)
-except ValueError:
-    items = [json.loads(l) for l in raw.splitlines() if l.strip().startswith("{")]
-if isinstance(items, dict):
-    items = [items]
-for e in items:
-    text = " ".join(str(e.get(k) or "") for k in ("AXLabel", "AXValue", "title", "label")).lower()
-    f = e.get("frame") or {}
-    if want in text and f.get("width"):
-        print(round(f["x"] + f["width"] / 2), round(f["y"] + f["height"] / 2))
-        break
-' "$1"
+  local at
+  xcrun simctl io "$DEV" screenshot "$SCREEN" > /dev/null 2>&1 || return 1
+  at=$("$OCR" "$SCREEN" "$1") || return 1
+  # shellcheck disable=SC2086
+  set -- $at
+  echo $(($1 / 3)) $(($2 / 3))
 }
 
 # Waits up to $2 seconds for the text; returns 1 if it never shows.
 wait_text() {
   local until=$((SECONDS + $2))
   while (( SECONDS < until )); do
-    [ -n "$(find_text "$1")" ] && return 0
+    find_text "$1" > /dev/null && return 0
     sleep 2
   done
   return 1
@@ -86,9 +78,36 @@ wait_text() {
 tap_text() {
   local at
   wait_text "$1" "$2" || return 1
-  at=$(find_text "$1")
+  at=$(find_text "$1") || return 1
   # shellcheck disable=SC2086
   idb ui tap $at
+}
+
+# iOS asks «¿Abrir en Oksigenia Aty?» each time a link opens the app: taps its «Abrir» button, found by its label.
+allow_open() {
+  local until=$((SECONDS + 20)) at
+  while (( SECONDS < until )); do
+    at=$(idb ui describe-all --json 2> /dev/null | python3 -c '
+import json, sys
+for e in json.load(sys.stdin):
+    f = e.get("frame") or {}
+    if e.get("type") == "Button" and (e.get("AXLabel") or "").strip() == "Abrir" and f.get("width"):
+        print(round(f["x"] + f["width"] / 2), round(f["y"] + f["height"] / 2))
+        break
+' 2> /dev/null)
+    if [ -n "$at" ]; then
+      # shellcheck disable=SC2086
+      idb ui tap $at
+      return 0
+    fi
+    sleep 1
+  done
+  return 1
+}
+
+open_url() {
+  xcrun simctl openurl "$DEV" "$1"
+  allow_open || echo "No «Abrir» from iOS for this link"
 }
 
 # shot NAME TEXT SECONDS: once TEXT is on the screen, lets images and fonts settle and takes the screenshot.
@@ -97,23 +116,22 @@ shot() {
     sleep 6
   else
     echo "$1: «$2» did not appear"
-    describe > "$LOGS/store-$1.json"
     FAILED=1
   fi
   xcrun simctl io "$DEV" screenshot "$OUT/$1.png" > /dev/null
 }
 
 open_link() {
-  xcrun simctl openurl "$DEV" "oksigeniaaty://link=$SITE$1"
+  open_url "oksigeniaaty://link=$SITE$1"
 }
 
 # 3. The first screen: connect to your platform, with the QR button.
 xcrun simctl launch "$DEV" "$BUNDLE_ID" > /dev/null
-shot qr "QR" 120
+shot qr "Escanear" 120
 
 # 1. Signed in with the token: the app asks before adding a site, then lands on the site's home.
-xcrun simctl openurl "$DEV" "oksigeniaaty://$SITE?token=$TOKEN&privatetoken=$PRIVATETOKEN"
-tap_text "Abrir el sitio" 60 || { echo "No confirmation to tap"; describe > "$LOGS/store-confirm.json"; }
+open_url "oksigeniaaty://$SITE?token=$TOKEN&privatetoken=$PRIVATETOKEN"
+tap_text "Abrir el sitio" 60 || { echo "No confirmation to tap"; cp "$SCREEN" "$LOGS/store-confirm.png"; }
 shot inicio "Hola" 120
 
 # 2. A course in the centre's colours.
