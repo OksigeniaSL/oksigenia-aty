@@ -55,11 +55,12 @@ OCR=$(mktemp -d)/ocr
 swiftc -O "$(dirname "$0")/oksigenia-ocr.swift" -o "$OCR"
 SCREEN=$(mktemp -d)/screen.png
 
-# Prints the centre "x y" of the text on the screen, in points (the screenshot is at 3x), or fails.
+# Prints the centre "x y" of the text on the screen, in points (the screenshot is at 3x), or fails. A second argument
+# "exact" asks for a line that is the text and nothing else.
 find_text() {
   local at
   xcrun simctl io "$DEV" screenshot "$SCREEN" > /dev/null 2>&1 || return 1
-  at=$("$OCR" "$SCREEN" "$1") || return 1
+  at=$("$OCR" "$SCREEN" "$@") || return 1
   # shellcheck disable=SC2086
   set -- $at
   echo $(($1 / 3)) $(($2 / 3))
@@ -79,13 +80,14 @@ tap_text() {
   local at
   wait_text "$1" "$2" || return 1
   at=$(find_text "$1") || return 1
+  echo "$(date -u +%T) «$1» at $at"
   # shellcheck disable=SC2086
   idb ui tap $at
 }
 
 # iOS asks «¿Abrir en Oksigenia Aty?» each time a link opens the app: taps its «Abrir» button, found by its label.
 allow_open() {
-  local until=$((SECONDS + 20)) at
+  local until=$((SECONDS + 60)) at
   while (( SECONDS < until )); do
     at=$(idb ui describe-all --json 2> /dev/null | python3 -c '
 import json, sys
@@ -95,9 +97,13 @@ for e in json.load(sys.stdin):
         print(round(f["x"] + f["width"] / 2), round(f["y"] + f["height"] / 2))
         break
 ' 2> /dev/null)
+    # Also on the screen itself, in case the accessibility tree is slow to show the alert.
+    [ -n "$at" ] || at=$(find_text "Abrir" exact)
     if [ -n "$at" ]; then
+      echo "$(date -u +%T) iOS «Abrir» at $at"
       # shellcheck disable=SC2086
       idb ui tap $at
+      sleep 2
       return 0
     fi
     sleep 1
@@ -113,6 +119,7 @@ open_url() {
 # shot NAME TEXT SECONDS: once TEXT is on the screen, lets images and fonts settle and takes the screenshot.
 shot() {
   if wait_text "$2" "$3"; then
+    echo "$(date -u +%T) $1: «$2» on the screen"
     sleep 6
   else
     echo "$1: «$2» did not appear"

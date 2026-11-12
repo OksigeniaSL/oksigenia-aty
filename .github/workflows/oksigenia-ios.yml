@@ -273,7 +273,7 @@ jobs:
 
       - name: Take the App Store screenshots
         if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' && inputs.shots_site != '' }}
-        timeout-minutes: 30
+        timeout-minutes: 50
         env:
           SITE: ${{ inputs.shots_site }}
           COURSE: ${{ inputs.shots_course }}

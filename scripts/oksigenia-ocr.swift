@@ -1,17 +1,18 @@
 // Finds a text in a screenshot with macOS's own text recognition (Vision), for scripts/oksigenia-store-shots.sh: the
 // app's screens are web content, which the simulator's accessibility tree does not show.
 //
-//   swiftc -O oksigenia-ocr.swift -o ocr && ./ocr screen.png "Abrir el sitio"
+//   swiftc -O oksigenia-ocr.swift -o ocr && ./ocr screen.png "Abrir el sitio" [exact]
 //
-// Prints "x y", the centre of the text in image pixels, and exits 0; exits 1 when the text is not on the screen.
+// Prints "x y", the centre of the text in image pixels, and exits 0; exits 1 when the text is not on the screen. With
+// "exact", only a line that is the text and nothing else counts: a button «Abrir» under a title «¿Abrir en …?».
 import AppKit
 import Foundation
 import Vision
 
 let args = CommandLine.arguments
-guard args.count == 3, let image = NSImage(contentsOfFile: args[1]),
+guard args.count == 3 || args.count == 4, let image = NSImage(contentsOfFile: args[1]),
       let cg = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
-    FileHandle.standardError.write("usage: ocr <image> <text>\n".data(using: .utf8)!)
+    FileHandle.standardError.write("usage: ocr <image> <text> [exact]\n".data(using: .utf8)!)
     exit(2)
 }
 
@@ -22,7 +23,12 @@ request.usesLanguageCorrection = false
 try VNImageRequestHandler(cgImage: cg).perform([request])
 
 let width = Double(cg.width), height = Double(cg.height)
+let exact = args.count == 4
 for observation in request.results ?? [] {
+    if exact, let line = observation.topCandidates(1).first,
+       line.string.trimmingCharacters(in: .whitespaces).compare(args[2], options: [.caseInsensitive, .diacriticInsensitive]) != .orderedSame {
+        continue
+    }
     guard let candidate = observation.topCandidates(1).first,
           let range = candidate.string.range(of: args[2], options: [.caseInsensitive, .diacriticInsensitive]) else {
         continue
