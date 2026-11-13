@@ -317,6 +317,9 @@ jobs:
            "encrypted": "1", "notId": "4711", "site": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
            "sitefullname": "$(head -c 70 /dev/urandom | base64)", "smallmessage": "$(head -c 90 /dev/urandom | base64)"}
           EOF
+          # iOS knows the extension once the app is installed: its Info.plist and principal class are right.
+          xcrun simctl spawn "$UDID" pluginkit -mAvvv -p com.apple.usernotifications.service 2>&1 | tee dist/logs/pluginkit.txt | head -20
+          grep -q "$BUNDLE_ID.NotificationService" dist/logs/pluginkit.txt && echo "iOS has the extension registered."
           xcrun simctl terminate "$UDID" "$BUNDLE_ID" 2> /dev/null || true
           START=$(date '+%Y-%m-%d %H:%M:%S')
           xcrun simctl push "$UDID" "$BUNDLE_ID" dist/notice.apns
@@ -324,11 +327,12 @@ jobs:
           xcrun simctl io "$UDID" screenshot dist/screenshots/notice-banner.png
           sleep 4
           xcrun simctl io "$UDID" screenshot dist/screenshots/notice-later.png
-          xcrun simctl spawn "$UDID" log show --start "$START" --style compact \
-            --predicate 'subsystem == "com.oksigenia.aty.NotificationService" OR process == "NotificationService"' \
+          xcrun simctl spawn "$UDID" log show --start "$START" --info --debug --style compact \
+            --predicate 'subsystem == "com.oksigenia.aty.NotificationService" OR process == "NotificationService" OR eventMessage CONTAINS[c] "NotificationService"' \
             > dist/logs/notification-service.log || true
-          cat dist/logs/notification-service.log | cut -c1-300 | tail -30
+          cut -c1-300 dist/logs/notification-service.log | tail -40
           grep -q 'generic text stays' dist/logs/notification-service.log && echo "The extension ran and left the generic text."
+          grep -q 'generic text stays' dist/logs/notification-service.log || echo "No sign of the extension in the log: simctl push may not run it."
 
       # The App Store screenshots, only when started by hand with a demo site. idb taps the one confirmation by its label.
       - name: Set up Python for idb
