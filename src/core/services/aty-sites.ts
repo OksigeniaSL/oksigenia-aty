@@ -19,6 +19,7 @@ import { CoreWS } from '@services/ws';
 import { Translate } from '@singletons';
 import { CoreLogger } from '@static/logger';
 import { CoreUrl } from '@static/url';
+import { CoreConstants } from '../constants';
 
 /**
  * Oksigenia Aty only opens the Moodle sites that Oksigenia hosts.
@@ -62,13 +63,32 @@ export class AtySites {
      * @param siteUrl The site's URL, with or without protocol.
      */
     static async assertAllowed(siteUrl: string): Promise<void> {
-        if (await AtySites.isAllowed(siteUrl)) {
+        const answer = await AtySites.check(siteUrl);
+        if (answer === 'yes') {
             return;
+        }
+
+        // Never seen a list (a first start with no connection, a captive portal): say so, instead of telling the user that
+        // their own school is not one of Oksigenia's.
+        if (answer === 'unknown') {
+            throw new CoreError(Translate.instant('core.aty.sitecheckfailed'), {
+                debug: { code: 'atysitecheckfailed', details: `URL: ${siteUrl}` },
+            });
         }
 
         throw new CoreError(Translate.instant('core.aty.sitenotallowed'), {
             debug: { code: 'atysitenotallowed', details: `URL: ${siteUrl}` },
         });
+    }
+
+    /**
+     * Whether a site is the local demo on this computer, which only builds for development may open.
+     *
+     * @param siteUrl The site's URL, with or without protocol.
+     * @returns Whether it is, in a build that allows it.
+     */
+    static isLoopback(siteUrl: string): boolean {
+        return !CoreConstants.BUILD.isProduction && AtySites.LOOPBACK.includes(AtySites.host(siteUrl));
     }
 
     /**
@@ -78,31 +98,47 @@ export class AtySites {
      * @returns Whether the app may open it.
      */
     static async isAllowed(siteUrl: string): Promise<boolean> {
+        return (await AtySites.check(siteUrl)) === 'yes';
+    }
+
+    /**
+     * Whether a site is on the list: yes, no, or unknown when no list has ever been verified on this phone.
+     *
+     * @param siteUrl The site's URL, with or without protocol.
+     * @returns The answer.
+     */
+    protected static async check(siteUrl: string): Promise<'yes' | 'no' | 'unknown'> {
         if (!AtySites.isActive()) {
-            return true;
+            return 'yes';
         }
 
         const host = AtySites.host(siteUrl);
         if (!host) {
-            return false;
+            return 'no';
         }
-        if (AtySites.LOOPBACK.includes(host)) {
-            return true;
+        // The local demo, only in a build for development: a published app opens no address on the phone itself, where
+        // another app could serve a sign-in page dressed as anyone.
+        if (AtySites.isLoopback(siteUrl)) {
+            return 'yes';
         }
 
         const digest = await AtySites.sha256Hex(host);
         const cached = await AtySites.cached();
         if (cached && cached.expires * 1000 > Date.now() && cached.sites.includes(digest)) {
-            return true;
+            return 'yes';
         }
 
         const fresh = await AtySites.download();
         if (fresh) {
-            return fresh.sites.includes(digest);
+            return fresh.sites.includes(digest) ? 'yes' : 'no';
         }
 
         // Offline, or the registry is down: trust the last good list, even when it has expired.
-        return !!cached?.sites.includes(digest);
+        if (cached) {
+            return cached.sites.includes(digest) ? 'yes' : 'no';
+        }
+
+        return 'unknown';
     }
 
     /**

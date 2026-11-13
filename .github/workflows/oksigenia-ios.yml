@@ -116,7 +116,7 @@ jobs:
         run: npm ci
 
       - name: Install Cordova
-        run: npm install -g cordova@13
+        run: npm install -g cordova@13.0.0
 
       - name: Fetch the web assets
         uses: actions/download-artifact@v4
@@ -269,7 +269,7 @@ jobs:
         run: |
           brew tap facebook/fb
           brew install facebook/fb/idb-companion
-          python -m pip install fb-idb
+          python -m pip install fb-idb==1.1.7
 
       - name: Take the App Store screenshots
         if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' && inputs.shots_site != '' }}

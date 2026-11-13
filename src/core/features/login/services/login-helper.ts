@@ -377,6 +377,13 @@ export class CoreLoginHelperProvider {
      * @returns Promise resolved with boolean: whether is one of the fixed sites.
      */
     async isSiteUrlAllowed(siteUrl: string, checkSiteFinder = true): Promise<boolean> {
+        // Oksigenia Aty: with the list in force, it alone says which sites may be opened (links with a token, loading a
+        // saved site, the site QR...). Imported lazily, as in hasSiteAllowlist.
+        const { AtySites } = await import('@services/aty-sites');
+        if (AtySites.isActive()) {
+            return AtySites.isAllowed(siteUrl);
+        }
+
         const sites = await this.getAvailableSites();
 
         if (sites.length) {

@@ -375,7 +375,12 @@ export class CoreSitePluginsInitService {
      * @param plugins The plugins to load.
      */
     protected async loadSitePlugins(plugins: CoreSitePluginsPlugin[]): Promise<void> {
-        await CoreSites.deleteTokensFromOtherSites();
+        // Oksigenia Aty: the sites on Oksigenia's list are trusted with each other's tokens only while every plugin that runs
+        // its code in the app is Oksigenia's. A plugin of anyone else, in one school's site, would run in the same app as
+        // the accounts of another school (a family with children in both): then the other sites' tokens go, as in Moodle's
+        // own app.
+        const onlyOurs = plugins.every((plugin) => /^[a-z]+_oksigenia[a-z]*$/.test(plugin.component));
+        await CoreSites.deleteTokensFromOtherSites(!onlyOurs);
 
         this.courseRestrictHandlers = {};
 

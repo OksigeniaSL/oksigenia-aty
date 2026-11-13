@@ -39,6 +39,9 @@ export class AtyRenewalService {
     /** How long to wait after a resume for a link that opened the app, in milliseconds. */
     protected static readonly LINK_GRACE = 1500;
 
+    /** After the PIN pad is put away, how long before it is offered again (seconds), unless the token falls sooner. */
+    protected static readonly CALM = 86400;
+
     /** The stored expiry of a token that never expires (0 means not known yet). */
     protected static readonly NEVER = -1;
 
@@ -129,6 +132,13 @@ export class AtyRenewalService {
                 return;
             }
 
+            // The pad was put away lately: leave it for a day, unless the token falls within that day. Otherwise it would
+            // come back on every return to the app for the whole window.
+            const asked = await CoreConfig.get<number>(this.askedKey(site), 0);
+            if (asked && now - asked < AtyRenewalService.CALM && validuntil - now > AtyRenewalService.CALM) {
+                return;
+            }
+
             await this.renew(site);
         } catch {
             // A renewal check must never get in the user's way.
@@ -197,7 +207,20 @@ export class AtyRenewalService {
 
         if (renewed) {
             await this.store(site, renewed.validuntil);
+            await CoreConfig.delete(this.askedKey(site));
+        } else {
+            await CoreConfig.set(this.askedKey(site), Math.floor(Date.now() / 1000));
         }
+    }
+
+    /**
+     * Where the time the PIN pad was last put away without renewing is kept, per account.
+     *
+     * @param site The site.
+     * @returns The config key.
+     */
+    protected askedKey(site: CoreSite): string {
+        return `${this.key(site)}_asked`;
     }
 
     /**

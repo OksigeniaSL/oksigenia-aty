@@ -532,11 +532,21 @@ export class CoreSitesProvider {
         const { AtySites } = await import('@services/aty-sites');
         await AtySites.assertAllowed(siteUrl);
 
+        // Every site Oksigenia hosts is https: with the list in force, never cleartext, typed or as a fallback. Someone in
+        // the middle of a Wi-Fi who blocks https would otherwise get the password sent in the clear to a fake site.
+        const httpsOnly = AtySites.isActive() && !AtySites.isLoopback(siteUrl);
+        if (httpsOnly && /^http:\/\//i.test(siteUrl)) {
+            siteUrl = siteUrl.replace(/^http:\/\//i, 'https://');
+        }
+        if (httpsOnly) {
+            protocol = 'https://';
+        }
+
         try {
             return await this.checkSiteWithProtocol(siteUrl, protocol);
         } catch (error) {
-            // Do not continue checking if a critical error happened.
-            if (error.critical) {
+            // Do not continue checking if a critical error happened, nor with http when only https is allowed.
+            if (error.critical || httpsOnly) {
                 throw error;
             }
 
@@ -832,12 +842,20 @@ export class CoreSitesProvider {
             login = true;
         }
 
+        // Oksigenia Aty: no site gets in without being on the list, whatever the way (a link with a token, a QR, a link in
+        // a page): checkSite is not on all of them. Loaded lazily, as in checkSite.
+        const { AtySites } = await import('@services/aty-sites');
+        await AtySites.assertAllowed(siteUrl);
+
         // Validate the site.
         const authSite = CoreSitesFactory.makeAuthenticatedSite(siteUrl, token, { privateToken });
         let isNewSite = true;
 
         try {
             const info = await authSite.fetchSiteInfo();
+            // The account is keyed by the address the server declares: it must be on the list too, or a site could take
+            // the place of an account saved for another.
+            await AtySites.assertAllowed(info.siteurl);
 
             const result = this.isValidMoodleVersion(info);
             if (result !== CoreSitesProvider.VALID_VERSION) {
@@ -1931,18 +1949,19 @@ export class CoreSitesProvider {
 
     /**
      * Delete tokens for all sites that don't match current site URL.
-     * If the app is configured to only allow connecting to certain sites, tokens won't be deleted.
+     * If the app is configured to only allow connecting to certain sites, tokens won't be deleted, unless forced.
      *
+     * @param force Oksigenia Aty: delete them even with the list, as when a site runs plugins that are not Oksigenia's.
      * @returns Promise resolved when done.
      */
-    async deleteTokensFromOtherSites(): Promise<void> {
+    async deleteTokensFromOtherSites(force = false): Promise<void> {
         const currentSite = this.currentSite;
         if (!currentSite) {
             return;
         }
 
         const hasSiteAllowlist = await CoreLoginHelper.hasSiteAllowlist();
-        if (hasSiteAllowlist) {
+        if (hasSiteAllowlist && !force) {
             // Sites connected to are trusted, no need to delete tokens from other sites.
             return;
         }

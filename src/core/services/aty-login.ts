@@ -48,6 +48,8 @@ export type AtyTokenResponse = {
     locked?: boolean; // Too many wrong PINs; verification is temporarily locked.
     pinui?: AtyPinUi; // Localised wording for the PIN pad (the server knows the user's language).
     error?: string; // Localised error (wrong PIN, locked, or a generic failure).
+    fullname?: string; // Who the link signs in (local_oksigeniaaty 0.5.59 on).
+    username?: string; // Their username, to know whether this phone already holds that account.
 };
 
 /**
@@ -218,6 +220,21 @@ export class AtyLoginService {
 
             await this.markSpent(url);
 
+            // A link or a QR someone else made (their own «Open in the app» page, a QR stuck over the school's poster) would
+            // put this phone in their account without a word, and what the user sends next would go out under it. When the
+            // phone already holds accounts and this one is not among them, ask first. A first sign-in asks nothing.
+            if (response.username && !(await this.holdsAccount(siteUrl, response.username))) {
+                const { CoreAlerts } = await import('@services/overlays/alerts');
+                try {
+                    await CoreAlerts.confirm(Translate.instant('core.aty.switchaccount', {
+                        name: response.fullname || response.username,
+                        site: AtySites.host(siteUrl),
+                    }), { okText: Translate.instant('core.aty.switchaccountok') });
+                } catch {
+                    throw new CoreCustomURLSchemesHandleError(new CoreCanceledError());
+                }
+            }
+
             // Trust on first use: no PIN yet, so offer to set one for next time (the user may skip it).
             if (response.needspinsetup && response.pinui) {
                 await this.offerPinSetup(siteUrl, response.token, response.pinui);
@@ -275,6 +292,34 @@ export class AtyLoginService {
             link: url.replace(/([?&])atylink=[^&#]*(&?)/, (_match, before, after) => after ? before : ''),
             siteId: mark[1] || undefined,
         };
+    }
+
+    /**
+     * Whether this phone holds an account of a site, by username; also true when it holds no account at all.
+     *
+     * @param siteUrl The site of the link.
+     * @param username The username the link signs in.
+     * @returns Whether it does.
+     */
+    async holdsAccount(siteUrl: string, username: string): Promise<boolean> {
+        const sites = await CoreSites.getSites();
+        if (!sites.length) {
+            // Nothing to switch from: the first account of the phone needs no question.
+            return true;
+        }
+        const { AtySites } = await import('@services/aty-sites');
+        const host = AtySites.host(siteUrl);
+        for (const basic of sites) {
+            if (AtySites.host(basic.siteUrl) !== host) {
+                continue;
+            }
+            const site = await CorePromiseUtils.ignoreErrors(CoreSites.getSite(basic.id));
+            if (site?.getInfo()?.username === username) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
