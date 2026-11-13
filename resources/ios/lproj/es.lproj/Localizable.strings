@@ -1,0 +1,4 @@
+/* The text of an encrypted notice when it cannot be decrypted on the phone: the bridge sends it as the alert's
+   loc-key, and the notification service extension puts the real one in its place. The key is the English text, so
+   that an app without this file shows it as it is. */
+"You have a new notification" = "Tienes un aviso nuevo";

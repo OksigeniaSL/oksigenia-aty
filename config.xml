@@ -194,6 +194,33 @@
         <resource-file src="resources/ios/lproj/fr.lproj/InfoPlist.strings" target="fr.lproj/InfoPlist.strings" />
         <resource-file src="resources/ios/lproj/de.lproj/InfoPlist.strings" target="de.lproj/InfoPlist.strings" />
         <resource-file src="resources/ios/lproj/it.lproj/InfoPlist.strings" target="it.lproj/InfoPlist.strings" />
+        <!-- The generic text of an encrypted notice, for when the notification service extension cannot decrypt it: the
+             bridge sends it as the alert's loc-key, which iOS looks up in the app's Localizable.strings. -->
+        <resource-file src="resources/ios/lproj/en.lproj/Localizable.strings" target="en.lproj/Localizable.strings" />
+        <resource-file src="resources/ios/lproj/es.lproj/Localizable.strings" target="es.lproj/Localizable.strings" />
+        <resource-file src="resources/ios/lproj/ca.lproj/Localizable.strings" target="ca.lproj/Localizable.strings" />
+        <resource-file src="resources/ios/lproj/gl.lproj/Localizable.strings" target="gl.lproj/Localizable.strings" />
+        <resource-file src="resources/ios/lproj/eu.lproj/Localizable.strings" target="eu.lproj/Localizable.strings" />
+        <resource-file src="resources/ios/lproj/pt-PT.lproj/Localizable.strings" target="pt-PT.lproj/Localizable.strings" />
+        <resource-file src="resources/ios/lproj/pt-BR.lproj/Localizable.strings" target="pt-BR.lproj/Localizable.strings" />
+        <resource-file src="resources/ios/lproj/fr.lproj/Localizable.strings" target="fr.lproj/Localizable.strings" />
+        <resource-file src="resources/ios/lproj/de.lproj/Localizable.strings" target="de.lproj/Localizable.strings" />
+        <resource-file src="resources/ios/lproj/it.lproj/Localizable.strings" target="it.lproj/Localizable.strings" />
+        <!-- The notification service extension (resources/ios/NotificationService): it decrypts encrypted notices with the
+             app closed. The hook adds its target to the Xcode project on every prepare. -->
+        <hook src="scripts/cordova-hooks/ios-notification-service.js" type="after_prepare" />
+        <!-- The app's keychain access group, which the extension shares to read the push plugin's key. It is the App ID, the
+             group the app has always used by default, so nothing already in the keychain moves. -->
+        <config-file target="*-Debug.plist" parent="keychain-access-groups">
+            <array>
+                <string>$(AppIdentifierPrefix)com.oksigenia.aty</string>
+            </array>
+        </config-file>
+        <config-file target="*-Release.plist" parent="keychain-access-groups">
+            <array>
+                <string>$(AppIdentifierPrefix)com.oksigenia.aty</string>
+            </array>
+        </config-file>
         <config-file parent="FIREBASE_ANALYTICS_COLLECTION_DEACTIVATED" target="*-Info.plist">
             <string>YES</string>
         </config-file>
