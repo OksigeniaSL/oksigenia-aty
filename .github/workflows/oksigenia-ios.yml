@@ -10,10 +10,10 @@
 # Started by hand with a demo site, it also takes the App Store screenshots (scripts/oksigenia-store-shots.sh): a 6.9"
 # iPhone, signed in with the token in the repository secrets ATY_SHOTS_TOKEN and ATY_SHOTS_PRIVATETOKEN.
 #
-# The notification service extension (resources/ios/NotificationService) has its own tests first, which take a minute:
-# its decryption against libsodium (scripts/oksigenia-nse-tests.sh). The build then checks that the extension is inside
-# the app with the app's version, and the simulator receives a test notice: there is no key in its keychain, so the
-# extension leaves the generic text, and its log shows that iOS ran it.
+# The notification service extension (resources/ios/NotificationService) has its own tests first, which take a minute
+# on the Mac: its decryption against libsodium (scripts/oksigenia-nse-tests.sh). The build then checks that the extension
+# is inside the app with the app's version, and the simulator receives a test notice: there is no key in its keychain,
+# so the extension leaves the generic text, and its log shows that iOS ran it.
 name: Oksigenia Aty iOS simulator
 
 on:
@@ -55,15 +55,6 @@ defaults:
     shell: bash
 
 jobs:
-  nse-tests:
-    runs-on: macos-26
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Test the notification service extension's decryption
-        run: bash scripts/oksigenia-nse-tests.sh
-
   web:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -110,11 +101,15 @@ jobs:
           if-no-files-found: error
 
   simulator:
-    needs: [nse-tests, web]
+    needs: web
     runs-on: macos-26
     timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
+
+      # First, and in a minute: a mistake in the decryption stops the run before the long build.
+      - name: Test the notification service extension's decryption
+        run: bash scripts/oksigenia-nse-tests.sh
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -169,6 +164,7 @@ jobs:
       # GoogleService-Info.plist is moodleapp's empty one, as committed. With IS_GCM_ENABLED false the push plugin never
       # calls [FIRApp configure], so the app starts without a Firebase project.
       - name: Build for the simulator
+        id: build
         run: |
           cordova build ios --emulator --debug --no-telemetry --verbose \
             "--buildFlag=-destination platform=iOS Simulator,id=$UDID" --buildFlag=-IDEBuildingContinueBuildingAfterErrors=YES > dist/build.log 2>&1 || {
@@ -214,6 +210,12 @@ jobs:
             esac
           done
           plutil -extract NSExtension json -o - "$EXT/Info.plist"; echo
+          # An app extension with its own Frameworks folder is refused by the App Store.
+          [ ! -d "$EXT/Frameworks" ] || { echo "The extension carries a Frameworks folder"; ls -la "$EXT/Frameworks"; STATUS=1; }
+          # The settings Xcode resolved for it, over the ones cordova-plugin-add-swift-support writes everywhere.
+          (cd platforms/ios && xcodebuild -project "$(ls -d ./*.xcodeproj | head -1)" -target NotificationService \
+            -configuration Debug -sdk iphonesimulator -showBuildSettings 2> /dev/null | grep -E \
+            ' (SWIFT_VERSION|SWIFT_OBJC_BRIDGING_HEADER|ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES|LD_RUNPATH_SEARCH_PATHS|PRODUCT_BUNDLE_IDENTIFIER|IPHONEOS_DEPLOYMENT_TARGET|CODE_SIGN_ENTITLEMENTS) = ') || true
           codesign -dvv "$EXT" 2>&1 | grep -E '^(Identifier|Signature|Authority|TeamIdentifier)=' || true
           codesign -d --entitlements - --xml "$EXT" 2> /dev/null | plutil -p - 2> /dev/null || true
           [ -n "$(find "$APP" -maxdepth 2 -name Localizable.strings)" ] || { echo "No Localizable.strings in the app"; STATUS=1; }
@@ -301,7 +303,7 @@ jobs:
       # so the extension must leave the generic text in Spanish; its log shows that iOS ran it. Informative: the simulator
       # may not run extensions for simctl push, and needs the notification permission that applesimutils gives.
       - name: Send an encrypted test notice to the extension
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         continue-on-error: true
         timeout-minutes: 10
         run: |

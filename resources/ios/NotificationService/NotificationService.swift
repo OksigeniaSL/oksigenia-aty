@@ -44,7 +44,7 @@ final class NotificationService: UNNotificationServiceExtension {
         }
         let keychain = AtyKeychain.secretKey()
         guard let key = keychain.key else {
-            log.error("No key in the keychain (status \(keychain.status, privacy: .public)): the generic text stays")
+            log.error("No key in the keychain (status \(Int(keychain.status), privacy: .public)): the generic text stays")
             return received
         }
         guard let shown = AtyNotice.decrypt(received.userInfo, secretKey: key) else {

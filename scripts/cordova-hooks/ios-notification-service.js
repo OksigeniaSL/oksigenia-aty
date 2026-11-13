@@ -9,7 +9,10 @@
 //
 // Its build settings live in NotificationService.xcconfig, not in the project: cordova takes the app's Info.plist from
 // the first build configuration of the project that names one, and the app's bundle id from the last one
-// (cordova-ios/lib/projectFile.js), so the extension's must name neither.
+// (cordova-ios/lib/projectFile.js), so the extension's must name neither. The few that cordova-plugin-add-swift-support
+// writes into every build configuration called Debug or Release, after this hook (the app's bridging header, Swift 4,
+// the Swift libraries embedded), the extension also sets in its own configurations, for every SDK ([sdk=*]): a
+// condition that matches is more specific than the plugin's plain setting, and the plugin never touches it.
 'use strict';
 
 const crypto = require('node:crypto');
@@ -135,6 +138,15 @@ function xcconfig(bundleId, appSettings, signing) {
     }
     return `${lines.join('\n')}\n`;
 }
+
+/** The extension's own values of the settings that cordova-plugin-add-swift-support writes into every configuration. */
+const OVER_SWIFT_SUPPORT = {
+    '"SWIFT_OBJC_BRIDGING_HEADER[sdk=*]"': quote(`${NAME}/${NAME}-Bridging-Header.h`),
+    '"SWIFT_VERSION[sdk=*]"': '5.0',
+    // An app extension carries no Frameworks folder: the App Store refuses it.
+    '"ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES[sdk=*]"': 'NO',
+    '"LD_RUNPATH_SEARCH_PATHS[sdk=*]"': quote('$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks'),
+};
 
 /** Copies the sources and writes Info.plist, the entitlements and the build settings of the extension. */
 function writeExtensionFiles(projectRoot, iosRoot, appInfo, appId, projectName, settings) {
@@ -401,6 +413,9 @@ module.exports = function (context) {
         ensureFileReference(project, groupUuid, file);
     }
     ensureEmbedded(project, appTargetUuid, extensionUuid);
+    for (const [, buildConfig] of buildConfigurations(objects, extensionTarget.buildConfigurationList)) {
+        Object.assign(buildConfig.buildSettings, OVER_SWIFT_SUPPORT);
+    }
 
     fs.writeFileSync(pbxPath, project.writeSync());
     forgetCordovaProject(iosRoot);
