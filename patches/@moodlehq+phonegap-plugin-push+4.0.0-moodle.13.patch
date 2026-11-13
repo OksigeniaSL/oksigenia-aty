@@ -1,3 +1,23 @@
+diff --git a/node_modules/@moodlehq/phonegap-plugin-push/src/ios/AppDelegate+notification.m b/node_modules/@moodlehq/phonegap-plugin-push/src/ios/AppDelegate+notification.m
+index 804d45b..08a1429 100644
+--- a/node_modules/@moodlehq/phonegap-plugin-push/src/ios/AppDelegate+notification.m
++++ b/node_modules/@moodlehq/phonegap-plugin-push/src/ios/AppDelegate+notification.m
+@@ -110,6 +110,15 @@ NSString *const pushPluginApplicationDidBecomeActiveNotification = @"pushPluginA
+         isEncrypted = [[userInfo objectForKey:@"encrypted"] boolValue];
+     }
+ 
++    // Oksigenia Aty: an encrypted notice that comes as an alert, not as a silent push, is shown by iOS once the
++    // notification service extension has decrypted it, and reaches the app through willPresentNotification or a tap.
++    // Keeping it here as well would hand it to the app a second time, the next time the app becomes active.
++    id contentAvailableForEncrypted = [[userInfo objectForKey:@"aps"] objectForKey:@"content-available"];
++    if (isEncrypted && ![contentAvailableForEncrypted boolValue]) {
++        completionHandler(UIBackgroundFetchResultNoData);
++        return;
++    }
++
+     // app is in the background or inactive, so only call notification callback if this is a silent push
+     if (application.applicationState != UIApplicationStateActive || isEncrypted) {
+         NSLog(@"app in-active");
 diff --git a/node_modules/@moodlehq/phonegap-plugin-push/src/ios/EncryptionHandler.m b/node_modules/@moodlehq/phonegap-plugin-push/src/ios/EncryptionHandler.m
 index 1ee2277..016355f 100644
 --- a/node_modules/@moodlehq/phonegap-plugin-push/src/ios/EncryptionHandler.m
@@ -11,3 +31,36 @@ index 1ee2277..016355f 100644
  
  @implementation EncryptionHandler
  
+diff --git a/node_modules/@moodlehq/phonegap-plugin-push/src/ios/PushPlugin.m b/node_modules/@moodlehq/phonegap-plugin-push/src/ios/PushPlugin.m
+index 909779b..ec8a930 100644
+--- a/node_modules/@moodlehq/phonegap-plugin-push/src/ios/PushPlugin.m
++++ b/node_modules/@moodlehq/phonegap-plugin-push/src/ios/PushPlugin.m
+@@ -494,6 +494,13 @@
+                     }
+                 }
+ 
++                // Oksigenia Aty: the alert of an encrypted notice is a generic text (loc-key), for when the
++                // notification service extension cannot decrypt it. The real title and text are the encrypted fields.
++                if ([additionalData objectForKey:@"loc-key"] != nil) {
++                    [message removeObjectForKey:@"title"];
++                    [message removeObjectForKey:@"message"];
++                }
++
+                 if ([message objectForKey:@"title"] != nil) {
+                     [message setObject:[EncryptionHandler decrypt:[message objectForKey:@"title"]] forKey:@"title"];
+                 } else if ([additionalData objectForKey:@"title"] != nil) {
+@@ -512,8 +519,13 @@
+                     [message setObject:[additionalData objectForKey:@"smallmessage"] forKey:@"message"];
+                 }
+ 
++                // Oksigenia Aty: a tap on the notice (it opened the app, or the app was open) goes to the app as a tap,
++                // so that it opens what the notice is about, not as a new notice to show again.
++                bool isTap = coldstart || [notificationMessage objectForKey:@"actionCallback"] != nil;
+                 UIApplicationState state = [[UIApplication sharedApplication] applicationState];
+-                if (state != UIApplicationStateActive) {
++                if (isTap) {
++                    NSLog(@"Push Plugin encrypted notice tapped");
++                } else if (state != UIApplicationStateActive) {
+                     // Create notification with decrypted payload for when app is not in the foreground.
+                     [additionalData setObject:[NSNumber numberWithBool:YES] forKey:@"silentencryptedtriggeredbyplugin"];
+                     UNMutableNotificationContent *content = [[UNMutableNotificationContent alloc] init];

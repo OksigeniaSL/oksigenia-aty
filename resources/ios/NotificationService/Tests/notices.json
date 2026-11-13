@@ -1,0 +1,302 @@
+{
+ "note": "Made by make-notices.py with libsodium, for the tests only: this key opens nothing else.",
+ "phone": "c7yvSWeLtnB48m8TDptGP4M9B846FBVTLV03bQcq5xk=",
+ "notEncrypted": [
+  {
+   "encrypted": "0"
+  },
+  {
+   "encrypted": ""
+  },
+  {},
+  {
+   "encrypted": false
+  }
+ ],
+ "encrypted": [
+  {
+   "encrypted": "1"
+  },
+  {
+   "encrypted": "true"
+  },
+  {
+   "encrypted": true
+  },
+  {
+   "encrypted": 1
+  }
+ ],
+ "cases": [
+  {
+   "name": "a typical notice opens: the site, the text and every field",
+   "userInfo": {
+    "aps": {
+     "alert": {
+      "loc-key": "You have a new notification",
+      "body": "You have a new notification"
+     },
+     "sound": "default",
+     "mutable-content": 1
+    },
+    "encrypted": "1",
+    "site": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+    "notId": "4711",
+    "notif": "1",
+    "moodlecomponent": "mod_assign",
+    "gcm.message_id": "1731500000000001",
+    "sitefullname": "LgABQ5HFbLnIKKGku8JezNkHysoIUr1JpAkAaB1YYHMuwGIrOx1p5A9RdHO0dl6sQ8Dgx+uhrUB8O2PwsXVRf+wn",
+    "smallmessage": "XtUIfhYgxGvsshRHhJX+eIKeIVKBpAhavIh0H8gMW0+9UfYqhA4NatZcINgT3CEiHv0tGwgHzaGXoQlNcnGZKnuaN2NTTppIsX6yRZAQom+1",
+    "subject": "aVTNrsSnv4PZINoqRpUQUQG651o2XD2TAjbaJuwymX3174MGf4mXl/++I2MkhErGpwhSCH47ps2XMA==",
+    "userfromfullname": "wzBxxUIesee9EJbt6kEza9U7uUBHbkQVhdF5hhs0fAOBytuqgzmvxDv2dNARrL7MyXbf/MU6IL3Xww==",
+    "userfromid": "4kOAZJOqMERwNI++S/zAJY0F3EdFduPgEJ2hgABuKVhiy89tPn1hTSMZJEbv/cXJsgc=",
+    "contexturl": "uZgOKyAoqdae+HmV6fYHApFdxs+rGacDYb2WuN8Hr1SpejGXHwuSLDuczi9Q78SZ/XOhzz4TRiOPHuAyGjUKuMV5hqWAcHpIJARaD6ocWH7tW8CCIfP9PHzI1znp2Oia1g=="
+   },
+   "expect": {
+    "title": "Colegio de ejemplo",
+    "body": "Tienes una nota nueva en Ciencias",
+    "decrypted": true,
+    "fields": {
+     "subject": "Nota nueva",
+     "userfromfullname": "Ana Pérez",
+     "userfromid": "42",
+     "contexturl": "https://aula.example.org/mod/assign/view.php?id=7",
+     "encrypted": "1",
+     "notId": "4711",
+     "site": "0f1e2d3c4b5a69788796a5b4c3d2e1f0"
+    }
+   }
+  },
+  {
+   "name": "a field too long to encrypt comes as a language string and stays",
+   "userInfo": {
+    "aps": {
+     "alert": {
+      "loc-key": "You have a new notification",
+      "body": "You have a new notification"
+     },
+     "sound": "default",
+     "mutable-content": 1
+    },
+    "encrypted": "1",
+    "site": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+    "notId": "4711",
+    "notif": "1",
+    "moodlecomponent": "mod_assign",
+    "gcm.message_id": "1731500000000001",
+    "sitefullname": "lPzZFuCMZ+4FPRXmyLrYwuNaTFE5FXCd8cVh3oEgLnqmmBSDsQD038kujsWaF+hobn6oT8eRj9l6pifnhHo=",
+    "smallmessage": "zKIaRPmyuoUI0d0TFaRFW/ZWMj97Q3RJDp2CNp+OkQ7VOYezcoX0mi0eLBayDLgeCN78YEE+6F6ZrTnr1ygj",
+    "fullmessage": "El mensaje es demasiado largo para cifrarlo."
+   },
+   "expect": {
+    "title": "Academia Norte",
+    "body": "Mensaje de Luis",
+    "decrypted": true,
+    "fields": {
+     "fullmessage": "El mensaje es demasiado largo para cifrarlo."
+    }
+   }
+  },
+  {
+   "name": "accents, other scripts and emoji",
+   "userInfo": {
+    "aps": {
+     "alert": {
+      "loc-key": "You have a new notification",
+      "body": "You have a new notification"
+     },
+     "sound": "default",
+     "mutable-content": 1
+    },
+    "encrypted": "1",
+    "site": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+    "notId": "4711",
+    "notif": "1",
+    "moodlecomponent": "mod_assign",
+    "gcm.message_id": "1731500000000001",
+    "sitefullname": "YpS3dfVDPn2ljk1DimKcxOGzmfJBlXh3PeWgHvglPCM/jj+37KtzAVpSSV1/uHm/fXFOQ8H3PV1FwVqs6D9e4Llog1XPQ9k=",
+    "smallmessage": "dTH44ly+YaKa4V0H3ubDEy4K/YF2hbrixc1imgy9MzmLoA/enRy+ACtPytk+BJobMbZbborDXM3ZD1Fz77z71nySZMfhGl9pxsW6LI58GQ=="
+   },
+   "expect": {
+    "title": "Escola Àgora · 学校",
+    "body": "Reunión mañana 🎒 ¿vienes?",
+    "decrypted": true,
+    "fields": {}
+   }
+  },
+  {
+   "name": "without the short message, the subject is the text",
+   "userInfo": {
+    "aps": {
+     "alert": {
+      "loc-key": "You have a new notification",
+      "body": "You have a new notification"
+     },
+     "sound": "default",
+     "mutable-content": 1
+    },
+    "encrypted": "1",
+    "site": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+    "notId": "4711",
+    "notif": "1",
+    "moodlecomponent": "mod_assign",
+    "gcm.message_id": "1731500000000001",
+    "sitefullname": "7RdBHoAQVgwouHr+NYzTzc5iQi51wto07CGbhaZ6PACLWEbiwHUYpOwEzSATnSJRrwD9J4SpJF7XTA==",
+    "subject": "7kGFLD7b8AdCYURQaV/7eawynI6rfw4iPdxAvmvNZjobLBHa2Rql81+/Kvqz7RXw5LX2/q4imc5sPzoX"
+   },
+   "expect": {
+    "title": "Centro Sur",
+    "body": "Recordatorio",
+    "decrypted": true,
+    "fields": {}
+   }
+  },
+  {
+   "name": "without the site, no title: iOS shows the app's name",
+   "userInfo": {
+    "aps": {
+     "alert": {
+      "loc-key": "You have a new notification",
+      "body": "You have a new notification"
+     },
+     "sound": "default",
+     "mutable-content": 1
+    },
+    "encrypted": "1",
+    "site": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+    "notId": "4711",
+    "notif": "1",
+    "moodlecomponent": "mod_assign",
+    "gcm.message_id": "1731500000000001",
+    "smallmessage": "f9zrKM3oKkG1PIqjybrV89Oiher+zLoGECPiYgO+pT/yLTTMaJQoEaM/60VwTLdL870RHerS9kqTpYxNex7XBxi66Q=="
+   },
+   "expect": {
+    "title": "",
+    "body": "Hay una tarea nueva",
+    "decrypted": true,
+    "fields": {}
+   }
+  },
+  {
+   "name": "sealed for another phone: the generic text stays",
+   "userInfo": {
+    "aps": {
+     "alert": {
+      "loc-key": "You have a new notification",
+      "body": "You have a new notification"
+     },
+     "sound": "default",
+     "mutable-content": 1
+    },
+    "encrypted": "1",
+    "site": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+    "notId": "4711",
+    "notif": "1",
+    "moodlecomponent": "mod_assign",
+    "gcm.message_id": "1731500000000001",
+    "sitefullname": "fjS/hGdRzn3wXA8gtK8IJVVWRR1zxgfdP+BeKptiASgRuGJ6wNkgNOAYLwHUvMkjpfa0B7IPTE3vxv/+zL7Q0PTw",
+    "smallmessage": "jHbgf2m/spuz4Ni4DKTj1E3BV4ccsqaLBSVH45CLSUttu7MAucgvA2ZKqrNm3faASYJ+mqQ="
+   },
+   "expect": null
+  },
+  {
+   "name": "a changed box: the generic text stays",
+   "userInfo": {
+    "aps": {
+     "alert": {
+      "loc-key": "You have a new notification",
+      "body": "You have a new notification"
+     },
+     "sound": "default",
+     "mutable-content": 1
+    },
+    "encrypted": "1",
+    "site": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+    "notId": "4711",
+    "notif": "1",
+    "moodlecomponent": "mod_assign",
+    "gcm.message_id": "1731500000000001",
+    "sitefullname": "DKqAVfb7BYu6eEjq6fe2wt1hY588EKCQHwtxGXyTe0/P5EpH49mjF465rPVSo370UMkm3aR+V0Oigl1ZQbd4Tpm4",
+    "smallmessage": "79KN+0Hx4XjzdPuUo2mHuyC73yV7QdhyeEd6dNaOdFc+b/qAVxxZ1widewaTfL2VNaFBQG1wHbJfP5JMoCA="
+   },
+   "expect": null
+  },
+  {
+   "name": "an empty text: the generic text stays",
+   "userInfo": {
+    "aps": {
+     "alert": {
+      "loc-key": "You have a new notification",
+      "body": "You have a new notification"
+     },
+     "sound": "default",
+     "mutable-content": 1
+    },
+    "encrypted": "1",
+    "site": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+    "notId": "4711",
+    "notif": "1",
+    "moodlecomponent": "mod_assign",
+    "gcm.message_id": "1731500000000001",
+    "sitefullname": "FvjlT+y+zS6WriXQrrBk6gZKpYINydFtbi8Kbf3SAyeJ7HEktUKfFbkZcY9SMgLb8Eg9QcKWq171aSWZipVpp+vP",
+    "smallmessage": "AMK6jarFBSxlhqatW6YAhVeItViWOci2dX16qappZVHQ/osTM0M028/Af516rlN4"
+   },
+   "expect": null
+  },
+  {
+   "name": "one field left sealed: shown, and the plugin opens the rest when tapped",
+   "userInfo": {
+    "aps": {
+     "alert": {
+      "loc-key": "You have a new notification",
+      "body": "You have a new notification"
+     },
+     "sound": "default",
+     "mutable-content": 1
+    },
+    "encrypted": "1",
+    "site": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+    "notId": "4711",
+    "notif": "1",
+    "moodlecomponent": "mod_assign",
+    "gcm.message_id": "1731500000000001",
+    "sitefullname": "brdL9+Cu6offiRxEnsKKlqohfQz2IUAjLDAQyS9sCFJBDTPkmLiY+ZsFMSn9C80jZzvtOe56rgDGEXFKEKIhKfLi",
+    "smallmessage": "54immTkijnKRqdyAZdrI6QuySgmmIdPc2gTXF1lhkVtXm9HsaQg9Ml7hdxzdXGD2aUss0ZM=",
+    "contexturl": "dkvFn9tKHQumX9xxQzijPWfXQYT860t1FzU8ixgy4TuGw5g/DDcVFD391MV+Ryqj2DRvv6GQzKmKGug7B8kJPxF08FNcM091IA=="
+   },
+   "expect": {
+    "title": "Colegio de ejemplo",
+    "body": "Texto",
+    "decrypted": false,
+    "fields": {}
+   }
+  },
+  {
+   "name": "encrypted as a number",
+   "userInfo": {
+    "aps": {
+     "alert": {
+      "loc-key": "You have a new notification",
+      "body": "You have a new notification"
+     },
+     "sound": "default",
+     "mutable-content": 1
+    },
+    "encrypted": 1,
+    "site": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+    "notId": "4711",
+    "notif": "1",
+    "moodlecomponent": "mod_assign",
+    "gcm.message_id": "1731500000000001",
+    "sitefullname": "lArsP96BE/j4sZ6+ri1BQKVFujTQg05ybuNahyojOA4SB9GIMLw4vaQzDt9/cc5Z2t8Ii6g3pw==",
+    "smallmessage": "DbC3o4slUhr+1Uc2Zux3uccgAG5skwDIe2flNIapAW5OJchITOufZZN3QTj/BbEx7Q29MwM="
+   },
+   "expect": {
+    "title": "Colegio",
+    "body": "Texto",
+    "decrypted": true,
+    "fields": {}
+   }
+  }
+ ]
+}

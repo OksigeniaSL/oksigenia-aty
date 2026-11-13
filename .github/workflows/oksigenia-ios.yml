@@ -9,6 +9,11 @@
 #
 # Started by hand with a demo site, it also takes the App Store screenshots (scripts/oksigenia-store-shots.sh): a 6.9"
 # iPhone, signed in with the token in the repository secrets ATY_SHOTS_TOKEN and ATY_SHOTS_PRIVATETOKEN.
+#
+# The notification service extension (resources/ios/NotificationService) has its own tests first, which take a minute
+# on the Mac: its decryption against libsodium (scripts/oksigenia-nse-tests.sh). The build then checks that the extension
+# is inside the app with the app's version, and the simulator receives a test notice: there is no key in its keychain,
+# so the extension leaves the generic text, and its log shows that iOS ran it.
 name: Oksigenia Aty iOS simulator
 
 on:
@@ -34,6 +39,9 @@ on:
       - 'package-lock.json'
       - 'cordova-plugin-moodleapp/**'
       - 'patches/**'
+      - 'resources/ios/NotificationService/**'
+      - 'scripts/cordova-hooks/**'
+      - 'scripts/oksigenia-nse-tests.sh'
 
 permissions:
   contents: read
@@ -99,6 +107,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # First, and in a minute: a mistake in the decryption stops the run before the long build.
+      - name: Test the notification service extension's decryption
+        run: bash scripts/oksigenia-nse-tests.sh
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -152,6 +164,7 @@ jobs:
       # GoogleService-Info.plist is moodleapp's empty one, as committed. With IS_GCM_ENABLED false the push plugin never
       # calls [FIRApp configure], so the app starts without a Firebase project.
       - name: Build for the simulator
+        id: build
         run: |
           cordova build ios --emulator --debug --no-telemetry --verbose \
             "--buildFlag=-destination platform=iOS Simulator,id=$UDID" --buildFlag=-IDEBuildingContinueBuildingAfterErrors=YES > dist/build.log 2>&1 || {
@@ -177,6 +190,39 @@ jobs:
           find "$APP" -maxdepth 2 -name InfoPlist.strings | sort | while IFS= read -r f; do
             echo "== ${f#"$APP"/}"; plutil -p "$f"
           done
+
+      # The extension, inside the app with the app's version, and the generic text of encrypted notices in every language.
+      - name: Check the notification service extension
+        run: |
+          APP=$(find platforms/ios/build -maxdepth 2 -type d -name '*.app' | head -1)
+          EXT="$APP/PlugIns/NotificationService.appex"
+          [ -d "$EXT" ] || { echo "No NotificationService.appex in the app"; ls -la "$APP" "$APP/PlugIns" || true; exit 1; }
+          ls -la "$EXT"
+          STATUS=0
+          for FIELD in CFBundleIdentifier CFBundlePackageType CFBundleShortVersionString CFBundleVersion; do
+            A=$(/usr/libexec/PlistBuddy -c "Print :$FIELD" "$APP/Info.plist")
+            E=$(/usr/libexec/PlistBuddy -c "Print :$FIELD" "$EXT/Info.plist")
+            echo "$FIELD: app $A, extension $E"
+            case $FIELD in
+              CFBundleIdentifier) [ "$E" = "$A.NotificationService" ] || STATUS=1 ;;
+              CFBundlePackageType) [ "$E" = "XPC!" ] || STATUS=1 ;;
+              *) [ "$E" = "$A" ] || STATUS=1 ;;
+            esac
+          done
+          plutil -extract NSExtension json -o - "$EXT/Info.plist"; echo
+          # An app extension with its own Frameworks folder is refused by the App Store.
+          [ ! -d "$EXT/Frameworks" ] || { echo "The extension carries a Frameworks folder"; ls -la "$EXT/Frameworks"; STATUS=1; }
+          # The settings Xcode resolved for it, over the ones cordova-plugin-add-swift-support writes everywhere.
+          (cd platforms/ios && xcodebuild -project "$(ls -d ./*.xcodeproj | head -1)" -target NotificationService \
+            -configuration Debug -sdk iphonesimulator -showBuildSettings 2> /dev/null | grep -E \
+            ' (SWIFT_VERSION|SWIFT_OBJC_BRIDGING_HEADER|ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES|LD_RUNPATH_SEARCH_PATHS|PRODUCT_BUNDLE_IDENTIFIER|IPHONEOS_DEPLOYMENT_TARGET|CODE_SIGN_ENTITLEMENTS) = ') || true
+          codesign -dvv "$EXT" 2>&1 | grep -E '^(Identifier|Signature|Authority|TeamIdentifier)=' || true
+          codesign -d --entitlements - --xml "$EXT" 2> /dev/null | plutil -p - 2> /dev/null || true
+          [ -n "$(find "$APP" -maxdepth 2 -name Localizable.strings)" ] || { echo "No Localizable.strings in the app"; STATUS=1; }
+          find "$APP" -maxdepth 2 -name Localizable.strings | sort | while IFS= read -r f; do
+            echo "== ${f#"$APP"/}"; plutil -p "$f"
+          done
+          exit "$STATUS"
 
       - name: Boot the simulator
         timeout-minutes: 15
@@ -252,6 +298,41 @@ jobs:
           find "$HOME/Library/Logs/DiagnosticReports" -name "*$EXECUTABLE*" -exec cp {} dist/logs/ \; 2> /dev/null || true
           ls -la dist/screenshots dist/logs
           exit "$STATUS"
+
+      # An encrypted notice to the closed app, as the bridge sends it. The simulator's keychain has no key (nobody signed in),
+      # so the extension must leave the generic text in Spanish; its log shows that iOS ran it. Informative: the simulator
+      # may not run extensions for simctl push, and needs the notification permission that applesimutils gives.
+      - name: Send an encrypted test notice to the extension
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          APP=$(find platforms/ios/build -maxdepth 2 -type d -name '*.app' | head -1)
+          BUNDLE_ID=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")
+          mkdir -p dist/screenshots dist/logs
+          cat > dist/notice.apns << EOF
+          {"Simulator Target Bundle": "$BUNDLE_ID",
+           "aps": {"alert": {"loc-key": "You have a new notification", "body": "You have a new notification"},
+                   "sound": "default", "mutable-content": 1},
+           "encrypted": "1", "notId": "4711", "site": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+           "sitefullname": "$(head -c 70 /dev/urandom | base64)", "smallmessage": "$(head -c 90 /dev/urandom | base64)"}
+          EOF
+          # iOS knows the extension once the app is installed: its Info.plist and principal class are right.
+          xcrun simctl spawn "$UDID" pluginkit -mAvvv -p com.apple.usernotifications.service 2>&1 | tee dist/logs/pluginkit.txt | head -20
+          grep -q "$BUNDLE_ID.NotificationService" dist/logs/pluginkit.txt && echo "iOS has the extension registered."
+          xcrun simctl terminate "$UDID" "$BUNDLE_ID" 2> /dev/null || true
+          START=$(date '+%Y-%m-%d %H:%M:%S')
+          xcrun simctl push "$UDID" "$BUNDLE_ID" dist/notice.apns
+          sleep 6
+          xcrun simctl io "$UDID" screenshot dist/screenshots/notice-banner.png
+          sleep 4
+          xcrun simctl io "$UDID" screenshot dist/screenshots/notice-later.png
+          xcrun simctl spawn "$UDID" log show --start "$START" --info --debug --style compact \
+            --predicate 'subsystem == "com.oksigenia.aty.NotificationService" OR process == "NotificationService" OR eventMessage CONTAINS[c] "NotificationService"' \
+            > dist/logs/notification-service.log || true
+          cut -c1-300 dist/logs/notification-service.log | tail -40
+          grep -q 'generic text stays' dist/logs/notification-service.log && echo "The extension ran and left the generic text."
+          grep -q 'generic text stays' dist/logs/notification-service.log || echo "No sign of the extension in the log: simctl push may not run it."
 
       # The App Store screenshots, only when started by hand with a demo site. idb taps the one confirmation by its label.
       - name: Set up Python for idb
