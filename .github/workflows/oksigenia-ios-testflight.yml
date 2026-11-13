@@ -216,6 +216,11 @@ jobs:
           for KEY in CFBundleIdentifier CFBundleShortVersionString CFBundleVersion ITSAppUsesNonExemptEncryption; do
             echo "$KEY: $(/usr/libexec/PlistBuddy -c "Print :$KEY" "$APP/Info.plist")"
           done
+          # The store version is config.xml's version: the edit-config on CFBundleShortVersionString (from Moodle's app)
+          # overrides it, and 52107 went out as 5.2.1 because only one of the two had changed.
+          WANT=$(sed -nE '2s/.* version="([^"]+)".*/\1/p' config.xml)
+          GOT=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$APP/Info.plist")
+          [ "$GOT" = "$WANT" ] || { echo "CFBundleShortVersionString is $GOT, config.xml says $WANT"; exit 1; }
           codesign -d --entitlements :- "$APP" 2> /dev/null | grep -A2 -E 'aps-environment|application-identifier|keychain-access-groups' || true
           codesign -dv "$APP" 2>&1 | grep -E 'Authority=|TeamIdentifier' || true
           # The notification service extension: inside, signed, with the app's version and keychain group.

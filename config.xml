@@ -167,7 +167,7 @@
             <true />
         </edit-config>
         <edit-config file="*-Info.plist" mode="merge" target="CFBundleShortVersionString">
-            <string>5.2.1</string>
+            <string>5.2.2</string>
         </edit-config>
         <!-- The languages of the permission texts, each in resources/ios/lproj/<lang>.lproj/InfoPlist.strings; the
              English ones are the Info.plist values above. -->
