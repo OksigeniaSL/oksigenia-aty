@@ -26,6 +26,7 @@ import { CoreModals } from '@services/overlays/modals';
 import { CoreToasts } from '@services/overlays/toasts';
 import { CoreSites } from '@services/sites';
 import { Translate, makeSingleton } from '@singletons';
+import { CorePromiseUtils } from '@static/promise-utils';
 
 /**
  * Oksigenia Aty: the "Fingerprint or face" entry of the account menu. The app signs in with the PIN and never proposes
@@ -82,18 +83,21 @@ export class AtyBiometricMenuHandlerService implements CoreUserProfileHandler {
         }
 
         try {
-            if ((await AtyBiometric.enrolledSite()) === site.getURL()) {
+            // By account, not by site: two accounts of one site on the phone each have their own PIN.
+            const enrolled = await AtyBiometric.enrolledAccount();
+            if (enrolled === site.getId()) {
                 await CoreAlerts.confirm(Translate.instant('core.aty.biometricaskdisable'), {
                     okText: Translate.instant('core.aty.biometricdisable'),
                 });
-                await AtyBiometric.disable();
+                await AtyBiometric.forget(site.getId());
                 await CoreToasts.show({ message: 'core.aty.biometricdisabled', translateMessage: true });
 
                 return;
             }
 
-            // Ask with "Only PIN" as the way out, so declining is the obvious choice.
-            await CoreAlerts.confirm(Translate.instant('core.aty.biometricaskenable'), {
+            // Ask with "Only PIN" as the way out, so declining is the obvious choice. The phone keeps one PIN behind the
+            // fingerprint or face: if another account holds it, say that it goes back to the PIN.
+            await CoreAlerts.confirm(await this.enableQuestion(enrolled), {
                 okText: Translate.instant('core.aty.biometricenable'),
                 cancelText: Translate.instant('core.aty.biometricdisable'),
             });
@@ -120,9 +124,31 @@ export class AtyBiometricMenuHandlerService implements CoreUserProfileHandler {
             return;
         }
 
-        if (await AtyBiometric.enable(site.getURL(), pin, ask.biometric)) {
+        if (await AtyBiometric.enable(site.getId(), pin, ask.biometric)) {
             await CoreToasts.show({ message: 'core.aty.biometricenabled', translateMessage: true });
         }
+    }
+
+    /**
+     * The question before turning it on, which names the account that holds it now, if there is one.
+     *
+     * @param enrolled The site id of the account that holds it, or ''.
+     * @returns The question.
+     */
+    protected async enableQuestion(enrolled: string): Promise<string> {
+        const question = Translate.instant('core.aty.biometricaskenable');
+        const [other] = enrolled ? await CorePromiseUtils.ignoreErrors(CoreSites.getSites([enrolled]), []) : [];
+        if (!other) {
+            return question;
+        }
+
+        // The site by its address, as the question before switching accounts names it. Loaded lazily, as elsewhere.
+        const { AtySites } = await import('@services/aty-sites');
+
+        return `${question} ${Translate.instant('core.aty.biometriconeaccount', {
+            name: other.fullname ?? '',
+            site: AtySites.host(other.siteUrl),
+        })}`;
     }
 
     /**

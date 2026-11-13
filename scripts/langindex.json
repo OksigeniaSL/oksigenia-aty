@@ -1532,6 +1532,7 @@
   "core.aty.biometricenable": "local_moodlemobileapp",
   "core.aty.biometricenabled": "local_moodlemobileapp",
   "core.aty.biometricneedspin": "local_moodlemobileapp",
+  "core.aty.biometriconeaccount": "local_moodlemobileapp",
   "core.aty.reconnectcode": "local_moodlemobileapp",
   "core.aty.reconnectpassword": "local_moodlemobileapp",
   "core.aty.reconnectscan": "local_moodlemobileapp",

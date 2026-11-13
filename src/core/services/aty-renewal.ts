@@ -21,6 +21,7 @@ import { CorePlatform } from '@services/platform';
 import { CoreSites } from '@services/sites';
 import { makeSingleton } from '@singletons';
 import { CoreEvents } from '@static/events';
+import { CorePromiseUtils } from '@static/promise-utils';
 import { CoreWait } from '@static/wait';
 
 /**
@@ -58,6 +59,13 @@ export class AtyRenewalService {
         CoreEvents.on(CoreEvents.LOGIN, async ({ siteId }) => {
             await this.storePending(siteId);
             await this.checkCurrentSite();
+        });
+
+        // An account that leaves the phone takes its renewal marks and its fingerprint or face with it.
+        CoreEvents.on(CoreEvents.SITE_DELETED, async ({ siteId }) => {
+            if (siteId) {
+                await this.forget(siteId);
+            }
         });
 
         CorePlatform.resume.subscribe(async () => {
@@ -164,18 +172,23 @@ export class AtyRenewalService {
             return;
         }
 
-        // Biometric shortcut: if this site's PIN is stored behind the fingerprint/face, unlock it and renew without
+        // Biometric shortcut: if this account's PIN is stored behind the fingerprint/face, unlock it and renew without
         // showing the pad. On cancel or a stale PIN, fall through to the pad.
         if (first.biometric) {
             const { AtyBiometric } = await import('@services/aty-biometric');
-            if ((await AtyBiometric.enrolledSite()) === site.getURL() && await AtyBiometric.isAvailable()) {
-                const pin = await AtyBiometric.unlockPin(first.biometric);
+            if (await AtyBiometric.isEnrolled(site.getId()) && await AtyBiometric.isAvailable()) {
+                const pin = await AtyBiometric.unlockPin(site.getId(), first.biometric);
                 if (pin) {
                     const result = await this.call(site, pin);
                     if (result && !result.needspin) {
                         await this.store(site, result.validuntil);
 
                         return;
+                    }
+                    if (result?.needspin) {
+                        // The site refused it (the PIN changed since, or it is locked): forget it, or it would be tried on
+                        // every renewal and count against the lock. The pad asks now; the menu turns it on again.
+                        await AtyBiometric.forget(site.getId());
                     }
                 }
             }
@@ -216,11 +229,25 @@ export class AtyRenewalService {
     /**
      * Where the time the PIN pad was last put away without renewing is kept, per account.
      *
-     * @param site The site.
+     * @param site The site, or its id.
      * @returns The config key.
      */
-    protected askedKey(site: CoreSite): string {
+    protected askedKey(site: CoreSite | string): string {
         return `${this.key(site)}_asked`;
+    }
+
+    /**
+     * Forget what is kept for an account that left the phone: its token expiry, the last time it put the pad away and, if it
+     * is its own, the PIN behind the fingerprint or face.
+     *
+     * @param siteId The site id of the account.
+     */
+    protected async forget(siteId: string): Promise<void> {
+        await CorePromiseUtils.ignoreErrors(CoreConfig.delete(this.key(siteId)));
+        await CorePromiseUtils.ignoreErrors(CoreConfig.delete(this.askedKey(siteId)));
+
+        const { AtyBiometric } = await import('@services/aty-biometric');
+        await AtyBiometric.forget(siteId);
     }
 
     /**
@@ -271,11 +298,11 @@ export class AtyRenewalService {
     /**
      * The config key that holds a site's token expiry.
      *
-     * @param site The site.
+     * @param site The site, or its id.
      * @returns The key.
      */
-    protected key(site: CoreSite): string {
-        return `aty_token_validuntil_${site.getId()}`;
+    protected key(site: CoreSite | string): string {
+        return `aty_token_validuntil_${typeof site === 'string' ? site : site.getId()}`;
     }
 
 }
