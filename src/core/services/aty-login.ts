@@ -83,6 +83,12 @@ export class AtyLoginService {
     protected logger = CoreLogger.getInstance('AtyLogin');
 
     /**
+     * Whether a sign-in link is being redeemed. CoreSSO's own mark lets go by itself after 10 seconds, while the PIN pad may
+     * wait much longer: Android handing the link over again meanwhile would open a second pad, which ends in «link used».
+     */
+    protected redeeming = false;
+
+    /**
      * Check whether a URL is an Oksigenia Aty sign-in URL (scheme://atylogin=...).
      *
      * @param url URL to check.
@@ -139,10 +145,30 @@ export class AtyLoginService {
             throw new CoreCustomURLSchemesHandleError(new CoreError(Translate.instant('core.login.invalidsite')));
         }
 
-        if (CoreSSO.isSSOAuthenticationOngoing() || await this.isSpent(url)) {
+        // Taken before anything is awaited, so the same link handed over twice at once is redeemed once.
+        if (this.redeeming || CoreSSO.isSSOAuthenticationOngoing()) {
             throw new CoreCustomURLSchemesHandleError('Duplicated');
         }
+        this.redeeming = true;
 
+        try {
+            if (await this.isSpent(url)) {
+                throw new CoreCustomURLSchemesHandleError('Duplicated');
+            }
+
+            return await this.redeem(url);
+        } finally {
+            this.redeeming = false;
+        }
+    }
+
+    /**
+     * Redeem a sign-in link: exchange its key for a token, asking for the PIN when the user has one.
+     *
+     * @param url The sign-in URL.
+     * @returns The sign-in data.
+     */
+    protected async redeem(url: string): Promise<CoreCustomURLSchemesParams> {
         CoreSSO.startSSOAuthentication();
         this.logger.debug('App launched by an Aty sign-in URL');
 
