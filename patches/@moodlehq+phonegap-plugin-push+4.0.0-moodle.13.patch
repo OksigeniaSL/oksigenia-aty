@@ -1,5 +1,5 @@
 diff --git a/node_modules/@moodlehq/phonegap-plugin-push/src/ios/AppDelegate+notification.m b/node_modules/@moodlehq/phonegap-plugin-push/src/ios/AppDelegate+notification.m
-index 804d45b..08a1429 100644
+index 804d45b..f4bcfe5 100644
 --- a/node_modules/@moodlehq/phonegap-plugin-push/src/ios/AppDelegate+notification.m
 +++ b/node_modules/@moodlehq/phonegap-plugin-push/src/ios/AppDelegate+notification.m
 @@ -110,6 +110,15 @@ NSString *const pushPluginApplicationDidBecomeActiveNotification = @"pushPluginA
@@ -18,6 +18,39 @@ index 804d45b..08a1429 100644
      // app is in the background or inactive, so only call notification callback if this is a silent push
      if (application.applicationState != UIApplicationStateActive || isEncrypted) {
          NSLog(@"app in-active");
+@@ -248,11 +257,30 @@ NSString *const pushPluginApplicationDidBecomeActiveNotification = @"pushPluginA
+     NSLog( @"NotificationCenter Handle push from foreground" );
+     // custom code to handle push while app is in the foreground
+     PushPlugin *pushHandler = [self getCommandInstance:@"PushNotification"];
+-    pushHandler.notificationMessage = notification.request.content.userInfo;
++    NSDictionary *userInfo = notification.request.content.userInfo;
++
++    // Oksigenia Aty: an encrypted notice that the notification service extension has already decrypted carries its real
++    // title and text, so iOS shows it as it is, and the app hears of it marked shownbyios and does not show it again.
++    // Any other notice is shown by the app, as before.
++    BOOL shownByIos = [[userInfo objectForKey:@"encrypted"] boolValue] &&
++        [[userInfo objectForKey:@"silentencryptedtriggeredbyplugin"] boolValue];
++    if (shownByIos) {
++        NSMutableDictionary *marked = [userInfo mutableCopy];
++        [marked setObject:[NSNumber numberWithBool:YES] forKey:@"shownbyios"];
++        userInfo = marked;
++        NSLog(@"Push Plugin encrypted notice decrypted by the extension: shown by iOS");
++    }
++
++    pushHandler.notificationMessage = userInfo;
+     pushHandler.isInline = YES;
+     [pushHandler notificationReceived];
+ 
+-    completionHandler(UNNotificationPresentationOptionNone);
++    if (shownByIos) {
++        completionHandler(UNNotificationPresentationOptionBanner | UNNotificationPresentationOptionList |
++            UNNotificationPresentationOptionSound);
++    } else {
++        completionHandler(UNNotificationPresentationOptionNone);
++    }
+ }
+ 
+ - (void)userNotificationCenter:(UNUserNotificationCenter *)center
 diff --git a/node_modules/@moodlehq/phonegap-plugin-push/src/ios/EncryptionHandler.m b/node_modules/@moodlehq/phonegap-plugin-push/src/ios/EncryptionHandler.m
 index 1ee2277..016355f 100644
 --- a/node_modules/@moodlehq/phonegap-plugin-push/src/ios/EncryptionHandler.m

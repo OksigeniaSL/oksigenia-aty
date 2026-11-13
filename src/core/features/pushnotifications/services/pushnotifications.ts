@@ -418,6 +418,14 @@ export class CorePushNotificationsProvider {
             return this.notificationClicked(data);
         }
 
+        if (CoreUtils.isTrueOrOne(data.shownbyios)) {
+            // Oksigenia Aty: iOS already shows this notice, decrypted by the app's notification service extension. The app
+            // only takes note of it, so that it is shown once.
+            await this.notifyReceived(notification, data);
+
+            return;
+        }
+
         const localNotif: ILocalNotification = {
             id: Number(data.notId) || 1,
             data: data,
@@ -966,6 +974,7 @@ export type CorePushNotificationsNotificationBasicRawData = {
     'summaryText'?: string; // Notification summary text. "Extra" feature.
     'sender'?: string; // Name of the user who sent the message. "Extra" feature.
     'senderImage'?: string; // Image of the user who sent the message. "Extra" feature.
+    'shownbyios'?: boolean; // Oksigenia Aty: iOS shows the notice itself, decrypted by the notification service extension.
 };
 
 /**
