@@ -37,7 +37,11 @@ describe('Site Home link handlers', () => {
             isLoggedIn: () => true,
         });
 
-        mockSingleton(CoreLoginHelper, { getAvailableSites: async () => [{ url: siteUrl, name: 'Example Campus' }] });
+        // Oksigenia Aty: the list of Oksigenia's sites is not what this test is about; the site counts as on it.
+        mockSingleton(CoreLoginHelper, {
+            getAvailableSites: async () => [{ url: siteUrl, name: 'Example Campus' }],
+            isSiteUrlAllowed: async () => true,
+        });
 
         CoreContentLinksDelegate.registerHandler(new CoreSiteHomeIndexLinkHandlerService());
 

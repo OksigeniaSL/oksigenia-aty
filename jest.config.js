@@ -13,6 +13,9 @@ module.exports = {
         '!src/core/initializers/index.ts',
         '!src/core/features/emulators/services/zip.ts',
     ],
-    transformIgnorePatterns: ['node_modules/(?!@stencil|@angular|@ionic|@moodlehq|@ngx-translate|@awesome-cordova-plugins|swiper)'],
+    // Oksigenia Aty: @noble (the signature of the list of sites) ships as ES modules too.
+    transformIgnorePatterns: [
+        'node_modules/(?!@stencil|@angular|@ionic|@moodlehq|@ngx-translate|@awesome-cordova-plugins|swiper|@noble)',
+    ],
     moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/src/' }),
 };
