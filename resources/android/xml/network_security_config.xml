@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Oksigenia Aty: every site it opens is one Oksigenia hosts, all of them https (src/core/services/aty-sites.ts), so no
+     traffic goes in the clear, which someone on the same Wi-Fi could read or change. Only this machine stays open in
+     cleartext, for a local demo reached through adb reverse while developing: the list lets it in only outside
+     production builds. -->
 <network-security-config>
-    <base-config cleartextTrafficPermitted="true" />
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
+    </domain-config>
 </network-security-config>
