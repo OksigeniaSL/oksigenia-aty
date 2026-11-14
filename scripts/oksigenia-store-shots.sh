@@ -56,18 +56,23 @@ idb_companion --udid "$DEV" > "$LOGS/idb-companion.log" 2>&1 &
 sleep 8
 idb connect localhost 10882 > /dev/null
 
+# The address bar of the app's own browser shows the site without its scheme: a link the app did not take as its own
+# (a page the site has not enabled for the app) opens there, over the app, and would hide every scene after it.
+BROWSER="${SITE#https://}/"
+
 # reach TEXT SECONDS: reads the screen until TEXT is on it, answering iOS's «Abrir» and the app's «Abrir el sitio» on the
 # way, and waiting while «Cargando» is shown. Those go first: the scene's text may already be on the screen beneath them.
-# Returns 1 if TEXT never comes.
+# Returns 1 if TEXT never comes, and 2 if the app's browser opened instead (the web page may have the same text).
 reach() {
   local want=$1 until=$((SECONDS + $2)) hit
   while (( SECONDS < until )); do
     if xcrun simctl io "$DEV" screenshot "$SCREEN" > /dev/null 2>&1 \
-      && hit=$("$OCR" "$SCREEN" "=Abrir" "Abrir el sitio" "Cargando" "$want"); then
+      && hit=$("$OCR" "$SCREEN" "=Abrir" "Abrir el sitio" "Cargando" "$BROWSER" "$want"); then
       # shellcheck disable=SC2086
       set -- $hit
       case $1 in
-        4) return 0 ;;
+        5) return 0 ;;
+        4) return 2 ;;
         3) ;;
         *) log "tapping «$([ "$1" = 1 ] && echo Abrir || echo 'Abrir el sitio')»"
            idb ui tap $(($2 / 3)) $(($3 / 3))      # the screenshot is at 3x; idb taps in points
@@ -80,23 +85,31 @@ reach() {
 }
 
 # scene NAME URL TEXT: opens the URL (none for the first screen) and, once the scene's TEXT is there, lets images and
-# fonts settle and takes the screenshot.
+# fonts settle and takes the screenshot. If the link opened in the app's browser, the screen goes to the logs, not to
+# the store, and the app starts again on its home so that the next scene is not under the browser.
 scene() {
-  local pid=
+  local pid= got=0
   if [ -n "$2" ]; then
     # simctl openurl waits until iOS's prompt is answered, so it runs in the background while reach() answers it.
     xcrun simctl openurl "$DEV" "$2" > /dev/null 2>&1 &
     pid=$!
     sleep 5                                     # the previous screen may hold the next scene's text
   fi
-  if reach "$3" 420; then
-    log "$1: «$3» on the screen"
-    sleep 8
-  else
-    log "$1: «$3» never came"
-    FAILED=1
-  fi
-  xcrun simctl io "$DEV" screenshot "$OUT/$1.png" > /dev/null
+  reach "$3" 420 || got=$?
+  case $got in
+    0) log "$1: «$3» on the screen"
+       sleep 8
+       xcrun simctl io "$DEV" screenshot "$OUT/$1.png" > /dev/null ;;
+    2) log "$1: the link opened in the app's browser, not in the app (screen in the logs)"
+       FAILED=1
+       xcrun simctl io "$DEV" screenshot "$LOGS/$1-browser.png" > /dev/null
+       xcrun simctl terminate "$DEV" "$BUNDLE_ID" > /dev/null 2>&1 || true
+       xcrun simctl launch "$DEV" "$BUNDLE_ID" > /dev/null
+       reach "Hola" 300 || log "the home did not come back after the browser" ;;
+    *) log "$1: «$3» never came"
+       FAILED=1
+       xcrun simctl io "$DEV" screenshot "$OUT/$1.png" > /dev/null ;;
+  esac
   [ -z "$pid" ] || wait "$pid" 2> /dev/null || true
 }
 
@@ -110,7 +123,8 @@ scene qr "" "Escanear código QR"
 scene inicio "oksigeniaaty://$SITE?token=$TOKEN&privatetoken=$PRIVATETOKEN" "Hola"
 
 # 6. The courses: the home no longer ends with course cards (Aty plugin 0.5.60, the home of 13 November 2026), so the
-# scene is the app's «Mis cursos» page, opened by its link.
+# scene is the app's «Mis cursos» page, opened by its link. The app has that page only when the site's courses page
+# has a block it can show (Moodle's course overview); without one the link goes to the browser.
 scene cursos "$(link /my/courses.php)" "Mis cursos"
 
 # 2. A course in the centre's colours; 4. the notifications; 5. the month.
