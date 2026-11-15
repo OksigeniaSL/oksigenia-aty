@@ -25,9 +25,11 @@ describe('AtyChildLinkHandler', () => {
     const handler = new AtyChildLinkHandlerService();
 
     it('handles the child page of a site, and nothing else', () => {
-        expect(handler.handles('https://aula.example.com/local/oksigeniaaty/child.php?id=45')).toBe(true);
-        expect(handler.handles('https://aula.example.com/local/oksigeniaaty/child.php')).toBe(false);
-        expect(handler.handles('https://aula.example.com/local/oksigeniaaty/mylink.php?id=45')).toBe(false);
+        // The delegate passes the address without the site, as it does to every handler.
+        expect(handler.handles('/local/oksigeniaaty/child.php?id=45')).toBe(true);
+        expect(handler.handles('/local/oksigeniaaty/child.php')).toBe(false);
+        expect(handler.handles('/local/oksigeniaaty/mylink.php?id=45')).toBe(false);
+        expect(handler.handles('/mod/page/view.php?id=45&x=/local/oksigeniaaty/child.php?id=45')).toBe(false);
     });
 
     it('opens the page of the child as the home does', async () => {
