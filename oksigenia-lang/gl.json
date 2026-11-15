@@ -32,5 +32,6 @@
     "core.aty.reconnectpassword": "Ou entra co teu contrasinal",
     "core.contentlinks.confirmlinktositetitle": "Abrir outro sitio?",
     "core.contentlinks.confirmlinktosite": "Esta ligazón lévate a:<br><br><strong>{{url}}</strong><br><br>Continúa só se confías neste sitio.",
-    "core.contentlinks.opensite": "Abrir o sitio"
+    "core.contentlinks.opensite": "Abrir o sitio",
+    "core.aty.child": "O teu fillo"
 }

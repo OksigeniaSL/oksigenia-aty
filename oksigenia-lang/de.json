@@ -32,5 +32,6 @@
     "core.aty.reconnectpassword": "Oder melde dich mit deinem Passwort an",
     "core.contentlinks.confirmlinktositetitle": "Andere Website öffnen?",
     "core.contentlinks.confirmlinktosite": "Dieser Link führt dich zu:<br><br><strong>{{url}}</strong><br><br>Fahre nur fort, wenn du dieser Website vertraust.",
-    "core.contentlinks.opensite": "Website öffnen"
+    "core.contentlinks.opensite": "Website öffnen",
+    "core.aty.child": "Dein Kind"
 }
