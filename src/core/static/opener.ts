@@ -31,6 +31,7 @@ import { CoreEvents } from '@static/events';
 import { CoreColors } from './colors';
 import { CorePrompts } from '@services/overlays/prompts';
 import { CoreNativeCordovaPluginResultStatus } from '@features/native/constants';
+import { atyReadableUrl } from './aty-readable-url';
 
 /**
  * Static class with helper functions to handler open files and urls.
@@ -65,6 +66,9 @@ export class CoreOpener {
         url = url
             .replace(/token=[^&#]+/gi, 'token=secret')
             .replace(/tokenpluginfile\.php\/[^/]+/gi, 'tokenpluginfile.php/secret');
+
+        // Aty: the site and the path, not a long encoded query (a WhatsApp message, a shopping list).
+        url = atyReadableUrl(url);
 
         const dontShowAgain = await CorePrompts.show(Translate.instant('core.warnopeninbrowser', { url }), 'checkbox', {
             placeholderOrLabel: Translate.instant('core.dontshowagain'),
