@@ -22,6 +22,7 @@ import {
     CORE_COURSES_MYCOURSES_PAGE_NAME,
 } from '@features/courses/constants';
 import { CoreCoursesMy } from '../my';
+import { atyIsFamilyAccount } from '@services/aty-family';
 
 /**
  * Handler to add my courses into main menu.
@@ -37,6 +38,11 @@ export class CoreCoursesMyCoursesMainMenuHandlerService implements CoreMainMenuH
      * @inheritdoc
      */
     async isEnabled(): Promise<boolean> {
+        // Oksigenia Aty: a family's own account has no courses; it follows its children from the home.
+        if (atyIsFamilyAccount(CoreSites.getCurrentSite())) {
+            return false;
+        }
+
         return CoreCoursesMy.isAvailable();
     }
 
