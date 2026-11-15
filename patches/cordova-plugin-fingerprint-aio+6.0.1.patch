@@ -1,0 +1,135 @@
+diff --git a/node_modules/cordova-plugin-fingerprint-aio/src/android/BiometricActivity.java b/node_modules/cordova-plugin-fingerprint-aio/src/android/BiometricActivity.java
+index ec74faf..1ad14d2 100644
+--- a/node_modules/cordova-plugin-fingerprint-aio/src/android/BiometricActivity.java
++++ b/node_modules/cordova-plugin-fingerprint-aio/src/android/BiometricActivity.java
+@@ -22,7 +22,7 @@ public class BiometricActivity extends AppCompatActivity {
+     private static final int REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS = 2;
+     private PromptInfo mPromptInfo;
+     private CryptographyManager mCryptographyManager;
+-    private static final String SECRET_KEY = "__aio_secret_key";
++    static final String SECRET_KEY = "__aio_secret_key"; // Oksigenia Aty: package-private, for deleteBiometricSecret.
+     private BiometricPrompt mBiometricPrompt;
+ 
+     @Override
+diff --git a/node_modules/cordova-plugin-fingerprint-aio/src/android/EncryptedData.java b/node_modules/cordova-plugin-fingerprint-aio/src/android/EncryptedData.java
+index fa0cc6e..cbe241d 100644
+--- a/node_modules/cordova-plugin-fingerprint-aio/src/android/EncryptedData.java
++++ b/node_modules/cordova-plugin-fingerprint-aio/src/android/EncryptedData.java
+@@ -31,6 +31,15 @@ class EncryptedData {
+         save(CIPHERTEXT_KEY_NAME, ciphertext, context);
+     }
+ 
++    // Oksigenia Aty: for deleteBiometricSecret. Written before it returns, so nothing is left if the app is killed next.
++    static void delete(Context context) {
++        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
++        preferences.edit()
++                .remove(IV_KEY_NAME)
++                .remove(CIPHERTEXT_KEY_NAME)
++                .commit();
++    }
++
+     private void save(String key, byte[] value, Context context) {
+         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+         preferences.edit()
+diff --git a/node_modules/cordova-plugin-fingerprint-aio/src/android/Fingerprint.java b/node_modules/cordova-plugin-fingerprint-aio/src/android/Fingerprint.java
+index 5f4a845..b724550 100644
+--- a/node_modules/cordova-plugin-fingerprint-aio/src/android/Fingerprint.java
++++ b/node_modules/cordova-plugin-fingerprint-aio/src/android/Fingerprint.java
+@@ -11,6 +11,7 @@ import android.util.Log;
+ 
+ 
+ import androidx.biometric.BiometricManager;
++import java.security.KeyStore;
+ import org.apache.cordova.CallbackContext;
+ import org.apache.cordova.CordovaInterface;
+ import org.apache.cordova.CordovaPlugin;
+@@ -38,6 +39,12 @@ public class Fingerprint extends CordovaPlugin {
+ 
+     public boolean execute(final String action, JSONArray args, CallbackContext callbackContext) {
+ 
++        if ("deleteBiometricSecret".equals(action)) {
++            // Oksigenia Aty: answered on its own callback, so a prompt in progress keeps its own.
++            executeDeleteBiometricSecret(callbackContext);
++            return true;
++        }
++
+         this.mCallbackContext = callbackContext;
+         Log.v(TAG, "Fingerprint action: " + action);
+ 
+@@ -81,6 +88,28 @@ public class Fingerprint extends CordovaPlugin {
+         this.runBiometricActivity(args, BiometricActivityType.REGISTER_SECRET);
+     }
+ 
++    /**
++     * Oksigenia Aty: delete the stored secret for real, with no prompt: its ciphertext and IV from the preferences and
++     * its key from the Android keystore. Deleting what is not there is a success.
++     */
++    private void executeDeleteBiometricSecret(CallbackContext callbackContext) {
++        cordova.getThreadPool().execute(() -> {
++            try {
++                EncryptedData.delete(cordova.getContext());
++                KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
++                keyStore.load(null);
++                if (keyStore.containsAlias(BiometricActivity.SECRET_KEY)) {
++                    keyStore.deleteEntry(BiometricActivity.SECRET_KEY);
++                }
++                Log.i(TAG, "Biometric secret deleted");
++                callbackContext.success("deleted");
++            } catch (Exception e) {
++                Log.e(TAG, "Biometric secret not deleted", e);
++                callbackContext.error(e.getMessage());
++            }
++        });
++    }
++
+     private void executeLoadBiometricSecret(JSONArray args) {
+         this.runBiometricActivity(args, BiometricActivityType.LOAD_SECRET);
+     }
+diff --git a/node_modules/cordova-plugin-fingerprint-aio/src/ios/Fingerprint.swift b/node_modules/cordova-plugin-fingerprint-aio/src/ios/Fingerprint.swift
+index 094e5b7..6020c65 100644
+--- a/node_modules/cordova-plugin-fingerprint-aio/src/ios/Fingerprint.swift
++++ b/node_modules/cordova-plugin-fingerprint-aio/src/ios/Fingerprint.swift
+@@ -199,6 +199,23 @@ enum PluginError:Int {
+         self.loadSecret(command)
+     }
+ 
++    // Oksigenia Aty: delete the stored secret for real, with no prompt (iOS does not ask to delete a keychain item).
++    // Deleting what is not there is a success.
++    @objc(deleteBiometricSecret:)
++    func deleteBiometricSecret(_ command: CDVInvokedUrlCommand){
++        var pluginResult: CDVPluginResult
++        do {
++            try Secret().delete()
++            pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: "deleted");
++        } catch let error as KeychainError where error.status == errSecItemNotFound {
++            pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: "deleted");
++        } catch {
++            let errorResult = ["code": PluginError.BIOMETRIC_UNKNOWN_ERROR.rawValue, "message": error.localizedDescription] as [String : Any];
++            pluginResult = CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: errorResult);
++        }
++        self.commandDelegate.send(pluginResult, callbackId:command.callbackId)
++    }
++
+     override func pluginInitialize() {
+         super.pluginInitialize()
+     }
+diff --git a/node_modules/cordova-plugin-fingerprint-aio/www/Fingerprint.js b/node_modules/cordova-plugin-fingerprint-aio/www/Fingerprint.js
+index e54a53b..d79f9e7 100644
+--- a/node_modules/cordova-plugin-fingerprint-aio/www/Fingerprint.js
++++ b/node_modules/cordova-plugin-fingerprint-aio/www/Fingerprint.js
+@@ -64,4 +64,15 @@ Fingerprint.prototype.loadBiometricSecret = function (params, successCallback, e
+   );
+ };
+ 
++// Oksigenia Aty: delete the stored secret for real, with no prompt (the plugin could only overwrite it).
++Fingerprint.prototype.deleteBiometricSecret = function (successCallback, errorCallback) {
++  cordova.exec(
++      successCallback,
++      errorCallback,
++      "Fingerprint",
++      "deleteBiometricSecret",
++      [{}]
++  );
++};
++
+ module.exports = new Fingerprint();

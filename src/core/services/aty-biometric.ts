@@ -31,6 +31,9 @@ export class AtyBiometric {
     /** Where it was kept until November 2026: by site URL, which two accounts of one site share. */
     protected static readonly LEGACY_SITE_KEY = 'aty_biometric_site';
 
+    /** Set once a PIN that versions before 5.2.3 left on the phone, turned off but not deleted, is gone. */
+    protected static readonly PURGED_KEY = 'aty_biometric_purged';
+
     /**
      * Whether the device has biometric hardware enrolled and the plugin is present (false on the web).
      *
@@ -52,9 +55,12 @@ export class AtyBiometric {
      */
     static async enrolledAccount(): Promise<string> {
         try {
-            const account = await CoreConfig.get<string>(AtyBiometric.ACCOUNT_KEY, '');
+            const account = await CoreConfig.get<string>(AtyBiometric.ACCOUNT_KEY, '') || await AtyBiometric.migrate();
+            if (!account) {
+                await AtyBiometric.purgeOnce();
+            }
 
-            return account || await AtyBiometric.migrate();
+            return account;
         } catch {
             return '';
         }
@@ -121,8 +127,7 @@ export class AtyBiometric {
 
     /**
      * Forget the stored biometric PIN, if it is the account's: the menu turns it off, the account leaves the phone or its site
-     * refuses the PIN. The plugin can only overwrite its copy, behind the fingerprint or face, which the next account to turn
-     * it on does; until then nothing in the app unlocks it.
+     * refuses the PIN. The PIN is deleted from the phone's keystore or keychain, not just left unused.
      *
      * @param siteId The site id of the account.
      */
@@ -135,6 +140,33 @@ export class AtyBiometric {
             await CoreConfig.delete(AtyBiometric.ACCOUNT_KEY);
         } catch {
             // Ignore.
+        }
+        await AtyBiometric.deleteSecret();
+    }
+
+    /**
+     * Delete the PIN stored behind biometrics from the phone, with no prompt (patched cordova-plugin-fingerprint-aio).
+     *
+     * @returns Whether it is gone (false without the plugin, or if the phone refused).
+     */
+    protected static async deleteSecret(): Promise<boolean> {
+        const plugin = AtyBiometric.plugin();
+        if (!plugin?.deleteBiometricSecret) {
+            return false;
+        }
+
+        return new Promise(resolve => plugin.deleteBiometricSecret?.(() => resolve(true), () => resolve(false)));
+    }
+
+    /**
+     * Versions before 5.2.3 could only stop using a PIN that was turned off: delete it, once, when no account holds it.
+     */
+    protected static async purgeOnce(): Promise<void> {
+        if (await CoreConfig.get<number>(AtyBiometric.PURGED_KEY, 0)) {
+            return;
+        }
+        if (await AtyBiometric.deleteSecret()) {
+            await CoreConfig.set(AtyBiometric.PURGED_KEY, 1);
         }
     }
 
@@ -157,6 +189,8 @@ export class AtyBiometric {
 
         if (account) {
             await CoreConfig.set(AtyBiometric.ACCOUNT_KEY, account);
+        } else {
+            await AtyBiometric.deleteSecret();
         }
         await CoreConfig.delete(AtyBiometric.LEGACY_SITE_KEY);
 
@@ -190,4 +224,6 @@ interface AtyFingerprintPlugin {
         success: (secret: string) => void,
         error: (err: unknown) => void,
     ): void;
+    /** Added by Aty's patch (patches/cordova-plugin-fingerprint-aio+6.0.1.patch); absent from a build without it. */
+    deleteBiometricSecret?(success: () => void, error: (err: unknown) => void): void;
 }

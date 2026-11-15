@@ -41,6 +41,7 @@ describe('AtyBiometric', () => {
         isAvailable: jest.Mock;
         registerBiometricSecret: jest.Mock;
         loadBiometricSecret: jest.Mock;
+        deleteBiometricSecret?: jest.Mock;
     };
     let openModal: jest.Mock;
     let confirm: jest.Mock;
@@ -104,6 +105,10 @@ describe('AtyBiometric', () => {
             }),
             loadBiometricSecret: jest.fn((_options: unknown, success: (secret: string) => void, error: (e: unknown) => void) =>
                 secret === undefined ? error(-113) : success(secret)),
+            deleteBiometricSecret: jest.fn((success: () => void) => {
+                secret = undefined;
+                success();
+            }),
         };
         // eslint-disable-next-line @typescript-eslint/naming-convention -- the plugin's global is named Fingerprint.
         (window as unknown as { Fingerprint?: unknown }).Fingerprint = plugin;
@@ -152,6 +157,49 @@ describe('AtyBiometric', () => {
         expect(await AtyBiometric.enrolledAccount()).toEqual('');
     });
 
+    it('deletes the PIN from the phone when its account turns it off, and leaves it when another account does', async () => {
+        await enrol(ana);
+
+        await AtyBiometric.forget(luis.id);
+        expect(secret).toEqual(ana.pin);
+
+        await AtyBiometric.forget(ana.id);
+        expect(secret).toBeUndefined();
+    });
+
+    it('deletes, once, a PIN that an earlier version turned off but left on the phone', async () => {
+        secret = ana.pin;
+
+        expect(await AtyBiometric.enrolledAccount()).toEqual('');
+        expect(secret).toBeUndefined();
+
+        await AtyBiometric.enrolledAccount();
+        expect(plugin.deleteBiometricSecret).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the PIN of the account that holds it when it looks for leftovers', async () => {
+        await enrol(ana);
+
+        expect(await AtyBiometric.enrolledAccount()).toEqual(ana.id);
+        expect(plugin.deleteBiometricSecret).not.toHaveBeenCalled();
+        expect(secret).toEqual(ana.pin);
+    });
+
+    it('still turns it off with a plugin that cannot delete, and looks for leftovers again with one that can', async () => {
+        const deleteBiometricSecret = plugin.deleteBiometricSecret;
+        delete plugin.deleteBiometricSecret;
+        await enrol(ana);
+
+        await AtyBiometric.forget(ana.id);
+        expect(await AtyBiometric.enrolledAccount()).toEqual('');
+        expect(stored['aty_biometric_purged']).toBeUndefined();
+
+        plugin.deleteBiometricSecret = deleteBiometricSecret;
+        expect(await AtyBiometric.enrolledAccount()).toEqual('');
+        expect(secret).toBeUndefined();
+        expect(stored['aty_biometric_purged']).toEqual(1);
+    });
+
     it('passes to the account that turns it on last: the phone keeps one', async () => {
         await enrol(ana);
         await enrol(luis);
@@ -176,6 +224,7 @@ describe('AtyBiometric', () => {
 
         expect(await AtyBiometric.enrolledAccount()).toEqual('');
         expect(stored['aty_biometric_site']).toBeUndefined();
+        expect(secret).toBeUndefined();
         expect(await AtyBiometric.unlockPin(luis.id, 'Touch')).toBeUndefined();
 
         stored['aty_biometric_site'] = 'https://gone.example.com';
@@ -279,6 +328,7 @@ describe('AtyBiometric', () => {
 
         expect(confirm).toHaveBeenCalledWith('core.aty.biometricaskdisable', expect.anything());
         expect(await AtyBiometric.enrolledAccount()).toEqual('');
+        expect(secret).toBeUndefined();
     });
 
 });
