@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const GET_STARTED_URL = 'https://moodle.com';
+// Oksigenia Aty: whoever wants the platform for their centre gets it from Oksigenia, whose sites are the only ones Aty opens.
+export const GET_STARTED_URL = 'https://oksigenia.com/servicios/moodle';
 export const FAQ_QRCODE_INFO_DONE = 'qrcode_info_done';
 export const FAQ_URL_IMAGE_HTML = '<img src="assets/img/login/faq_url.png" role="presentation" alt="">';
 export const FAQ_QRCODE_IMAGE_HTML = '<img src="assets/img/login/faq_qrcode.png" role="presentation" alt="">';
