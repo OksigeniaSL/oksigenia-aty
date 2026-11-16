@@ -103,6 +103,28 @@ export class AtyLoginService {
     }
 
     /**
+     * The sign-in a page of the site handed to Google Play when the app was not installed (open.php's button, as
+     * «referrer=atylogin=…»): the app's sign-in scheme, so the first opening after installing signs in. Undefined if
+     * the referrer carries none.
+     *
+     * @param referrer The install referrer, as Google Play gives it.
+     * @returns The sign-in scheme URL, or undefined.
+     */
+    getSchemeFromReferrer(referrer: string): string | undefined {
+        let text = referrer || '';
+        if (text.includes('%')) {
+            try {
+                text = decodeURIComponent(text);
+            } catch {
+                return undefined;
+            }
+        }
+        const match = text.match(/(?:^|&)atylogin=([A-Za-z0-9_-]+)(?:&|$)/);
+
+        return match ? `${CoreConstants.CONFIG.customurlscheme}://atylogin=${match[1]}` : undefined;
+    }
+
+    /**
      * Turn an Aty magic link (https://.../local/oksigeniaaty/open.php?key=...) into the app's sign-in scheme, so a QR
      * or link that any camera can open also signs in when scanned with the app itself. Returns undefined otherwise.
      *

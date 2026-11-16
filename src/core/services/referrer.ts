@@ -32,6 +32,18 @@ export class CoreReferrerService {
      * @returns Referrer URL, undefined if not supported, already consumed or no referrer URL.
      */
     async consumeInstallReferrerUrl(): Promise<string | undefined> {
+        const siteUrlMatch = (await this.consumeInstallReferrer() ?? '').match(/siteurl=([^&]+)/);
+
+        return siteUrlMatch?.[1];
+    }
+
+    /**
+     * Oksigenia Aty: consume the whole install referrer (Android only), which may carry a sign-in from a page of the site
+     * («atylogin=…», from open.php's Google Play link) instead of a site URL. Read once, like the site URL.
+     *
+     * @returns The referrer, undefined if not supported, already consumed or empty.
+     */
+    async consumeInstallReferrer(): Promise<string | undefined> {
         const installReferrerPlugin = CoreNative.plugin('installReferrer');
         if (!installReferrerPlugin) {
             return;
@@ -46,9 +58,7 @@ export class CoreReferrerService {
         try {
             const result = await installReferrerPlugin.getReferrer();
 
-            const siteUrlMatch = (result.referrer ?? '').match(/siteurl=([^&]+)/);
-
-            return siteUrlMatch?.[1];
+            return result.referrer || undefined;
         } catch {
             // Error getting referrer, it probably means Google Play is not available.
         } finally {

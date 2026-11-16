@@ -110,7 +110,15 @@ export default class CoreLoginSitePage implements OnInit, OnDestroy {
         if (sites.length) {
             url = await this.initSiteSelector();
         } else {
-            url = await this.consumeInstallReferrerUrl() ?? '';
+            // Oksigenia Aty: installed from a sign-in page's button, Google Play hands the sign-in over: in at the first opening.
+            const referrer = await this.consumeInstallReferrer();
+            const atyLogin = referrer ? AtyLogin.getSchemeFromReferrer(referrer) : undefined;
+            if (atyLogin) {
+                CoreCustomURLSchemes.handleCustomURL(atyLogin).catch((error) => {
+                    CoreCustomURLSchemes.treatHandleCustomURLError(error, atyLogin, 'CoreLoginSitePage');
+                });
+            }
+            url = (!atyLogin && referrer?.match(/siteurl=([^&]+)/)?.[1]) || '';
 
             if (url) {
                 this.connect(url);
@@ -166,13 +174,13 @@ export default class CoreLoginSitePage implements OnInit, OnDestroy {
     }
 
     /**
-     * Consume install referrer URL.
+     * Consume the install referrer (Oksigenia Aty: the whole of it, which may carry a sign-in instead of a site URL).
      *
-     * @returns Referrer URL, undefined if no URL to use.
+     * @returns Referrer, undefined if none to use.
      */
-    protected async consumeInstallReferrerUrl(): Promise<string | undefined> {
+    protected async consumeInstallReferrer(): Promise<string | undefined> {
         const url = await CorePromiseUtils.ignoreErrors(
-            CorePromiseUtils.timeoutPromise(CoreReferrer.consumeInstallReferrerUrl(), 1000),
+            CorePromiseUtils.timeoutPromise(CoreReferrer.consumeInstallReferrer(), 1000),
         );
 
         if (!url) {

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { CoreConstants } from '@/core/constants';
 import { mockSingleton, overrideTranslations } from '@/testing/utils';
 import { CoreCanceledError } from '@classes/errors/cancelederror';
 import { CorePromisedValue } from '@classes/promised-value';
@@ -82,6 +83,17 @@ describe('AtyLogin', () => {
         });
         mockSingleton(CoreAlerts, { confirm });
         mockSingleton(CoreLoadings, { pauseActiveModals: async () => undefined, resumeActiveModals: async () => undefined });
+    });
+
+    it('takes the sign-in Google Play hands over from a sign-in page', () => {
+        const scheme = `${CoreConstants.CONFIG.customurlscheme}://atylogin=aHR0cHM6Ly9zaXRl_-9`;
+
+        expect(AtyLogin.getSchemeFromReferrer('atylogin=aHR0cHM6Ly9zaXRl_-9')).toEqual(scheme);
+        expect(AtyLogin.getSchemeFromReferrer('atylogin%3DaHR0cHM6Ly9zaXRl_-9')).toEqual(scheme);
+        expect(AtyLogin.getSchemeFromReferrer('utm_source=x&atylogin=aHR0cHM6Ly9zaXRl_-9')).toEqual(scheme);
+        expect(AtyLogin.getSchemeFromReferrer('siteurl=https://example.org')).toBeUndefined();
+        expect(AtyLogin.getSchemeFromReferrer('atylogin=<script>')).toBeUndefined();
+        expect(AtyLogin.getSchemeFromReferrer('')).toBeUndefined();
     });
 
     it('knows whether the phone holds an account, by site and username', async () => {
