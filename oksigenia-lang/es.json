@@ -420,5 +420,6 @@
     "core.sitemaintenance": "La plataforma de tu centro está en mantenimiento y ahora no está disponible",
     "core.user.support": "Ayuda de tu centro",
     "core.settings.synchronizenowhelp": "Al sincronizar se envían a tu centro todos los cambios y la actividad que hiciste sin conexión en este dispositivo, y se actualizan los mensajes y las notificaciones.",
-    "core.aty.child": "Tu hijo"
+    "core.aty.child": "Tu hijo",
+    "core.login.sitebadgedescription": "Avisos sin leer: {{count}}."
 }
