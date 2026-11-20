@@ -1221,9 +1221,13 @@ export class CoreLoginHelperProvider {
             : Promise.resolve('');
         const [sitename, name] = await Promise.all([format(siteName), format(fullname)]);
 
-        await CoreAlerts.confirmDelete(name
+        // «Remove», not «Delete»: the account stays on the site, it only leaves this phone.
+        await CoreAlerts.confirm(name
             ? Translate.instant('core.aty.confirmdeleteaccount', { sitename, fullname: name })
-            : Translate.instant('core.login.confirmdeletesite', { sitename }));
+            : Translate.instant('core.login.confirmdeletesite', { sitename }), {
+            okText: Translate.instant('core.aty.removeaccount'),
+            isDestructive: true,
+        });
     }
 
     /**

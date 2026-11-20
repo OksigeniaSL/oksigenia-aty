@@ -1538,6 +1538,7 @@
   "core.aty.reconnectcode": "local_moodlemobileapp",
   "core.aty.reconnectpassword": "local_moodlemobileapp",
   "core.aty.reconnectscan": "local_moodlemobileapp",
+  "core.aty.removeaccount": "local_moodlemobileapp",
   "core.aty.sitecheckfailed": "local_moodlemobileapp",
   "core.aty.sitenotallowed": "local_moodlemobileapp",
   "core.aty.switchaccount": "local_moodlemobileapp",

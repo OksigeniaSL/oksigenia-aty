@@ -34,5 +34,6 @@
     "core.contentlinks.confirmlinktosite": "Este link vai levar você para:<br><br><strong>{{url}}</strong><br><br>Continue só se você confia neste site.",
     "core.contentlinks.opensite": "Abrir o site",
     "core.aty.child": "Seu filho",
-    "core.aty.confirmdeleteaccount": "Quer mesmo remover deste celular a conta de {{fullname}} em {{sitename}}?"
+    "core.aty.confirmdeleteaccount": "Quer mesmo remover deste celular a conta de {{fullname}} em {{sitename}}?",
+    "core.aty.removeaccount": "Remover"
 }
