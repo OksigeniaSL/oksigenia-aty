@@ -47,12 +47,27 @@ function createAsyncInstanceWrapper<
         },
         async getInstance() {
             if (!promisedInstance) {
-                promisedInstance = new CorePromisedValue();
+                const pending = new CorePromisedValue<TLazyInstance>();
+                promisedInstance = pending;
 
                 if (lazyConstructor) {
-                    const instance = await lazyConstructor();
+                    try {
+                        pending.resolve(await lazyConstructor());
+                    } catch (error) {
+                        // A constructor that fails must not leave the instance pending forever: whoever was waiting
+                        // gets the error, and the next use tries again (a site's table asked for while the site was
+                        // being removed, then the same account added back, waited forever and the phone was never
+                        // registered for push notifications).
+                        if (promisedInstance === pending) {
+                            promisedInstance = null;
+                        }
+                        pending.catch(() => {
+                            // This caller gets the error below; only those waiting on the promise need it.
+                        });
+                        pending.reject(error);
 
-                    promisedInstance.resolve(instance);
+                        throw error;
+                    }
                 }
             }
 

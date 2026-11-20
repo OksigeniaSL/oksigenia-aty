@@ -25,6 +25,38 @@ describe('AsyncInstance', () => {
         expect(asyncService.instance).toBeInstanceOf(LazyService);
     });
 
+    it('tries the constructor again after it fails', async () => {
+        let fail = true;
+        const asyncService = asyncInstance(() => {
+            if (fail) {
+                throw new Error('Not yet');
+            }
+
+            return new LazyService();
+        });
+
+        await expect(asyncService.hello()).rejects.toThrow('Not yet');
+        expect(asyncService.instance).toBe(undefined);
+
+        fail = false;
+
+        expect(await asyncService.hello()).toEqual('Hi there!');
+        expect(asyncService.instance).toBeInstanceOf(LazyService);
+    });
+
+    it('gives the error to whoever was waiting for a failing constructor', async () => {
+        let rejectConstructor!: (error: Error) => void;
+        const asyncService = asyncInstance(() => new Promise<LazyService>((resolve, reject) => rejectConstructor = reject));
+
+        const first = asyncService.hello();
+        const second = asyncService.goodbye();
+        await new Promise(resolve => setTimeout(resolve));
+        rejectConstructor(new Error('Gone'));
+
+        await expect(first).rejects.toThrow('Gone');
+        await expect(second).rejects.toThrow('Gone');
+    });
+
     it('does not initialize instance for eager properties', async () => {
         const asyncService = asyncInstance(() => new LazyService());
 
