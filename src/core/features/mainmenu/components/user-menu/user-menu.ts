@@ -16,7 +16,6 @@ import { CoreConstants } from '@/core/constants';
 import { CoreSharedModule } from '@/core/shared.module';
 import { Component, OnDestroy, OnInit, Type, viewChildren } from '@angular/core';
 import { CoreSiteInfo } from '@classes/sites/unauthenticated-site';
-import { CoreFilter } from '@features/filter/services/filter';
 import { CoreUserAuthenticatedSupportConfig } from '@features/user/classes/support/authenticated-support-config';
 import { CoreUserSupport } from '@features/user/services/support';
 import { CoreUser, CoreUserProfile } from '@features/user/services/user';
@@ -30,11 +29,10 @@ import {
 import { CoreModals } from '@services/overlays/modals';
 import { CoreNavigator } from '@services/navigator';
 import { CoreSites } from '@services/sites';
-import { ModalController, Translate } from '@singletons';
+import { ModalController } from '@singletons';
 import { Subscription } from 'rxjs';
 import { CoreLoginHelper } from '@features/login/services/login-helper';
 import { CoreSiteLogoComponent } from '@/core/components/site-logo/site-logo';
-import { CoreAlerts } from '@services/overlays/alerts';
 import { CoreDynamicComponent } from '@components/dynamic-component/dynamic-component';
 import { CorePromiseUtils } from '@static/promise-utils';
 import type { ReloadableComponent } from '@coretypes/reloadable-component';
@@ -258,12 +256,8 @@ export class CoreMainMenuUserMenuComponent implements OnInit, OnDestroy {
     async logout(event: Event): Promise<void> {
         if (this.removeAccountOnLogout) {
             // Ask confirm.
-            const siteName = this.siteName ?
-                await CoreFilter.formatText(this.siteName, { clean: true, singleLine: true, filter: false }, [], this.siteId) :
-                '';
-
             try {
-                await CoreAlerts.confirmDelete(Translate.instant('core.login.confirmdeletesite', { sitename: siteName }));
+                await CoreLoginHelper.confirmDeleteAccount(this.siteName, this.siteInfo?.fullname, this.siteId);
             } catch {
                 // User cancelled, stop.
                 return;

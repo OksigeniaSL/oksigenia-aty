@@ -421,5 +421,6 @@
     "core.user.support": "Ayuda de tu centro",
     "core.settings.synchronizenowhelp": "Al sincronizar se envían a tu centro todos los cambios y la actividad que hiciste sin conexión en este dispositivo, y se actualizan los mensajes y las notificaciones.",
     "core.aty.child": "Tu hijo",
+    "core.aty.confirmdeleteaccount": "¿De verdad quieres quitar de este móvil la cuenta de {{fullname}} en {{sitename}}?",
     "core.login.sitebadgedescription": "Avisos sin leer: {{count}}."
 }

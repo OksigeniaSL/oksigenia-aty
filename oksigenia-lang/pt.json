@@ -33,5 +33,6 @@
     "core.contentlinks.confirmlinktositetitle": "Abrir outro site?",
     "core.contentlinks.confirmlinktosite": "Este link leva-te a:<br><br><strong>{{url}}</strong><br><br>Continua apenas se confias neste site.",
     "core.contentlinks.opensite": "Abrir o site",
-    "core.aty.child": "O teu filho"
+    "core.aty.child": "O teu filho",
+    "core.aty.confirmdeleteaccount": "Queres mesmo remover deste telemóvel a conta de {{fullname}} em {{sitename}}?"
 }

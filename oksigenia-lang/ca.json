@@ -33,5 +33,6 @@
     "core.contentlinks.confirmlinktositetitle": "Vols obrir un altre lloc?",
     "core.contentlinks.confirmlinktosite": "Aquest enllaç et porta a:<br><br><strong>{{url}}</strong><br><br>Continua només si confies en aquest lloc.",
     "core.contentlinks.opensite": "Obre el lloc",
-    "core.aty.child": "El teu fill"
+    "core.aty.child": "El teu fill",
+    "core.aty.confirmdeleteaccount": "Segur que vols treure d'aquest mòbil el compte de {{fullname}} a {{sitename}}?"
 }

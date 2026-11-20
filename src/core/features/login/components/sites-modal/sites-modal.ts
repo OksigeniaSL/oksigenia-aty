@@ -16,7 +16,6 @@ import { Component, OnInit } from '@angular/core';
 import { CoreSiteBasicInfo, CoreSites } from '@services/sites';
 import { CoreAccountsList, CoreLoginHelper } from '@features/login/services/login-helper';
 import { CoreNavigator } from '@services/navigator';
-import { CoreFilter } from '@features/filter/services/filter';
 import { ModalController, Translate } from '@singletons';
 import { CoreSharedModule } from '@/core/shared.module';
 import { CoreAlerts } from '@services/overlays/alerts';
@@ -75,12 +74,8 @@ export class CoreLoginSitesModalComponent implements OnInit {
     async deleteSite(event: Event, site: CoreSiteBasicInfo): Promise<void> {
         event.stopPropagation();
 
-        let siteName = site.siteName || '';
-
-        siteName = await CoreFilter.formatText(siteName, { clean: true, singleLine: true, filter: false }, [], site.id);
-
         try {
-            await CoreAlerts.confirmDelete(Translate.instant('core.login.confirmdeletesite', { sitename: siteName }));
+            await CoreLoginHelper.confirmDeleteAccount(site.siteName, site.fullname, site.id);
         } catch {
             // User cancelled, stop.
             return;

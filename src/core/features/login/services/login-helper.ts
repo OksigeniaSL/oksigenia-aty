@@ -63,6 +63,7 @@ import { CoreSSO } from '@static/sso';
 import { CorePromiseUtils } from '@static/promise-utils';
 import { CoreOpener } from '@static/opener';
 import { CoreAlerts } from '@services/overlays/alerts';
+import { CoreFilter } from '@features/filter/services/filter';
 import { CorePrompts } from '@services/overlays/prompts';
 import {
     AuthEmailSignupProfileField,
@@ -1203,6 +1204,26 @@ export class CoreLoginHelperProvider {
         accountsList.otherSites = CoreObject.toArray(otherSites);
 
         return accountsList;
+    }
+
+    /**
+     * Ask to confirm removing an account from the app, saying whose it is when known: with several accounts on the same
+     * site, the site's name alone does not tell which one goes.
+     *
+     * @param siteName Site name, as stored.
+     * @param fullname Full name of the account's user, if known.
+     * @param siteId Site ID.
+     * @returns Promise resolved if the user confirms, rejected if they cancel.
+     */
+    async confirmDeleteAccount(siteName: string | undefined, fullname: string | undefined, siteId?: string): Promise<void> {
+        const format = (text?: string): Promise<string> => text
+            ? CoreFilter.formatText(text, { clean: true, singleLine: true, filter: false }, [], siteId)
+            : Promise.resolve('');
+        const [sitename, name] = await Promise.all([format(siteName), format(fullname)]);
+
+        await CoreAlerts.confirmDelete(name
+            ? Translate.instant('core.aty.confirmdeleteaccount', { sitename, fullname: name })
+            : Translate.instant('core.login.confirmdeletesite', { sitename }));
     }
 
     /**
