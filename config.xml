@@ -64,6 +64,9 @@
         <preference name="AndroidWindowSplashScreenAnimatedIcon" value="resources/android/android-splash.xml" />
         <preference name="AndroidWindowSplashScreenBackground" value="#0a2e50" />
         <preference name="AndroidWindowSplashScreenIconBackgroundColor" value="#0a2e50" />
+        <!-- After the splash, a theme that follows the phone's light or dark mode: with the default (dark) one, the WebView
+             reported dark to the pages even with the phone in light, and «Colour scheme: default» came out dark. -->
+        <preference name="AndroidPostSplashScreenTheme" value="@style/Theme.AppCompat.DayNight.NoActionBar" />
         <resource-file src="google-services.json" target="app/google-services.json" />
         <!-- The adaptive launcher icon: Android 8 and later take the -v26 folders first, where Cordova's template leaves its own robot. -->
         <resource-file src="resources/android/launcher/mipmap-mdpi/ic_launcher_foreground.png" target="app/src/main/res/mipmap-mdpi-v26/ic_launcher_foreground.png" />
