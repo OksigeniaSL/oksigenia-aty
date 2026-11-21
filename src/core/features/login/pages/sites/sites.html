@@ -31,8 +31,7 @@
                 @if (showDelete) {
                     <!-- Oksigenia Aty: «Remove from phone» in words, not a small bin by the arrow. -->
                     <ion-button slot="end" fill="outline" color="danger" size="small" (click)="deleteSite($event, site)"
-                        animate.enter="slide-in-right-animation" animate.leave="slide-out-right-animation">
-                        class="ion-text-wrap">
+                        animate.enter="slide-in-right-animation" animate.leave="slide-out-right-animation" class="aty-remove-button">
                         {{ 'core.aty.removefromphone' | translate }}
                     </ion-button>
                 } @else if (site.badge) {
