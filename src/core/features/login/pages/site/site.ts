@@ -114,6 +114,7 @@ export default class CoreLoginSitePage implements OnInit, OnDestroy {
             const referrer = await this.consumeInstallReferrer();
             const atyLogin = referrer ? AtyLogin.getSchemeFromReferrer(referrer) : undefined;
             if (atyLogin) {
+                AtyLogin.markFromInstall();
                 CoreCustomURLSchemes.handleCustomURL(atyLogin).catch((error) => {
                     CoreCustomURLSchemes.treatHandleCustomURLError(error, atyLogin, 'CoreLoginSitePage');
                 });

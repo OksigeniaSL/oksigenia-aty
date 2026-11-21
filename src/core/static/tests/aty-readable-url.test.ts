@@ -27,4 +27,16 @@ describe('atyReadableUrl', () => {
         expect(atyReadableUrl('https://example.org/%E0%A4%A')).toEqual('https://example.org/%E0%A4%A');
     });
 
+
+    it('never lets the address carry markup or turn the text around', () => {
+        const fake = 'https://evil.example/%3C/b%3E%3C/p%3E%3Cp%3E%3Cb%3Ehttps://aula.centro.example/curso%3C/b%3E';
+        const shown = atyReadableUrl(fake);
+        expect(shown).not.toContain('<');
+        expect(shown).not.toContain('>');
+        expect(shown).toContain('&lt;/b&gt;');
+        expect(atyReadableUrl('https://evil.example/a%0Ab')).toBe('https://evil.example/ab');
+        expect(atyReadableUrl('https://evil.example/a%E2%80%AEb')).toBe('https://evil.example/ab');
+        expect(atyReadableUrl('https://site.example/a&b')).toBe('https://site.example/a&amp;b');
+    });
+
 });

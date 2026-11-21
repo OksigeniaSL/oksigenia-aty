@@ -24,7 +24,7 @@ export function atyReadableUrl(url: string): string {
     try {
         parsed = new URL(url);
     } catch {
-        return url;
+        return escapeHtml(url);
     }
 
     let path = parsed.pathname === '/' ? '' : parsed.pathname;
@@ -33,6 +33,25 @@ export function atyReadableUrl(url: string): string {
     } catch {
         // Keep it as it is.
     }
+    // The warning is HTML: a decoded path could carry tags (a second, fake destination) or control and bidirectional
+    // characters that turn the text around. They go, and what is left is escaped.
+    // eslint-disable-next-line no-control-regex
+    path = path.replace(/[\u0000-\u001f\u007f-\u009f\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, '');
 
-    return parsed.origin + path;
+    return escapeHtml(parsed.origin + path);
+}
+
+/**
+ * Text made safe inside HTML.
+ *
+ * @param text The text.
+ * @returns The text with its special characters as references.
+ */
+function escapeHtml(text: string): string {
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }

@@ -134,6 +134,20 @@ describe('AtyLogin', () => {
         expect(confirm).toHaveBeenCalledTimes(2);
     });
 
+    it('asks also for the first account when it came through Google Play\'s install referrer', async () => {
+        accounts = [];
+        confirm.mockRejectedValueOnce(new CoreCanceledError());
+
+        AtyLogin.markFromInstall();
+        await expect(AtyLogin.getLoginData(linkOf('KEY9'))).rejects.toMatchObject({ error: expect.any(CoreCanceledError) });
+        expect(confirm).toHaveBeenCalledWith('This link signs in Ana Pérez at aula.example.com. Is that you?', expect.anything());
+
+        // Only that sign-in: the next first account asks nothing.
+        confirm.mockClear();
+        await AtyLogin.getLoginData(linkOf('KEY10'));
+        expect(confirm).not.toHaveBeenCalled();
+    });
+
     it('redeems a link once while its PIN is typed, however long it takes', async () => {
         answers = (data) => data.pin === '2468' ? { token: 'token', username: 'ana' } : { needspin: true, pinui: {} };
         const closed = new CorePromisedValue<string>();

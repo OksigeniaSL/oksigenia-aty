@@ -89,6 +89,19 @@ export class AtyLoginService {
     protected redeeming = false;
 
     /**
+     * The next sign-in came from Google Play's install referrer: whoever shared that Play link (a WhatsApp message, a
+     * «Download the app» QR) chose the account, so the person is always asked, also when the phone holds no account.
+     */
+    protected fromInstall = false;
+
+    /**
+     * Mark the next sign-in as coming from the install referrer.
+     */
+    markFromInstall(): void {
+        this.fromInstall = true;
+    }
+
+    /**
      * Check whether a URL is an Oksigenia Aty sign-in URL (scheme://atylogin=...).
      *
      * @param url URL to check.
@@ -270,8 +283,12 @@ export class AtyLoginService {
 
             // A link or a QR someone else made (their own «Open in the app» page, a QR stuck over the school's poster) would
             // put this phone in their account without a word, and what the user sends next would go out under it. When the
-            // phone already holds accounts and this one is not among them, ask first. A first sign-in asks nothing.
-            if (response.username && !(await this.holdsAccount(siteUrl, response.username))) {
+            // phone already holds accounts and this one is not among them, ask first. A first sign-in asks nothing, unless
+            // it came through Google Play's install referrer.
+            // A first account that comes from the install referrer is asked too: someone else made that link.
+            const fromInstall = this.fromInstall;
+            this.fromInstall = false;
+            if (response.username && (fromInstall || !(await this.holdsAccount(siteUrl, response.username)))) {
                 const { CoreAlerts } = await import('@services/overlays/alerts');
                 try {
                     await CoreAlerts.confirm(Translate.instant('core.aty.switchaccount', {
