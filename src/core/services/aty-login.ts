@@ -69,6 +69,9 @@ export type AtyPinUi = {
     confirmok?: string;
     mismatch?: string;
     notsaved?: string; // Said when the new PIN could not be saved; sites whose plugin predates it send none.
+    hint?: string; // While a PIN is set, a line under the dots. Sites whose plugin predates it send none.
+    shuffle?: string; // The switch that shuffles the keys; without it the pad keeps its old corner key.
+    shufflehelp?: string;
 };
 
 /**
@@ -491,6 +494,9 @@ export class AtyLoginService {
                     okText: ui.ok ?? '',
                     cancelText: ui.cancel ?? '',
                     forgotText: ui.forgot ?? '',
+                    hint: ui.hint ?? '',
+                    shuffleText: ui.shuffle ?? '',
+                    shuffleHelp: ui.shufflehelp ?? '',
                     validator,
                     confirmTitle: confirm ? ui.confirmtitle ?? '' : '',
                     confirmMessage: confirm ? ui.confirmmessage ?? '' : '',

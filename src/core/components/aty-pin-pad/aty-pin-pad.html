@@ -7,31 +7,33 @@
     }
 
     <div class="aty-pin-dots" role="status" aria-live="polite">
-        @for (filled of dots(); track $index) {
-            <span class="aty-pin-dot" [class.filled]="filled" [class.error]="error()"></span>
+        @for (dot of dots(); track $index) {
+            <span class="aty-pin-dot" [class.filled]="dot === 'filled'" [class.more]="dot === 'more'" [class.error]="error()"></span>
         }
     </div>
 
-    <div class="aty-pin-strength" [attr.data-level]="strength()" aria-hidden="true">
-        <span class="aty-pin-seg"></span>
-        <span class="aty-pin-seg"></span>
-        <span class="aty-pin-seg"></span>
-    </div>
-
-    <div class="aty-pin-keypad">
-        @for (key of topKeys(); track $index) {
-            <button type="button" class="aty-pin-key" [disabled]="busy()" (click)="press(key)">{{ key }}</button>
+    @if (shuffleText()) {
+        @if (showHint()) {
+            <p class="aty-pin-hint" [class.ok]="strong()">
+                @if (strong()) {
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m5 12 5 5 9-10" />
+                    </svg>
+                }
+                {{ hint() }}
+            </p>
         }
-
         <button
             type="button"
-            class="aty-pin-key aty-pin-aux"
+            class="aty-pin-shuffle"
             [class.active]="shuffled()"
+            [attr.aria-pressed]="shuffled()"
+            [attr.aria-describedby]="shuffleHelp() ? 'aty-pin-shuffle-help' : null"
             [disabled]="busy()"
             (click)="toggleShuffle()"
-            aria-label="shuffle"
         >
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M16 3h5v5" />
                 <path d="M4 20 21 3" />
@@ -39,7 +41,45 @@
                 <path d="M4 4l6 6" />
                 <path d="M14 14l7 7" />
             </svg>
+            {{ shuffleText() }}
         </button>
+        @if (shuffleHelp()) {
+            <span id="aty-pin-shuffle-help" class="sr-only">{{ shuffleHelp() }}</span>
+        }
+    } @else {
+        <div class="aty-pin-strength" [attr.data-level]="strength()" aria-hidden="true">
+            <span class="aty-pin-seg"></span>
+            <span class="aty-pin-seg"></span>
+            <span class="aty-pin-seg"></span>
+        </div>
+    }
+
+    <div class="aty-pin-keypad">
+        @for (key of topKeys(); track $index) {
+            <button type="button" class="aty-pin-key" [disabled]="busy()" (click)="press(key)">{{ key }}</button>
+        }
+
+        @if (shuffleText()) {
+            <span class="aty-pin-key aty-pin-gap" aria-hidden="true"></span>
+        } @else {
+            <button
+                type="button"
+                class="aty-pin-key aty-pin-aux"
+                [class.active]="shuffled()"
+                [disabled]="busy()"
+                (click)="toggleShuffle()"
+                aria-label="shuffle"
+            >
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M16 3h5v5" />
+                    <path d="M4 20 21 3" />
+                    <path d="M16 21h5v-5" />
+                    <path d="M4 4l6 6" />
+                    <path d="M14 14l7 7" />
+                </svg>
+            </button>
+        }
 
         <button type="button" class="aty-pin-key" [disabled]="busy()" (click)="press(lastKey())">{{ lastKey() }}</button>
 

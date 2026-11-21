@@ -164,3 +164,54 @@
     border-color: var(--ion-color-danger, #d64550);
     background: var(--ion-color-danger, #d64550);
 }
+
+// The pad says how many digits there are, not how many fit (Jujol, 21 November 2026): four rings at first (the least),
+// and past four one more ahead, dashed, up to eight. Eight empty rings made people think of an eight-digit PIN.
+.aty-pin-dot.more {
+    border-style: dashed;
+    opacity: 0.45;
+}
+
+// In place of the three bars nobody could read: a line of the server's, only while setting a PIN, that turns to the
+// app's green with a tick from six digits.
+.aty-pin-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ion-text-color-step-300, #5b6b7b);
+}
+
+.aty-pin-hint.ok {
+    color: var(--ion-color-success, #2aa45a);
+}
+
+// Shuffling the keys, said: a switch with its name over the pad, in the app's colour when on. The corner of the pad
+// stays empty, as on any phone's.
+.aty-pin-shuffle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 14px;
+    padding: 7px 14px;
+    border: 1.5px solid rgba(var(--ion-color-primary-rgb, 10, 46, 80), 0.35);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ion-color-primary, #0a2e50);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.aty-pin-shuffle.active {
+    border-color: var(--ion-color-primary, #0a2e50);
+    background: var(--ion-color-primary, #0a2e50);
+    color: var(--ion-color-primary-contrast, #fff);
+}
+
+.aty-pin-gap {
+    visibility: hidden;
+}

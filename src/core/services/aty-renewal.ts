@@ -203,6 +203,8 @@ export class AtyRenewalService {
                 title: first.title,
                 okText: first.ok,
                 cancelText: first.cancel,
+                shuffleText: first.shuffle ?? '',
+                shuffleHelp: first.shufflehelp ?? '',
                 validator: async (pin: string) => {
                     const result = await this.call(site, pin);
                     if (result && !result.needspin) {
@@ -321,4 +323,6 @@ type AtyRenewResponse = {
     ok: string;
     cancel: string;
     biometric: string;
+    shuffle?: string; // Sites whose plugin predates it send none: the pad keeps its old corner key.
+    shufflehelp?: string;
 };

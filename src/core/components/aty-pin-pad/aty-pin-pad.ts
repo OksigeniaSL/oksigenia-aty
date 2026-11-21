@@ -41,6 +41,12 @@ export class AtyPinPadComponent {
     readonly okText = input('');
     readonly cancelText = input('');
     readonly forgotText = input(''); // When set, a "forgot your PIN?" link is shown; empty hides it.
+    // The switch that shuffles the keys, said in words over the pad, and what it is for (for screen readers). A site that
+    // sends no label keeps the old pad: the crossed arrows in the corner and the three bars.
+    readonly shuffleText = input('');
+    readonly shuffleHelp = input('');
+    // While a PIN is set: a line under the dots («Better with 6 digits or more») that turns green from six.
+    readonly hint = input('');
     readonly minLength = input(4);
     readonly maxLength = input(8);
     // When given, the entered PIN is checked against the server without closing the pad: a wrong PIN shakes the pad
@@ -69,12 +75,26 @@ export class AtyPinPadComponent {
 
     protected readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
-    /** One boolean per dot: filled up to the entered length, empty after. */
-    readonly dots = computed(() => {
+    /**
+     * The dots say how many digits there are, not how many fit (Jujol, 21 November 2026): as many rings as the least
+     * length at first, and past it one more ahead, dashed, up to the most. Eight empty rings made people think of an
+     * eight-digit PIN. The old pad (no shuffle label from the site) keeps its eight.
+     */
+    readonly dots = computed((): ('filled' | 'empty' | 'more')[] => {
         const length = this.pin().length;
+        if (!this.shuffleText()) {
+            return Array.from({ length: this.maxLength() }, (_, i) => i < length ? 'filled' : 'empty');
+        }
+        const shown = Math.min(this.maxLength(), Math.max(this.minLength(), length >= this.minLength() ? length + 1 : 0));
 
-        return Array.from({ length: this.maxLength() }, (_, i) => i < length);
+        return Array.from({ length: shown }, (_, i) => i < length ? 'filled' : (i >= this.minLength() ? 'more' : 'empty'));
     });
+
+    /** The hint shows only while a new PIN is set, not while it is confirmed or entered. */
+    readonly showHint = computed(() => !!this.hint() && !this.confirming() && !this.validator());
+
+    /** Six digits or more: the hint turns green. */
+    readonly strong = computed(() => this.pin().length >= 6);
 
     /** Strength 0..3: nothing under 4 digits, then weak (4), medium (5), strong (6+). */
     readonly strength = computed(() => {

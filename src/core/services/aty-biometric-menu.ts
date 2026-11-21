@@ -169,6 +169,8 @@ export class AtyBiometricMenuHandlerService implements CoreUserProfileHandler {
                 title: ask.title,
                 okText: ask.ok,
                 cancelText: ask.cancel,
+                shuffleText: ask.shuffle ?? '',
+                shuffleHelp: ask.shufflehelp ?? '',
                 validator: async (candidate: string) => {
                     const result = await this.call(site, candidate);
                     if (result && !result.needspin) {
@@ -216,4 +218,6 @@ type AtyBiometricRenewResponse = {
     ok: string;
     cancel: string;
     biometric: string;
+    shuffle?: string; // Sites whose plugin predates it send none: the pad keeps its old corner key.
+    shufflehelp?: string;
 };
