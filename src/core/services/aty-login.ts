@@ -242,6 +242,10 @@ export class AtyLoginService {
                 throw new CoreCustomURLSchemesHandleError(error);
             }
 
+            // The link comes from outside the app and may find another account's menu open: it goes first, so the
+            // question and the PIN pad do not sit on top of it.
+            await this.closeSideModals();
+
             const tokenUrl = `${siteUrl}/local/oksigeniaaty/token.php`;
 
             // Exchange the key for a token. If the user has set a PIN, the server asks for it without consuming the
@@ -449,6 +453,14 @@ export class AtyLoginService {
                 debug: { code: 'atylogintokenerror', details: CoreErrorHelper.getErrorMessageFromError(error) ?? '' },
             }));
         }
+    }
+
+    /**
+     * Close the side modals that are open (the account menu), without waiting for anyone who opened them.
+     */
+    protected async closeSideModals(): Promise<void> {
+        const open = Array.from(document.querySelectorAll<HTMLIonModalElement>('ion-modal.core-modal-lateral'));
+        await Promise.all(open.map((modal) => modal.dismiss().catch(() => false)));
     }
 
     /**
