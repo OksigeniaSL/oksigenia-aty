@@ -27,7 +27,6 @@ describe('atyReadableUrl', () => {
         expect(atyReadableUrl('https://example.org/%E0%A4%A')).toEqual('https://example.org/%E0%A4%A');
     });
 
-
     it('never lets the address carry markup or turn the text around', () => {
         const fake = 'https://evil.example/%3C/b%3E%3C/p%3E%3Cp%3E%3Cb%3Ehttps://aula.centro.example/curso%3C/b%3E';
         const shown = atyReadableUrl(fake);
