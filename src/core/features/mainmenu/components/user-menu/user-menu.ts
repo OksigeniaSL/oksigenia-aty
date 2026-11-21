@@ -103,6 +103,17 @@ export class CoreMainMenuUserMenuComponent implements OnInit, OnDestroy {
     }
 
     /**
+     * Oksigenia Aty: «Delete my account at the centre», drawn apart from the other entries.
+     *
+     * @param event Click event.
+     */
+    async atyDeletionClicked(event: Event): Promise<void> {
+        if (this.atyDeletion && !('component' in this.atyDeletion)) {
+            await this.handlerClicked(event, this.atyDeletion);
+        }
+    }
+
+    /**
      * Oksigenia Aty: the entries of the menu this account leaves out: a family's own account, the courses' and the files';
      * an account in no course (the office), the courses'. When the courses cannot be read, nothing is left out.
      *
