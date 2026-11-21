@@ -1,4 +1,8 @@
 {
+    "core.aty.deletefromcentre": "Mein Konto bei der Einrichtung löschen",
+    "core.aty.deletefromcentrehelp": "Bittet die Einrichtung, dein Konto und deine Daten zu löschen. Um es nur von diesem Handy zu entfernen, geh zu «{{switch}}».",
+    "core.aty.removefromphone": "Vom Handy entfernen",
+    "core.aty.removefromphonenote": "Ein Konto von diesem Handy zu entfernen, löscht es nicht bei der Einrichtung.",
     "core.settings.accessibility": "Barrierefreiheit",
     "core.settings.accessibilityintro": "Wähle, was dir die App leichter macht. Es bleibt auf diesem Handy. Was du auf der Website deiner Plattform gewählt hast, gilt auch hier, bis du es änderst.",
     "core.settings.accessibilitycontrast": "Hoher Kontrast",

@@ -79,6 +79,16 @@
                     </ion-label>
                 </ion-item>
             }
+            <!-- Oksigenia Aty: asking the centre to delete the account, last, apart and explained. -->
+            @if (atyDeletion) {
+                <ion-item button (click)="handlerClicked($event, atyDeletion)" [detail]="true"
+                    class="ion-text-wrap aty-account-deletion core-user-menu-separator">
+                    <ion-label>
+                        <p class="item-heading">{{ 'core.aty.deletefromcentre' | translate }}</p>
+                        <p>{{ 'core.aty.deletefromcentrehelp' | translate: { switch: ('core.mainmenu.switchaccount' | translate) } }}</p>
+                    </ion-label>
+                </ion-item>
+            }
         </ion-list>
     </core-loading>
 </ion-content>

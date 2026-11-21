@@ -1,4 +1,8 @@
 {
+    "core.aty.deletefromcentre": "Elimina il mio account presso il centro",
+    "core.aty.deletefromcentrehelp": "Chiede al centro di eliminare il tuo account e i tuoi dati. Per toglierlo solo da questo telefono, vai su «{{switch}}».",
+    "core.aty.removefromphone": "Togli dal telefono",
+    "core.aty.removefromphonenote": "Togliere un account da questo telefono non lo elimina dal centro.",
     "core.settings.accessibility": "Accessibilità",
     "core.settings.accessibilityintro": "Scegli ciò che ti rende più facile l'app. Resta su questo telefono. Ciò che hai scelto sulla piattaforma della tua organizzazione vale anche qui, finché non lo cambi.",
     "core.settings.accessibilitycontrast": "Contrasto elevato",

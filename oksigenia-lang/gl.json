@@ -1,4 +1,8 @@
 {
+    "core.aty.deletefromcentre": "Borrar a miña conta do centro",
+    "core.aty.deletefromcentrehelp": "Pídelle ao centro que borre a túa conta e os teus datos. Para quitala só deste móbil, vai a «{{switch}}».",
+    "core.aty.removefromphone": "Quitar do móbil",
+    "core.aty.removefromphonenote": "Quitar unha conta deste móbil non a borra do centro.",
     "core.settings.accessibility": "Accesibilidade",
     "core.settings.accessibilityintro": "Escolle o que che faga máis doada a aplicación. Queda neste móbil. O que escolliches na web da túa plataforma tamén vale aquí, ata que o cambies.",
     "core.settings.accessibilitycontrast": "Alto contraste",

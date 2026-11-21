@@ -1,4 +1,8 @@
 {
+    "core.aty.deletefromcentre": "Borrar mi cuenta del centro",
+    "core.aty.deletefromcentrehelp": "Le pide al centro que borre tu cuenta y tus datos. Para quitarla solo de este móvil, ve a «{{switch}}».",
+    "core.aty.removefromphone": "Quitar del móvil",
+    "core.aty.removefromphonenote": "Quitar una cuenta de este móvil no la borra del centro.",
     "addon.notifications.markallread": "Marcar todos como leídos",
     "addon.notifications.notifications": "Avisos",
     "core.settings.accessibility": "Accesibilidad",

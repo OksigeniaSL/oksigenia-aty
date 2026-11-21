@@ -39,6 +39,8 @@ import type { ReloadableComponent } from '@coretypes/reloadable-component';
 import { CoreCustomMenu, CoreCustomMenuItem } from '@features/mainmenu/services/custommenu';
 import { CoreCustomMenuItemComponent } from '../custom-menu-item/custom-menu-item';
 import { CORE_SETTINGS_PREFERENCES_PAGE_NAME } from '@features/settings/constants';
+import { ATY_MENU_DELETION, atyMenuHidden } from '@services/aty-menu';
+import { atyIsFamilyAccount } from '@services/aty-family';
 
 /**
  * Component to display a user menu.
@@ -64,6 +66,7 @@ export class CoreMainMenuUserMenuComponent implements OnInit, OnDestroy {
     customItems?: CoreCustomMenuItem[];
     customMenuOverrideComponent?: Type<unknown>;
     accountHandlers: HandlerData[] = [];
+    atyDeletion?: HandlerData; // Oksigenia Aty: «Delete my account at the centre», last and apart.
     handlersLoaded = false;
     user?: CoreUserProfile;
     displaySwitchAccount = true;
@@ -73,6 +76,7 @@ export class CoreMainMenuUserMenuComponent implements OnInit, OnDestroy {
     protected siteId?: string;
     protected siteName?: string;
     protected subscription!: Subscription;
+    protected atyHidden: string[] = []; // Oksigenia Aty: the entries this account does not show (aty-menu.ts).
 
     /**
      * @inheritdoc
@@ -90,9 +94,32 @@ export class CoreMainMenuUserMenuComponent implements OnInit, OnDestroy {
 
         this.customMenuOverrideComponent = await CoreCustomMenu.getCustomItemComponent();
 
+        // Oksigenia Aty: each account sees what is its own. Known before the handlers arrive, so nothing blinks.
+        this.atyHidden = await this.atyMenuHidden();
+
         await this.loadCustomMenuItems();
 
         await this.loadData();
+    }
+
+    /**
+     * Oksigenia Aty: the entries of the menu this account leaves out: a family's own account, the courses' and the files';
+     * an account in no course (the office), the courses'. When the courses cannot be read, nothing is left out.
+     *
+     * @returns The names of the handlers.
+     */
+    protected async atyMenuHidden(): Promise<string[]> {
+        const site = CoreSites.getCurrentSite();
+        if (atyIsFamilyAccount(site)) {
+            return atyMenuHidden(true, false);
+        }
+        try {
+            const { CoreCourses } = await import('@features/courses/services/courses');
+
+            return atyMenuHidden(false, (await CoreCourses.getUserCourses(true, site?.getId())).length > 0);
+        } catch {
+            return [];
+        }
     }
 
     /**
@@ -127,6 +154,7 @@ export class CoreMainMenuUserMenuComponent implements OnInit, OnDestroy {
 
                 let newHandlers = handlers
                     .filter((handler) => handler.type === CoreUserProfileHandlerType.LIST_ITEM)
+                    .filter((handler) => !this.atyHidden.includes(handler.name))
                     .map((handler) => ({
                         name: handler.name,
                         ...handler.data,
@@ -152,6 +180,10 @@ export class CoreMainMenuUserMenuComponent implements OnInit, OnDestroy {
                             ...(handler.data.componentData || {}),
                         } : undefined,
                     }));
+
+                // Oksigenia Aty: asking the centre to delete the account goes last and apart, with what it does.
+                this.atyDeletion = newHandlers.find((handler) => handler.name === ATY_MENU_DELETION);
+                newHandlers = newHandlers.filter((handler) => handler.name !== ATY_MENU_DELETION);
 
                 // Only update handlers if they have changed, to prevent a blink effect.
                 if (newHandlers.length !== this.accountHandlers.length ||

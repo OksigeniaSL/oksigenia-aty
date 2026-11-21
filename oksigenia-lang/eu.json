@@ -1,4 +1,8 @@
 {
+    "core.aty.deletefromcentre": "Ezabatu nire kontua erakundean",
+    "core.aty.deletefromcentrehelp": "Erakundeari zure kontua eta datuak ezabatzeko eskatzen dio. Mugikor honetatik bakarrik kentzeko, joan «{{switch}}» atalera.",
+    "core.aty.removefromphone": "Kendu mugikorretik",
+    "core.aty.removefromphonenote": "Kontu bat mugikor honetatik kentzeak ez du erakundean ezabatzen.",
     "core.settings.accessibility": "Irisgarritasuna",
     "core.settings.accessibilityintro": "Aukeratu aplikazioa errazten dizuna. Mugikor honetan geratzen da. Zure plataformaren webgunean aukeratutakoak hemen ere balio du, aldatu arte.",
     "core.settings.accessibilitycontrast": "Kontraste handia",

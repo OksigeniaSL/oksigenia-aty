@@ -1,4 +1,8 @@
 {
+    "core.aty.deletefromcentre": "Supprimer mon compte auprès de l'établissement",
+    "core.aty.deletefromcentrehelp": "Demande à l'établissement de supprimer votre compte et vos données. Pour le retirer seulement de ce téléphone, allez dans « {{switch}} ».",
+    "core.aty.removefromphone": "Retirer du téléphone",
+    "core.aty.removefromphonenote": "Retirer un compte de ce téléphone ne le supprime pas auprès de l'établissement.",
     "core.settings.accessibility": "Accessibilité",
     "core.settings.accessibilityintro": "Choisissez ce qui vous facilite l'application. Cela reste sur ce téléphone. Ce que vous avez choisi sur la plateforme de votre établissement vaut aussi ici, jusqu'à ce que vous le changiez.",
     "core.settings.accessibilitycontrast": "Contraste élevé",

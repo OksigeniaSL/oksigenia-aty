@@ -21,16 +21,21 @@
 </ion-header>
 <ion-content>
     <core-loading [hideUntil]="loaded">
+        <!-- Oksigenia Aty: removing an account from the phone does not delete it at the centre. -->
+        @if (showDelete) {
+            <p class="ion-padding-horizontal aty-remove-note">{{ 'core.aty.removefromphonenote' | translate }}</p>
+        }
         <core-sites-list [accountsList]="accountsList" [sitesClickable]="true" [currentSiteClickable]="false"
             (onSiteClicked)="login($event)">
             <ng-template #siteItem let-site="site" let-isCurrentSite="isCurrentSite">
                 @if (isCurrentSite) {
                     <ion-icon color="success" name="fas-check" aria-hidden="true" />
                 } @else if (showDelete) {
-                    <ion-button slot="end" fill="clear" color="danger" (click)="deleteSite($event, site)"
-                        [ariaLabel]="'core.login.removeaccount' | translate"
+                    <!-- Oksigenia Aty: «Remove from phone» in words, not a small bin by the arrow. -->
+                    <ion-button slot="end" fill="outline" color="danger" size="small" (click)="deleteSite($event, site)"
                         animate.enter="slide-in-right-animation" animate.leave="slide-out-right-animation">
-                        <ion-icon name="fas-trash" slot="icon-only" aria-hidden="true" />
+                        class="ion-text-wrap">
+                        {{ 'core.aty.removefromphone' | translate }}
                     </ion-button>
                 } @else if (site.badge) {
                     <ion-badge slot="end" animate.enter="slide-in-right-animation" animate.leave="slide-out-right-animation">

@@ -165,7 +165,7 @@
     background: var(--ion-color-danger, #d64550);
 }
 
-// The pad says how many digits there are, not how many fit (Jujol, 21 November 2026): four rings at first (the least),
+// The pad says how many digits there are, not how many fit: four rings at first (the least),
 // and past four one more ahead, dashed, up to eight. Eight empty rings made people think of an eight-digit PIN.
 .aty-pin-dot.more {
     border-style: dashed;

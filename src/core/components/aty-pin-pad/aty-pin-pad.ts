@@ -76,7 +76,7 @@ export class AtyPinPadComponent {
     protected readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
     /**
-     * The dots say how many digits there are, not how many fit (Jujol, 21 November 2026): as many rings as the least
+     * The dots say how many digits there are, not how many fit: as many rings as the least
      * length at first, and past it one more ahead, dashed, up to the most. Eight empty rings made people think of an
      * eight-digit PIN. The old pad (no shuffle label from the site) keeps its eight.
      */

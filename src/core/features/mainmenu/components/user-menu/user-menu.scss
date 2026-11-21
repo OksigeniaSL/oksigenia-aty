@@ -45,3 +45,14 @@ core-site-logo {
 ion-footer {
     background: var(--contrast-background);
 }
+
+// Oksigenia Aty: asking the centre to delete the account reads apart from the rest, in the colour of danger.
+.aty-account-deletion {
+    --background: transparent;
+    margin-top: 12px;
+
+    .item-heading {
+        color: var(--danger);
+        font-weight: 600;
+    }
+}

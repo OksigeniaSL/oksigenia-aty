@@ -1,4 +1,8 @@
 {
+    "core.aty.deletefromcentre": "Esborrar el meu compte del centre",
+    "core.aty.deletefromcentrehelp": "Demana al centre que esborri el teu compte i les teves dades. Per treure'l només d'aquest mòbil, ves a «{{switch}}».",
+    "core.aty.removefromphone": "Treure del mòbil",
+    "core.aty.removefromphonenote": "Treure un compte d'aquest mòbil no l'esborra del centre.",
     "core.settings.accessibility": "Accessibilitat",
     "core.settings.accessibilityintro": "Tria el que et faci més fàcil l'aplicació. Es queda en aquest mòbil. El que vas triar al web de la teva plataforma també val aquí, fins que ho canviïs.",
     "core.settings.accessibilitycontrast": "Contrast alt",

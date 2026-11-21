@@ -1,4 +1,8 @@
 {
+    "core.aty.deletefromcentre": "Apagar a minha conta na instituição",
+    "core.aty.deletefromcentrehelp": "Pede à instituição que apague a tua conta e os teus dados. Para a retirar só deste telemóvel, vai a «{{switch}}».",
+    "core.aty.removefromphone": "Retirar do telemóvel",
+    "core.aty.removefromphonenote": "Retirar uma conta deste telemóvel não a apaga da instituição.",
     "core.settings.accessibility": "Acessibilidade",
     "core.settings.accessibilityintro": "Escolhe o que te torna a aplicação mais fácil. Fica neste telemóvel. O que escolheste na plataforma da tua instituição também vale aqui, até o alterares.",
     "core.settings.accessibilitycontrast": "Alto contraste",

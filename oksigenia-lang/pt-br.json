@@ -1,4 +1,8 @@
 {
+    "core.aty.deletefromcentre": "Excluir minha conta na instituição",
+    "core.aty.deletefromcentrehelp": "Pede à instituição que exclua sua conta e seus dados. Para tirá-la só deste celular, vá em “{{switch}}”.",
+    "core.aty.removefromphone": "Tirar do celular",
+    "core.aty.removefromphonenote": "Tirar uma conta deste celular não a exclui da instituição.",
     "core.settings.accessibility": "Acessibilidade",
     "core.settings.accessibilityintro": "Escolha o que torna o aplicativo mais fácil para você. Fica neste celular. O que você escolheu na plataforma da sua instituição também vale aqui, até você mudar.",
     "core.settings.accessibilitycontrast": "Alto contraste",
