@@ -34,6 +34,6 @@
     "core.contentlinks.confirmlinktosite": "Esta ligazón lévate a:<br><br><strong>{{url}}</strong><br><br>Continúa só se confías neste sitio.",
     "core.contentlinks.opensite": "Abrir o sitio",
     "core.aty.child": "O teu fillo",
-    "core.aty.confirmdeleteaccount": "Seguro que queres quitar deste móbil a conta de {{fullname}} en {{sitename}}?",
+    "core.aty.confirmdeleteaccount": "Seguro que queres quitar deste móbil a conta de {{fullname}} en {{sitename}}? A conta segue no centro: podes volver entrar cando queiras.",
     "core.aty.removeaccount": "Quitar"
 }

@@ -34,6 +34,6 @@
     "core.contentlinks.confirmlinktosite": "Ce lien vous emmène vers :<br><br><strong>{{url}}</strong><br><br>Ne continuez que si vous faites confiance à ce site.",
     "core.contentlinks.opensite": "Ouvrir le site",
     "core.aty.child": "Votre enfant",
-    "core.aty.confirmdeleteaccount": "Voulez-vous vraiment retirer de ce téléphone le compte de {{fullname}} sur {{sitename}} ?",
+    "core.aty.confirmdeleteaccount": "Voulez-vous vraiment retirer de ce téléphone le compte de {{fullname}} sur {{sitename}} ? Le compte reste au centre : vous pourrez vous reconnecter quand vous voudrez.",
     "core.aty.removeaccount": "Retirer"
 }

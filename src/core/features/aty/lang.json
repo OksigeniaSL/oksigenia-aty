@@ -9,7 +9,7 @@
     "biometricneedspin": "To use your fingerprint or face you first need a PIN. You create it when you sign in with the link or QR code of your organisation.",
     "biometriconeaccount": "This phone keeps the fingerprint or face for one account only: {{name}}, at {{site}}, will go back to the PIN.",
     "child": "Your child",
-    "confirmdeleteaccount": "Are you sure you want to remove {{fullname}}'s account on {{sitename}} from this phone?",
+    "confirmdeleteaccount": "Are you sure you want to remove {{fullname}}'s account on {{sitename}} from this phone? The account stays at the centre: you can sign in again whenever you want.",
     "reconnectcode": "Did you sign in with a link or a QR code? Ask your organisation for a new one, or get it on its platform, in your user menu: “Open in the Aty app”.",
     "reconnectpassword": "Or sign in with your password",
     "reconnectscan": "Scan the code",

@@ -34,6 +34,6 @@
     "core.contentlinks.confirmlinktosite": "Dieser Link führt dich zu:<br><br><strong>{{url}}</strong><br><br>Fahre nur fort, wenn du dieser Website vertraust.",
     "core.contentlinks.opensite": "Website öffnen",
     "core.aty.child": "Dein Kind",
-    "core.aty.confirmdeleteaccount": "Möchtest du das Konto von {{fullname}} bei {{sitename}} wirklich von diesem Handy entfernen?",
+    "core.aty.confirmdeleteaccount": "Möchtest du das Konto von {{fullname}} bei {{sitename}} wirklich von diesem Handy entfernen? Das Konto bleibt bei der Schule: Du kannst dich jederzeit wieder anmelden.",
     "core.aty.removeaccount": "Entfernen"
 }
