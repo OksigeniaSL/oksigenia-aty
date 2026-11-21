@@ -16,6 +16,6 @@
     "removeaccount": "Remove",
     "sitecheckfailed": "Could not check your organisation: check your connection and try again.",
     "sitenotallowed": "This app is for the organisations whose platform Oksigenia hosts, and this one is not among them. Open it in your browser.",
-    "switchaccount": "This link signs in {{name}} at {{site}}. Is that you?",
+    "switchaccount": "This link signs in with the account of {{name}} at {{site}}. Is it your account?",
     "switchaccountok": "Yes, sign in"
 }

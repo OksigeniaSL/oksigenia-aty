@@ -25,7 +25,7 @@
     "core.aty.biometriconeaccount": "Este celular guarda a impressão digital ou o rosto para uma só conta: {{name}}, em {{site}}, volta a entrar só com o PIN.",
     "core.aty.sitecheckfailed": "Não foi possível verificar a escola: verifique sua conexão e tente de novo.",
     "core.aty.sitenotallowed": "Este app é para as instituições cuja plataforma é hospedada pela Oksigenia, e esta não é uma delas. Acesse pelo navegador.",
-    "core.aty.switchaccount": "Este link entra como {{name}} em {{site}}. É você?",
+    "core.aty.switchaccount": "Este link entra com a conta de {{name}} em {{site}}. É a sua conta?",
     "core.aty.switchaccountok": "Sim, entrar",
     "core.aty.reconnectcode": "Você entrou com um link ou um QR code? Peça um novo à sua instituição, ou gere-o na plataforma dela, no seu menu de usuário, na opção Aty.",
     "core.aty.reconnectscan": "Escanear o código",

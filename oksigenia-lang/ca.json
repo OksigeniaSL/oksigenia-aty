@@ -25,7 +25,7 @@
     "core.aty.biometriconeaccount": "Aquest mòbil guarda l'empremta o la cara per a un sol compte: {{name}}, a {{site}}, tornarà a entrar només amb el PIN.",
     "core.aty.sitecheckfailed": "No s'ha pogut comprovar el centre: revisa la connexió i torna-ho a provar.",
     "core.aty.sitenotallowed": "Aquesta app és per als centres que tenen la plataforma allotjada a Oksigenia, i aquest no n'és cap. Entra-hi des del navegador.",
-    "core.aty.switchaccount": "Aquest enllaç entra com a {{name}} a {{site}}. Ets tu?",
+    "core.aty.switchaccount": "Aquest enllaç entra amb el compte de {{name}} a {{site}}. És el teu compte?",
     "core.aty.switchaccountok": "Sí, entra",
     "core.aty.reconnectcode": "Vas entrar amb un enllaç o un codi QR? Demana'n un de nou al teu centre o aconsegueix-lo al seu web, al teu menú d'usuari, a l'entrada d'Aty.",
     "core.aty.reconnectscan": "Escaneja el codi",

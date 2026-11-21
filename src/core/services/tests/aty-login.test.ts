@@ -134,6 +134,15 @@ describe('AtyLogin', () => {
         expect(confirm).toHaveBeenCalledTimes(2);
     });
 
+    it('names the centre, when the server says it, instead of its address', async () => {
+        accounts = [{ id: 'b', siteUrl, username: 'luis' }];
+        answers = () => ({ token: 'token', username: 'ana', fullname: 'Ana Pérez', sitename: 'Colegio Ejemplo' });
+
+        await AtyLogin.getLoginData(linkOf('KEY11'));
+
+        expect(confirm).toHaveBeenCalledWith('This link signs in Ana Pérez at Colegio Ejemplo. Is that you?', expect.anything());
+    });
+
     it('asks also for the first account when it came through Google Play\'s install referrer', async () => {
         accounts = [];
         confirm.mockRejectedValueOnce(new CoreCanceledError());

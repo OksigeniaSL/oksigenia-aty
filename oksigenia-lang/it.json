@@ -25,7 +25,7 @@
     "core.aty.biometriconeaccount": "Questo telefono conserva l'impronta o il volto per un solo account: {{name}}, su {{site}}, tornerà ad accedere solo con il PIN.",
     "core.aty.sitecheckfailed": "Non è stato possibile verificare la scuola: controlla la connessione e riprova.",
     "core.aty.sitenotallowed": "Questa app è per le organizzazioni la cui piattaforma è ospitata da Oksigenia, e questa non è tra queste. Aprila nel browser.",
-    "core.aty.switchaccount": "Questo link accede come {{name}} su {{site}}. Sei tu?",
+    "core.aty.switchaccount": "Questo link accede con l'account di {{name}} su {{site}}. È il tuo account?",
     "core.aty.switchaccountok": "Sì, accedi",
     "core.aty.reconnectcode": "Sei entrato con un link o un codice QR? Chiedine uno nuovo alla tua organizzazione, oppure ottienilo sulla sua piattaforma, nel tuo menu utente, alla voce Aty.",
     "core.aty.reconnectscan": "Scansiona il codice",

@@ -1,4 +1,6 @@
 {
+    "addon.notifications.markallread": "Marcar todos como leídos",
+    "addon.notifications.notifications": "Avisos",
     "core.settings.accessibility": "Accesibilidad",
     "core.settings.accessibilityintro": "Elige lo que te haga más fácil la app. Se queda en este móvil. Lo que elegiste en la plataforma de tu centro también vale aquí, hasta que lo cambies.",
     "core.settings.accessibilitycontrast": "Alto contraste",
@@ -25,7 +27,7 @@
     "core.aty.biometriconeaccount": "Este móvil guarda la huella o la cara para una sola cuenta: {{name}}, en {{site}}, volverá a entrar solo con el PIN.",
     "core.aty.sitecheckfailed": "No se ha podido comprobar el centro: revisa la conexión y vuelve a intentarlo.",
     "core.aty.sitenotallowed": "Esta app es para los centros cuya plataforma aloja Oksigenia, y este no es uno de ellos. Entra desde el navegador.",
-    "core.aty.switchaccount": "Este enlace entra como {{name}} en {{site}}. ¿Eres tú?",
+    "core.aty.switchaccount": "Este enlace entra con la cuenta de {{name}} en {{site}}. ¿Es tu cuenta?",
     "core.aty.switchaccountok": "Sí, entrar",
     "core.aty.reconnectcode": "¿Entraste con un enlace o un código QR? Pide uno nuevo a tu centro o consíguelo en su web, en tu menú de usuario: «Abrir en la app Aty».",
     "core.aty.reconnectscan": "Escanear el código",

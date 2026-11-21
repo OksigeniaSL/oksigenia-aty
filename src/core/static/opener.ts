@@ -312,6 +312,9 @@ export class CoreOpener {
         options = options || {};
         options.usewkwebview = 'yes'; // Force WKWebView in iOS.
         options.enableViewPortScale = options.enableViewPortScale ?? 'yes'; // Enable zoom on iOS by default.
+        // Oksigenia Aty: Android's on-screen zoom buttons covered the buttons of a page (the second factor's «I have
+        // approved it»); pinch-to-zoom stays.
+        options.zoomcontrols = options.zoomcontrols ?? 'no';
         options.allowInlineMediaPlayback = options.allowInlineMediaPlayback ?? 'yes'; // Allow playing inline videos in iOS.
 
         if (!options.location && CorePlatform.isIOS() && url.indexOf('file://') === 0) {
@@ -426,6 +429,7 @@ export class CoreOpener {
  */
 export type CoreOpenerOpenInAppBrowserOptions = InAppBrowserOptions & {
     originalUrl?: string; // Original URL to open (in case the URL was treated, e.g. to add a token or an auto-login).
+    zoomcontrols?: 'yes' | 'no'; // Android: show the on-screen zoom buttons (pinch-to-zoom is «zoom»).
 };
 
 /**

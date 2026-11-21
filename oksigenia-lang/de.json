@@ -25,7 +25,7 @@
     "core.aty.biometriconeaccount": "Dieses Handy speichert Fingerabdruck oder Gesicht nur für ein Konto: {{name}} bei {{site}} meldet sich dann wieder nur mit der PIN an.",
     "core.aty.sitecheckfailed": "Deine Einrichtung konnte nicht geprüft werden: Prüfe deine Verbindung und versuche es erneut.",
     "core.aty.sitenotallowed": "Diese App ist für Einrichtungen, deren Plattform Oksigenia betreibt, und diese gehört nicht dazu. Öffne sie im Browser.",
-    "core.aty.switchaccount": "Dieser Link meldet {{name}} bei {{site}} an. Bist du das?",
+    "core.aty.switchaccount": "Dieser Link meldet sich mit dem Konto von {{name}} bei {{site}} an. Ist das dein Konto?",
     "core.aty.switchaccountok": "Ja, anmelden",
     "core.aty.reconnectcode": "Hast du dich mit einem Link oder QR-Code angemeldet? Bitte deine Einrichtung um einen neuen oder hol ihn dir auf ihrer Plattform, in deinem Benutzermenü unter „Aty“.",
     "core.aty.reconnectscan": "Code scannen",

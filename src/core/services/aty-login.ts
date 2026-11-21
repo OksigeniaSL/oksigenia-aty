@@ -48,7 +48,8 @@ export type AtyTokenResponse = {
     locked?: boolean; // Too many wrong PINs; verification is temporarily locked.
     pinui?: AtyPinUi; // Localised wording for the PIN pad (the server knows the user's language).
     error?: string; // Localised error (wrong PIN, locked, or a generic failure).
-    fullname?: string; // Who the link signs in (local_oksigeniaaty 0.5.59 on).
+    fullname?: string; // Who the link signs in (local_oksigeniaaty 0.5.59 on; first name first from 0.5.92).
+    sitename?: string; // The centre's name, for the question (local_oksigeniaaty 0.5.92 on).
     username?: string; // Their username, to know whether this phone already holds that account.
 };
 
@@ -293,7 +294,7 @@ export class AtyLoginService {
                 try {
                     await CoreAlerts.confirm(Translate.instant('core.aty.switchaccount', {
                         name: response.fullname || response.username,
-                        site: AtySites.host(siteUrl),
+                        site: response.sitename || AtySites.host(siteUrl),
                     }), { okText: Translate.instant('core.aty.switchaccountok') });
                 } catch {
                     throw new CoreCustomURLSchemesHandleError(new CoreCanceledError());

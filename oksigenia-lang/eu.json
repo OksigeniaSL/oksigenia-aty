@@ -25,7 +25,7 @@
     "core.aty.biometriconeaccount": "Mugikor honek kontu bakar baterako gordetzen du hatz-marka edo aurpegia: {{name}} {{site}} gunean PINarekin bakarrik sartuko da berriro.",
     "core.aty.sitecheckfailed": "Ezin izan da ikastetxea egiaztatu: begiratu konexioa eta saiatu berriro.",
     "core.aty.sitenotallowed": "Aplikazio hau Oksigeniak ostatatzen dituen erakundeentzat da, eta hau ez da horietako bat. Sartu nabigatzailetik.",
-    "core.aty.switchaccount": "Esteka honek {{name}} gisa sartzen du {{site}} gunean. Zu zara?",
+    "core.aty.switchaccount": "Esteka honek {{name}} erabiltzailearen kontuarekin sartzen da {{site}} gunean. Zure kontua da?",
     "core.aty.switchaccountok": "Bai, sartu",
     "core.aty.reconnectcode": "Esteka edo QR kode batekin sartu zinen? Eskatu berri bat zure ikastetxeari, edo lortu bere webgunean, zure erabiltzaile-menuko Aty sarreran.",
     "core.aty.reconnectscan": "Eskaneatu kodea",
