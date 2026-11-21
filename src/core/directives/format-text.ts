@@ -30,6 +30,7 @@ import {
 
 import { CoreSites } from '@services/sites';
 import { CoreIframe } from '@static/iframe';
+import { atyHttpsUrl } from '@static/aty-https';
 import { CoreText } from '@static/text';
 import { CoreErrorHelper } from '@services/error-helper';
 import { CoreSite } from '@classes/sites/site';
@@ -1081,7 +1082,8 @@ export class CoreFormatTextDirective implements OnDestroy, AsyncDirective {
      * @param site Site instance.
      */
     protected async treatIframe(iframe: HTMLIFrameElement, site: CoreSite | undefined): Promise<void> {
-        let src = this.getFrameUrl(iframe, site);
+        // Oksigenia Aty: nothing goes in the clear, so another site's http frame is asked for over https.
+        let src = atyHttpsUrl(this.getFrameUrl(iframe, site));
         const currentSite = CoreSites.getCurrentSite();
 
         this.addMediaAdaptClass(iframe);

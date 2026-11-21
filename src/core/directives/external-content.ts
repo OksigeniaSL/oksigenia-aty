@@ -44,6 +44,7 @@ import { CoreArray } from '@static/array';
 import { CoreMimetype } from '@static/mimetype';
 import { FileEntry } from '@awesome-cordova-plugins/file/ngx';
 import { CoreWS } from '@services/ws';
+import { atyHttpsUrl } from '@static/aty-https';
 
 /**
  * Directive to handle external content.
@@ -214,6 +215,8 @@ export class CoreExternalContentDirective implements AfterViewInit, OnChanges, O
         // Try to convert the URL to absolute. This will only work for URLs relative to the site URL, it won't work for
         // URLs relative to a subpath (e.g. relative to the course page URL).
         url = site && url ? CoreUrl.toAbsoluteURL(site.getURL(), url) : url;
+        // Oksigenia Aty: nothing goes in the clear, so another site's http resource is asked for over https.
+        url = url ? atyHttpsUrl(url) : url;
 
         if (!url || !url.match(/^https?:\/\//i) || CoreUrl.isLocalFileUrl(url) ||
                 (tagName === 'A' && !(isSiteFile || site?.isSiteThemeImageUrl(url) || CoreUrl.isGravatarUrl(url)))) {
