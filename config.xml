@@ -132,7 +132,7 @@
     </platform>
     <platform name="ios">
         <resource-file src="GoogleService-Info.plist" />
-        <!-- The Refugio icon of Oksigenia Aty, every size from Gaudi's 1024 master; without them Cordova ships its robot. -->
+        <!-- The Refugio icon of Oksigenia Aty, every size from its 1024 master; without them Cordova ships its robot. -->
         <icon src="resources/ios/icon/icon-20.png" width="20" height="20" />
         <icon src="resources/ios/icon/icon-29.png" width="29" height="29" />
         <icon src="resources/ios/icon/icon-40.png" width="40" height="40" />
