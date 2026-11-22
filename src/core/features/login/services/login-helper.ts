@@ -18,7 +18,7 @@ import { Md5 } from 'ts-md5';
 import { CoreApp, CoreStoreConfig } from '@services/app';
 import { CoreConfig } from '@services/config';
 import { CoreEvents, CoreEventSessionExpiredData, CoreEventSiteData } from '@static/events';
-import { CoreSites, CoreLoginSiteInfo, CoreSiteBasicInfo } from '@services/sites';
+import { ATY_SECOND_FACTOR, CoreSites, CoreLoginSiteInfo, CoreSiteBasicInfo } from '@services/sites';
 import { CoreWSExternalWarning } from '@services/ws';
 import { CoreText } from '@static/text';
 import { CoreObject } from '@static/object';
@@ -993,6 +993,15 @@ export class CoreLoginHelperProvider {
                 break;
             case 'invalidlogin':
                 this.showInvalidLoginModal(error);
+                break;
+            case ATY_SECOND_FACTOR:
+                // Aty: the site's own sign-in, inside the app, for the second factor; the password is already checked.
+                this.openBrowserForSSOLogin(
+                    siteUrl,
+                    TypeOfLogin.EMBEDDED,
+                    undefined,
+                    error instanceof CoreSiteError ? error.debug?.details : undefined,
+                );
                 break;
             default:
                 CoreAlerts.showError(error);

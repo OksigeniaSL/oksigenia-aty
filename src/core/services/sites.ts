@@ -75,6 +75,11 @@ export const CORE_SITE_SCHEMAS = new InjectionToken<CoreSiteSchema[]>('CORE_SITE
 export const CORE_SITE_CURRENT_SITE_ID_CONFIG = 'current_site_id';
 
 /**
+ * Aty: the code of the login error that sends to the site's own sign-in for its second factor.
+ */
+export const ATY_SECOND_FACTOR = 'oksigeniaatymfa';
+
+/**
  * Sites DB Manager.
  */
 class CoreSitesDB {
@@ -784,6 +789,16 @@ export class CoreSitesProvider {
 
         if (data.token !== undefined) {
             return { token: data.token, siteUrl, privateToken: data.privatetoken };
+        }
+
+        // Aty: the site asks this person for a second factor (local_oksigeniaaty). Its sign-in page takes over, with the
+        // password already checked there, and gives the token back as a sign-in in the browser does.
+        const launchUrl = data.oksigeniaatylaunch;
+        if (launchUrl && CoreUrl.sameDomainAndPath(launchUrl, `${siteUrl}/local/oksigeniaaty/launch.php`)) {
+            throw new CoreLoginError({
+                message: data.error ?? '',
+                debug: { code: ATY_SECOND_FACTOR, details: launchUrl },
+            });
         }
 
         if (data.error === undefined) {
@@ -2748,6 +2763,7 @@ export type CoreSitesDemoSiteData = {
 export type CoreSitesLoginTokenResponse = {
     token?: string;
     privatetoken?: string;
+    oksigeniaatylaunch?: string; // Aty: the site's sign-in with its second factor, when the password alone is not enough.
     error?: string;
     errorcode?: string;
     stacktrace?: string;
