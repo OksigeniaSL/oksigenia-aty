@@ -13,8 +13,9 @@ on:
         type: choice
         options: [prod, test]
         default: prod
+  # Only for a version (an oksigenia-v* tag) or by hand: every push is checked on the laptop first (hq,
+  # shared/publicacion-github.md, «El CI, primero en el portátil»).
   push:
-    branches: [oksigenia-v52]
     tags: ['oksigenia-v*']
 
 permissions:

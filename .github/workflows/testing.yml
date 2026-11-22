@@ -1,6 +1,10 @@
 name: Testing
 
-on: [push, pull_request]
+# Oksigenia Aty: only for a version (an oksigenia-v* tag) or by hand; every push is checked on the laptop first.
+on:
+  push:
+    tags: ['oksigenia-v*']
+  workflow_dispatch:
 
 # Oksigenia Aty: read only. Inherited from upstream with no permissions, it ran npm ci on every push with a token that could
 # write to the repository.

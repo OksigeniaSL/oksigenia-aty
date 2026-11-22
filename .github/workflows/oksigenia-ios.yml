@@ -27,21 +27,10 @@ on:
         description: 'For App Store screenshots: id of the course of the second scene'
         required: false
         default: ''
+  # Only for a version (an oksigenia-v* tag) or by hand: every push is checked on the laptop first (hq,
+  # shared/publicacion-github.md, «El CI, primero en el portátil»).
   push:
-    branches: [oksigenia-v52]
     tags: ['oksigenia-v*']
-    paths:
-      - '.github/workflows/oksigenia-ios.yml'
-      - 'config.xml'
-      - 'resources/ios/lproj/**'
-      - 'GoogleService-Info.plist'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'cordova-plugin-moodleapp/**'
-      - 'patches/**'
-      - 'resources/ios/NotificationService/**'
-      - 'scripts/cordova-hooks/**'
-      - 'scripts/oksigenia-nse-tests.sh'
 
 permissions:
   contents: read
