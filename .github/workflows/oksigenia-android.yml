@@ -7,6 +7,12 @@ name: Oksigenia Aty Android
 
 on:
   workflow_dispatch:
+    inputs:
+      web:
+        description: 'prod, as in the stores; test, a build that also opens the local demo (localhost over adb), to try a change on a phone'
+        type: choice
+        options: [prod, test]
+        default: prod
   push:
     branches: [oksigenia-v52]
     tags: ['oksigenia-v*']
@@ -58,10 +64,14 @@ jobs:
           node scripts/oksigenia-merge-lang.mjs
           echo "Built language files:"; ls src/assets/lang | sort | tr '\n' ' '; echo
 
+      # A push always builds for the stores; by hand, "test" gives a build that is not for production, which also opens
+      # the local demo (AtySites.isLoopback). Never upload a test build to a store.
       - name: Build the app plugin and the web assets
+        env:
+          WEB: ${{ inputs.web || 'prod' }}
         run: |
           npm run prod --prefix cordova-plugin-moodleapp
-          npm run build:prod
+          if [ "$WEB" = "test" ]; then npm run build:test; else npm run build:prod; fi
 
       # The web build does not reference cordova.js (the app also ships as a PWA), so the native plugins would be
       # unavailable and the app would hang on the splash. Add the reference; cordova prepare provides the file itself.
@@ -114,7 +124,7 @@ jobs:
       - name: Upload the artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: oksigenia-aty-android
+          name: oksigenia-aty-android${{ inputs.web == 'test' && '-test' || '' }}
           path: dist/*
           if-no-files-found: error
           # The repository is public: the signed builds stay downloadable for a week, not ninety days.
