@@ -63,6 +63,8 @@ import { CoreAlerts } from '@services/overlays/alerts';
  */
 export class CoreSite extends CoreAuthenticatedSite {
 
+    protected static lastInAppSiteId?: string; // Oksigenia Aty: account that opened the last page in the app's browser.
+
     id: string;
     config?: CoreSiteConfig;
     loggedOut?: boolean;
@@ -524,14 +526,19 @@ export class CoreSite extends CoreAuthenticatedSite {
         // Open the URL.
         if (inApp) {
             if (
-                options.clearsessioncache === undefined && autoLoginUrl !== url &&
+                options.clearsessioncache === undefined &&
                 (
                     CoreConstants.CONFIG.clearIABSessionWhenAutoLogin === 'all' ||
                     (CoreConstants.CONFIG.clearIABSessionWhenAutoLogin === 'android' && CorePlatform.isAndroid()) ||
                     (CoreConstants.CONFIG.clearIABSessionWhenAutoLogin === 'ios' && CorePlatform.isIOS())
                 )
             ) {
-                options.clearsessioncache = 'yes';
+                // Oksigenia Aty: say it every time, also when there is no new key. Android's plugin keeps the last value it was
+                // given, so a page opened again before the site hands out another key lost the session and asked to sign in.
+                // The session is kept only for the account that opened the previous page.
+                const keepSession = autoLoginUrl === url && CoreSite.lastInAppSiteId === this.id;
+                options.clearsessioncache = keepSession ? 'no' : 'yes';
+                CoreSite.lastInAppSiteId = this.id;
             }
 
             return CoreOpener.openInApp(autoLoginUrl, options);
